@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { ProjectCategory, Project, Certificate } from '@/types';
 import { Plus, Github, Link as LinkIcon, Save, Image as ImageIcon, Lock, X, Search, FileUp, Star, Briefcase, Award, ChevronUp, ChevronDown, Eye, EyeOff, Pencil, Database } from 'lucide-react';
-import { addProjectAction, deleteProjectAction, uploadImageAction, addCertificateAction, deleteCertificateAction, reorderAction, updateProjectAction, updateCertificateAction, runMigration } from '@/app/actions';
+import { addProjectAction, deleteProjectAction, uploadImageAction, addCertificateAction, deleteCertificateAction, reorderAction, updateProjectAction, updateCertificateAction, runMigration, updateSettingsAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
-import { Trash2, HelpCircle } from 'lucide-react';
+import { Trash2, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
 import TechBadge from '@/components/TechBadge';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -17,10 +17,12 @@ function cn(...inputs: ClassValue[]) {
 
 export default function AdminPage({
   initialProjects: allProjects,
-  initialCertificates: allCertificates
+  initialCertificates: allCertificates,
+  initialSettings = {}
 }: {
   initialProjects: Project[],
-  initialCertificates: Certificate[]
+  initialCertificates: Certificate[],
+  initialSettings?: Record<string, string>
 }) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -51,7 +53,12 @@ export default function AdminPage({
     imageUrl: '',
   });
 
-  const [activeTab, setActiveTab] = useState<'projects' | 'certificates'>('projects');
+  const [settings, setSettings] = useState({
+    cv_url: initialSettings.cv_url || '',
+    cv_description: initialSettings.cv_description || '',
+  });
+
+  const [activeTab, setActiveTab] = useState<'projects' | 'certificates' | 'settings'>('projects');
 
   const existingTechs = Array.from(new Set(allProjects.flatMap(p => p.technologies)));
 
@@ -67,7 +74,9 @@ export default function AdminPage({
     setIsUploading(false);
 
     if (result.success && result.url) {
-      if (activeTab === 'certificates') {
+      if (activeTab === 'settings') {
+        setSettings({ ...settings, cv_url: result.url });
+      } else if (activeTab === 'certificates') {
         setCertificate({ ...certificate, imageUrl: result.url });
       } else if (isGallery) {
         setProject({ ...project, gallery: [...project.gallery, result.url] });
@@ -75,7 +84,20 @@ export default function AdminPage({
         setProject({ ...project, imageUrl: result.url });
       }
     } else {
-      alert('Error subiendo imagen: ' + result.error);
+      alert('Error subiendo archivo: ' + result.error);
+    }
+  };
+
+  const handleSettingsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSaving(true);
+    const result = await updateSettingsAction(settings);
+    setIsSaving(false);
+    if (result.success) {
+      alert('Configuración guardada');
+      router.refresh();
+    } else {
+      alert('Error: ' + result.error);
     }
   };
 
@@ -228,65 +250,41 @@ export default function AdminPage({
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <main className="min-h-screen bg-[#050505] flex items-center justify-center px-6">
-        <div className="max-w-md w-full bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl animate-blurred-fade-in text-center">
-          <Lock className="mx-auto mb-6 text-gray-500" size={48} />
-          <h1 className="text-2xl font-black mb-6 uppercase tracking-tighter text-white">Acceso Restringido</h1>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="relative">
-              <input 
-                type={showPassword ? "text" : "password"} 
-                placeholder="Contraseña Maestro"
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-colors text-center"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button 
-                type="button" 
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
-                title={showPassword ? "Ocultar" : "Mostrar"}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-            <button 
-              type="submit"
-              className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-gray-200 transition-all active:scale-95"
-            >
-              Entrar al Sistema
-            </button>
-          </form>
-        </div>
-      </main>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#050505] pt-32 pb-20 px-6 font-mono">
       <Navbar themeColor="#fff" />
       
-      <div className="max-w-4xl mx-auto flex gap-4 mb-8">
-        <button 
-          onClick={() => setActiveTab('projects')}
-          className={cn(
-            "flex-1 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] md:text-xs transition-all border",
-            activeTab === 'projects' ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]" : "bg-white/5 text-gray-500 border-white/10 hover:bg-white/10"
-          )}
-        >
-          Proyectos
-        </button>
-        <button 
-          onClick={() => setActiveTab('certificates')}
-          className={cn(
-            "flex-1 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] md:text-xs transition-all border",
-            activeTab === 'certificates' ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]" : "bg-white/5 text-gray-500 border-white/10 hover:bg-white/10"
-          )}
-        >
-          Certificados
-        </button>
+      <div className="max-w-7xl mx-auto flex flex-wrap gap-4 mb-8">
+        <div className="flex-1 flex gap-4">
+          <button 
+            onClick={() => { setActiveTab('projects'); setEditingId(null); }}
+            className={cn(
+              "flex-1 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] md:text-xs transition-all border",
+              activeTab === 'projects' ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]" : "bg-white/5 text-gray-500 border-white/10 hover:bg-white/10"
+            )}
+          >
+            Proyectos
+          </button>
+          <button 
+            onClick={() => { setActiveTab('certificates'); setEditingId(null); }}
+            className={cn(
+              "flex-1 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] md:text-xs transition-all border",
+              activeTab === 'certificates' ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]" : "bg-white/5 text-gray-500 border-white/10 hover:bg-white/10"
+            )}
+          >
+            Certificados
+          </button>
+          <button 
+            onClick={() => { setActiveTab('settings'); setEditingId(null); }}
+            className={cn(
+              "flex-1 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] md:text-xs transition-all border",
+              activeTab === 'settings' ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]" : "bg-white/5 text-gray-500 border-white/10 hover:bg-white/10"
+            )}
+          >
+            Ajustes
+          </button>
+        </div>
+        
         <button 
           onClick={async () => {
             if (confirm('¿Migrar datos locales a la base de datos? Esto creará las tablas si no existen.')) {
@@ -296,20 +294,21 @@ export default function AdminPage({
               router.refresh();
             }
           }}
-          className="px-4 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20"
+          className="px-6 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px] bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-all flex items-center gap-2"
           title="Solo ejecutar una vez para inicializar DB"
         >
-          <Database size={16} />
+          <Database size={16} /> Inicializar DB
         </button>
       </div>
 
-      <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl animate-blurred-fade-in shadow-2xl">
-          {activeTab === 'projects' ? (
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        {/* PANEL IZQUIERDO: FORMULARIOS */}
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl animate-blurred-fade-in shadow-2xl flex flex-col">
+          {activeTab === 'projects' && (
             <>
-              <h1 className="text-2xl font-black mb-8 flex items-center justify-between text-white">
+              <h1 className="text-xl font-black mb-8 flex items-center justify-between text-white uppercase tracking-tighter">
                 <div className="flex items-center gap-4">
-                  {editingId ? <Pencil className="text-yellow-500" /> : <Plus className="text-cyan-500" />}
+                  {editingId ? <Pencil size={20} className="text-yellow-500" /> : <Plus size={20} className="text-cyan-500" />}
                   {editingId ? 'EDITAR PROYECTO' : 'NUEVO PROYECTO'}
                 </div>
                 {editingId && (
@@ -335,11 +334,11 @@ export default function AdminPage({
                     <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Categoría</label>
                     <div className="relative">
                       <select className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-xs appearance-none cursor-pointer" value={project.category} onChange={e => setProject({...project, category: e.target.value as ProjectCategory})}>
-                        <option value="frontend">Frontend</option>
-                        <option value="backend">Backend</option>
-                        <option value="fullstack">Fullstack</option>
-                        <option value="research">Investigación</option>
-                        <option value="other">Otros</option>
+                        <option value="frontend">Front-end</option>
+                        <option value="backend">Back-end</option>
+                        <option value="fullstack">Full-stack</option>
+                        <option value="research">Research</option>
+                        <option value="other">Other</option>
                       </select>
                       <div className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none scale-75">
                         <TechBadge name={project.category} showName={false} />
@@ -348,18 +347,16 @@ export default function AdminPage({
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Miniatura Principal</label>
-                    <div className="flex gap-2">
-                       <label className="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl hover:bg-white/10 cursor-pointer transition-colors flex items-center justify-center gap-2 text-xs text-gray-400 overflow-hidden">
-                        <FileUp size={16} className={isUploading ? "animate-bounce" : ""} />
-                        <span className="truncate">{project.imageUrl ? 'Imagen lista' : 'Subir archivo'}</span>
-                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, false)} disabled={isUploading} />
-                      </label>
-                    </div>
+                    <label className="flex w-full bg-white/5 border border-white/10 p-3 rounded-xl hover:bg-white/10 cursor-pointer transition-colors items-center justify-center gap-2 text-xs text-gray-400 overflow-hidden">
+                      <FileUp size={16} className={isUploading ? "animate-bounce" : ""} />
+                      <span className="truncate">{project.imageUrl ? 'Imagen lista' : 'Subir archivo'}</span>
+                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, false)} disabled={isUploading} />
+                    </label>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Galería (Markdown Ready)</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Galería Adicional</label>
                   <div className="grid grid-cols-4 gap-2">
                     {project.gallery.map((img, i) => (
                       <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-white/10 group bg-black/50">
@@ -382,38 +379,23 @@ export default function AdminPage({
 
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Tecnologías</label>
-                  <div className="flex flex-wrap gap-2 mb-3">
+                  <div className="flex flex-wrap gap-1 mb-3">
                     {project.technologies.map(t => (
                       <div key={t} className="flex items-center gap-2 bg-white/5 border border-white/10 pl-3 pr-1 py-1 rounded-lg text-[9px] uppercase tracking-tighter text-white">
-                        {t} <button type="button" onClick={() => removeTech(t)} className="p-1 hover:bg-white/10 rounded text-gray-500 hover:text-white"><X size={12} /></button>
+                        {t} <button type="button" onClick={() => removeTech(t)} className="p-1 hover:bg-white/10 rounded text-gray-500 hover:text-white"><X size={10} /></button>
                       </div>
                     ))}
                   </div>
                   <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <input 
-                        type="text" 
-                        list="tech-list" 
-                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-white transition-colors" 
-                        placeholder="Añadir tech..." 
-                        value={newTech} 
-                        onChange={e => setNewTech(e.target.value)} 
-                        onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTech(newTech))} 
-                      />
-                      {newTech && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-100 scale-75">
-                          <TechBadge name={newTech} showName={false} />
-                        </div>
-                      )}
-                    </div>
-                    <button type="button" onClick={() => addTech(newTech)} className="bg-white/10 px-4 rounded-xl text-[10px] font-black uppercase text-white hover:bg-white/20 transition-all">OK</button>
+                    <input type="text" list="tech-list" className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-white transition-colors" placeholder="Añadir tech..." value={newTech} onChange={e => setNewTech(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTech(newTech))} />
+                    <button type="button" onClick={() => addTech(newTech)} className="bg-white/10 px-4 rounded-xl text-[10px] font-black uppercase text-white hover:bg-white/20">OK</button>
                     <datalist id="tech-list">{existingTechs.map(t => <option key={t} value={t} />)}</datalist>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Descripción (Markdown)</label>
-                  <textarea rows={4} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-xs resize-none" placeholder="### Características\n- Item 1\n- Item 2" value={project.description} onChange={e => setProject({...project, description: e.target.value})} />
+                  <textarea rows={4} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-xs resize-none" placeholder="### Características\n- Item 1" value={project.description} onChange={e => setProject({...project, description: e.target.value})} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -426,11 +408,13 @@ export default function AdminPage({
                 </button>
               </form>
             </>
-          ) : (
+          )}
+
+          {activeTab === 'certificates' && (
             <>
-              <h1 className="text-2xl font-black mb-8 flex items-center justify-between text-white uppercase tracking-tighter">
+              <h1 className="text-xl font-black mb-8 flex items-center justify-between text-white uppercase tracking-tighter">
                 <div className="flex items-center gap-4">
-                  {editingId ? <Pencil className="text-yellow-500" /> : <Award className="text-yellow-500" />}
+                  {editingId ? <Pencil size={20} className="text-yellow-500" /> : <Award size={20} className="text-yellow-500" />}
                   {editingId ? 'EDITAR CERTIFICADO' : 'NUEVO CERTIFICADO'}
                 </div>
                 {editingId && (
@@ -457,21 +441,7 @@ export default function AdminPage({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Institución</label>
-                    <div className="relative">
-                      <input 
-                        type="text" 
-                        required 
-                        placeholder="Udemy, Coursera..." 
-                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:outline-none focus:border-white" 
-                        value={certificate.academy} 
-                        onChange={e => setCertificate({...certificate, academy: e.target.value})} 
-                      />
-                      {certificate.academy && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-100 scale-75">
-                          <TechBadge name={certificate.academy} showName={false} />
-                        </div>
-                      )}
-                    </div>
+                    <input type="text" required placeholder="Udemy, Coursera..." className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:outline-none focus:border-white" value={certificate.academy} onChange={e => setCertificate({...certificate, academy: e.target.value})} />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Año</label>
@@ -480,7 +450,7 @@ export default function AdminPage({
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Certificado (JPG/PNG)</label>
-                  <label className="flex w-full bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 cursor-pointer transition-colors items-center justify-center gap-3 text-xs text-gray-500 font-bold uppercase tracking-widest">
+                  <label className="flex w-full bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 cursor-pointer transition-colors items-center justify-center gap-3 text-xs text-gray-500 font-bold uppercase tracking-widest whitespace-nowrap">
                     <FileUp size={18} className={isUploading ? "animate-bounce" : ""} />
                     <span className="truncate">{certificate.imageUrl ? 'Archivo cargado' : 'Subir certificado'}</span>
                     <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e)} disabled={isUploading} />
@@ -492,22 +462,51 @@ export default function AdminPage({
               </form>
             </>
           )}
+
+          {activeTab === 'settings' && (
+            <>
+              <h1 className="text-xl font-black mb-8 flex items-center gap-4 text-white uppercase tracking-tighter">
+                <SettingsIcon size={24} className="text-white/40" />
+                AJUSTES DEL PORTAFOLIO
+              </h1>
+              <form onSubmit={handleSettingsSubmit} className="space-y-6">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Archivo CV (PDF)</label>
+                  <label className="flex w-full bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 cursor-pointer transition-colors items-center justify-center gap-3 text-xs text-gray-500 font-bold uppercase tracking-widest overflow-hidden">
+                    <FileUp size={18} className={isUploading ? "animate-bounce" : ""} />
+                    <span className="truncate">{settings.cv_url ? "CV Cargado con éxito" : "Subir CV (PDF)"}</span>
+                    <input type="file" className="hidden" accept="application/pdf" onChange={(e) => handleFileUpload(e)} disabled={isUploading} />
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Descripción del CV (Modal)</label>
+                  <textarea rows={4} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-xs resize-none" value={settings.cv_description} onChange={e => setSettings({...settings, cv_description: e.target.value})} placeholder="Describe brevemente este CV..." />
+                </div>
+
+                <button disabled={isSaving} type="submit" className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50 text-xs tracking-[0.3em] uppercase">
+                  {isSaving ? "Guardando..." : "GUARDAR CONFIGURACIÓN"}
+                </button>
+              </form>
+            </>
+          )}
         </div>
 
+        {/* PANEL DERECHO: LISTADO */}
         <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl h-[800px] flex flex-col shadow-2xl overflow-hidden">
           <h2 className="text-xs font-black mb-8 text-gray-500 flex items-center gap-3 uppercase tracking-[0.4em]">
-            Listado de {activeTab === 'projects' ? 'Proyectos' : 'Certificados'}
+            Listado de {activeTab === 'projects' ? 'Proyectos' : (activeTab === 'certificates' ? 'Certificados' : 'Información')}
           </h2>
           <div className="space-y-4 overflow-y-auto pr-4 custom-scrollbar">
-            {activeTab === 'projects' ? (
+            {activeTab === 'projects' && (
               allProjects.map(p => (
                 <div key={p.id} className="flex items-center justify-between p-4 bg-black/30 border border-white/5 rounded-2xl hover:border-white/10 transition-all group">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 overflow-hidden">
                     <div className="w-12 h-12 rounded-xl border border-white/10 overflow-hidden flex-shrink-0">
                       <img src={p.imageUrl} className="w-full h-full object-cover" />
                     </div>
-                    <div>
-                      <h3 className="text-xs font-bold text-white uppercase tracking-tight">{p.title}</h3>
+                    <div className="truncate">
+                      <h3 className="text-xs font-bold text-white uppercase tracking-tight truncate">{p.title}</h3>
                       <p className="text-[9px] text-gray-600 uppercase font-mono mt-1">{p.category}</p>
                     </div>
                   </div>
@@ -521,15 +520,17 @@ export default function AdminPage({
                   </div>
                 </div>
               ))
-            ) : (
+            )}
+            
+            {activeTab === 'certificates' && (
               allCertificates.map(c => (
                 <div key={c.id} className="flex items-center justify-between p-4 bg-black/30 border border-white/5 rounded-2xl hover:border-white/10 transition-all group">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 overflow-hidden">
                     <div className="w-12 h-12 rounded-xl border border-white/10 overflow-hidden flex-shrink-0">
                       <img src={c.imageUrl} className="w-full h-full object-cover" />
                     </div>
-                    <div>
-                      <h3 className="text-xs font-bold text-white uppercase tracking-tight">{c.title}</h3>
+                    <div className="truncate">
+                      <h3 className="text-xs font-bold text-white uppercase tracking-tight truncate">{c.title}</h3>
                       <p className="text-[9px] text-gray-600 uppercase font-mono mt-1">{c.academy} • {c.date}</p>
                     </div>
                   </div>
@@ -543,6 +544,21 @@ export default function AdminPage({
                   </div>
                 </div>
               ))
+            )}
+            
+            {activeTab === 'settings' && (
+              <div className="p-8 text-center text-gray-600 h-full flex flex-col justify-center items-center">
+                <SettingsIcon size={64} className="mb-6 opacity-10 rotate-12" />
+                <p className="text-xs uppercase tracking-[0.4em] font-bold text-white/40">Modo Configuración Global</p>
+                <p className="text-[10px] mt-4 opacity-40 max-w-[200px] leading-relaxed">
+                  Utiliza este panel para gestionar archivos que afectan a todo el portafolio, como tu CV y metadatos del sitio.
+                </p>
+                {settings.cv_url && (
+                  <a href={settings.cv_url} target="_blank" rel="noopener noreferrer" className="mt-8 flex items-center gap-2 text-cyan-500 text-[10px] font-bold tracking-widest hover:underline">
+                    VER CV ACTUAL <FileUp size={14} />
+                  </a>
+                )}
+              </div>
             )}
           </div>
         </div>

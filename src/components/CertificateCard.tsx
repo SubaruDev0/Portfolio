@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Certificate } from '@/types';
 import { Award, Maximize2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -9,19 +10,20 @@ import CertificateModal from '@/components/CertificateModal';
 interface CertificateCardProps {
   certificate: Certificate;
   themeColor: string;
+  onSelect?: (certificate: Certificate) => void;
 }
 
-export default function CertificateCard({ certificate, themeColor }: CertificateCardProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
+export default function CertificateCard({ certificate, themeColor, onSelect }: CertificateCardProps) {
   return (
     <>
-      <div 
-        onClick={() => setIsModalOpen(true)}
-        className="min-w-[300px] md:min-w-[400px] snap-start group cursor-pointer"
+      <motion.div 
+        onClick={() => onSelect?.(certificate)}
+        whileHover={{ y: -5 }}
+        whileTap={{ scale: 0.98 }}
+        className="min-w-[300px] md:min-w-[380px] snap-start group cursor-pointer w-full flex"
       >
-        <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 hover:border-white/20 transition-all h-full flex flex-col">
-          <div className="aspect-video rounded-2xl overflow-hidden mb-6 border border-white/10 bg-black/50 relative">
+        <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 hover:border-white/20 transition-all w-full flex flex-col min-h-[420px]">
+          <div className="aspect-video rounded-2xl overflow-hidden mb-6 border border-white/10 bg-black/50 relative shrink-0">
             <img 
               src={certificate.imageUrl} 
               alt={certificate.title} 
@@ -45,7 +47,7 @@ export default function CertificateCard({ certificate, themeColor }: Certificate
             {certificate.title}
           </h3>
           
-          <div className="text-sm text-gray-500 mb-6 flex-1 font-light line-clamp-3 prose prose-invert prose-xs">
+          <div className="text-sm text-gray-500 mb-6 flex-1 font-light line-clamp-2 prose prose-invert prose-xs">
             <ReactMarkdown>{certificate.description || ""}</ReactMarkdown>
           </div>
           
@@ -54,14 +56,7 @@ export default function CertificateCard({ certificate, themeColor }: Certificate
             <Award size={16} style={{ color: themeColor }} />
           </div>
         </div>
-      </div>
-
-      <CertificateModal 
-        certificate={certificate}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        themeColor={themeColor}
-      />
+      </motion.div>
     </>
   );
 }

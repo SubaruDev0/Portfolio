@@ -47,10 +47,23 @@ export async function getCertificates(): Promise<Certificate[]> {
     `;
     return result as unknown as Certificate[];
   } catch (error: any) {
-    if (error.message?.includes('relation "certificates" does not exist')) {
-      console.log('Table "certificates" does not exist yet. Returning empty array.');
-      return [];
+    throw error;
+  }
+}
+
+export async function getPortfolioSettings(): Promise<Record<string, string>> {
+  try {
+    const result = await sql`SELECT key, value FROM portfolio_settings`;
+    const settings: Record<string, string> = {};
+    (result as any[]).forEach(row => {
+      settings[row.key] = row.value;
+    });
+    return settings;
+  } catch (error: any) {
+    if (error.message?.includes('relation "portfolio_settings" does not exist')) {
+      return {};
     }
     throw error;
   }
 }
+

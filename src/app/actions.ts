@@ -133,6 +133,24 @@ export async function deleteCertificateAction(id: string) {
   }
 }
 
+export async function updateSettingsAction(settings: Record<string, string>) {
+  try {
+    for (const [key, value] of Object.entries(settings)) {
+      await sql`
+        INSERT INTO portfolio_settings (key, value)
+        VALUES (${key}, ${value})
+        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+      `;
+    }
+    revalidatePath('/');
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error) {
+    console.error('Update settings error:', error);
+    return { success: false, error: String(error) };
+  }
+}
+
 export async function reorderAction(type: 'projects' | 'certificates', id: string, direction: 'up' | 'down') {
   return { success: true };
 }

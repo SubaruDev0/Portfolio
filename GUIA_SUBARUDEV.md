@@ -99,20 +99,69 @@ Hemos creado un "Puente" en el archivo `tailwind.config.ts`. Si lo abres, verás
 
 ## 🧬 4. La Lógica de "Metamorfosis" (State Management)
 
-En la página principal (`src/app/page.tsx`), verás una línea que dice:
-`const [theme, setTheme] = useState<ThemeType>('frontend');`
+En la página principal (`src/app/page-client.tsx`), verás una línea que dice:
+`const [theme, setTheme] = useState<ThemeType>('all');`
 
 Esto es el **Estado**. 
 - Cuando haces clic en el seleccionador de temas, `setTheme` cambia el valor.
 - React detecta ese cambio y **redibuja** toda la página instantáneamente con los nuevos colores de la categoría (Azul para Frontend, Rojo para Backend, etc.).
 - No hay recargas de página (F5), todo fluye en el navegador del usuario.
 
+### ¿Cómo funciona el cambio de color dinámico?
+Usamos una función llamada `getThemeColors(theme)` ubicada en `src/utils/theme.ts`. Esta función devuelve un objeto con el color en formato HEX. 
+Luego, en el código, inyectamos ese color directamente en el atributo `style` de los elementos:
+```tsx
+style={{ color: themeColors.hex }} // Para texto
+style={{ backgroundColor: themeColors.hex }} // Para fondos
+```
+
 ### El Filtro de Proyectos (`useMemo`)
 Usamos algo llamado `useMemo` para que, cada vez que cambies el tema o filtres por tecnología, la computadora no trabaje de más. Solo recalcula qué proyectos mostrar si realmente algo cambió.
 
 ---
 
-## 📁 5. Estructura de Archivos (Para que no te pierdas)
+## 🏎️ 5. El Carrusel de Alto Rendimiento (Framer Motion Physics)
+
+Este no es un carrusel normal. Es un sistema de **físicas de partículas** aplicado a imágenes.
+
+### El Secreto del Movimiento Infinito
+Usamos tres herramientas clave de la librería `framer-motion`:
+1.  **`useMotionValue(x)`**: Es un valor de posición súper rápido que no hace que React se ralentice.
+2.  **`useAnimationFrame`**: Es un bucle que corre 60 veces por segundo. En cada cuadro, calculamos `está posición + velocidad`.
+3.  **Wrapping Matemático**: 
+    ```tsx
+    if (latest <= -totalWidth * 2) x.set(latest + totalWidth);
+    ```
+    Cuando el carrusel se mueve hacia la izquierda y llega al final del segundo set de imágenes, lo movemos instantáneamente al inicio del primer set. Como todas las imágenes son clones, es un bucle infinito perfecto (sin saltos visuales).
+
+### Inercia y Momentum (Modo Divertido)
+Al añadir `drag="x"`, permitimos que uses el ratón como si estuvieras moviendo algo físico. 
+- Usamos `dragTransition={{ power: 0.8, timeConstant: 200 }}` para que, al soltarlo, el carrusel siga girando solo y se detenga gradualmente con fricción, como una rueda de la fortuna.
+
+---
+
+## 🛠️ 6. Arquitectura de Modales Globales (Z-Index Fix)
+
+Tuvimos un problema técnico: los modales no se veían. Esto pasaba porque el carrusel tiene una propiedad llamada `transform` (para moverse), y en el mundo web, eso crea un "caparazón" que bloquea a los elementos con `position: fixed`.
+
+### ¿Cómo lo arreglamos? (State Lifting)
+1.  **Sacamos los Modales del Carrusel**: Los movimos al final de `HomeClient`, cerca del `</footer>`.
+2.  **Referencia por Estado**: Creamos `activeProject` y `activeCertificate`. 
+3.  **Comunicación**: Cuando haces clic en una tarjeta, esta envía un mensaje: *"Oye, muéstrame a mí"*. `HomeClient` captura ese mensaje, guarda el objeto en el estado, y renderiza el modal correspondiente en la raíz de la página, por encima de todo.
+
+---
+
+## 💾 7. Pipeline de Datos y Assets (Base64)
+
+Para que el sitio funcione en **Vercel** sin problemas de permisos de escritura, cambiamos el sistema de archivos local por una base de datos **Neon (PostgreSQL)**.
+
+- **Imágenes como Texto**: Cuando subes una foto en el panel admin, la convertimos a una cadena **Base64** (un texto larguísimo que representa la imagen). 
+- **Ventaja**: El sitio es totalmente "Serverless". No necesitamos un servidor de archivos externo; todo vive dentro de tu base de datos.
+- **CV Inteligente**: Tu CV se guarda igual. Cuando alguien pulsa "Descargar CV", reconstruimos el PDF desde ese texto Base64 en un milisegundo.
+
+---
+
+## 📁 8. Estructura de Archivos (Para que no te pierdas)
 
 - `/src/app/`: Las páginas del sitio.
 - `/src/components/`: Los botones, barras de navegación y tarjetas.

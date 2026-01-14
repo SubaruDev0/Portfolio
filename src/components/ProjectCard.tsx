@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Project } from '@/types';
 import { Github, ExternalLink, Code, Maximize2, Star, Briefcase, Info, CheckCircle } from 'lucide-react';
 import ProjectModal from './ProjectModal';
@@ -10,25 +11,26 @@ interface ProjectCardProps {
   project: Project;
   themeColor: string;
   className?: string;
+  onSelect?: (project: Project) => void;
 }
 
-export default function ProjectCard({ project, themeColor, className = "" }: ProjectCardProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
+export default function ProjectCard({ project, themeColor, className = "", onSelect }: ProjectCardProps) {
   const categoryLabels: Record<string, string> = {
-    frontend: 'Frontend',
-    backend: 'Backend',
-    fullstack: 'Fullstack',
-    research: 'Investigación',
-    other: 'Otro'
+    frontend: 'Front-end',
+    backend: 'Back-end',
+    fullstack: 'Full-stack',
+    research: 'Research',
+    other: 'Other'
   };
 
   return (
     <>
-      <div
+      <motion.div
         style={{ viewTransitionName: `card-${project.id}` } as any}
-        onClick={() => setIsModalOpen(true)}
-        className={`group relative bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden hover:border-white/30 transition-all animate-blurred-fade-in cursor-pointer ${className}`}
+        onClick={() => onSelect?.(project)}
+        whileHover={{ y: -8 }}
+        whileTap={{ scale: 0.98 }}
+        className={`group relative bg-[#0a0a0a] border border-white/10 rounded-3xl overflow-hidden hover:border-white/30 transition-all cursor-pointer ${className}`}
       >
         {/* Badge de Categoría y Real World */}
         <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
@@ -104,14 +106,7 @@ export default function ProjectCard({ project, themeColor, className = "" }: Pro
             )}
           </div>
         </div>
-      </div>
-
-      <ProjectModal 
-        project={project}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        themeColor={themeColor}
-      />
+      </motion.div>
     </>
   );
 }

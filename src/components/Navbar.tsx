@@ -6,9 +6,10 @@ import { User, Code2, Briefcase, Mail, Download } from 'lucide-react';
 
 interface NavbarProps {
   themeColor: string;
+  onOpenCV?: () => void;
 }
 
-export default function Navbar({ themeColor }: NavbarProps) {
+export default function Navbar({ themeColor, onOpenCV }: NavbarProps) {
   return (
     <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-md animate-slide-in-top">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -46,7 +47,7 @@ export default function Navbar({ themeColor }: NavbarProps) {
             Sobre Mi
           </Link>
           <Link 
-            href="#proyectos" 
+            href="#proyectos-anchor" 
             className="transition-colors duration-300 hover:text-white"
             onMouseEnter={(e) => e.currentTarget.style.color = themeColor}
             onMouseLeave={(e) => e.currentTarget.style.color = ''}
@@ -64,7 +65,8 @@ export default function Navbar({ themeColor }: NavbarProps) {
         </div>
 
         <button 
-          className="px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-all duration-500 bg-white text-black"
+          onClick={onOpenCV}
+          className="px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-all duration-500 bg-white text-black hover:scale-105 active:scale-95"
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = themeColor;
           }}

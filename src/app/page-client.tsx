@@ -1,26 +1,82 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useAnimationFrame, useSpring, useTransform, animate } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import ThemeSwitch from '@/components/ThemeSwitch';
 import ProjectCard from '@/components/ProjectCard';
 import CertificateCard from '@/components/CertificateCard';
 import TechBadge from '@/components/TechBadge';
+import CVModal from '@/components/CVModal';
+import ProjectModal from '@/components/ProjectModal';
+import CertificateModal from '@/components/CertificateModal';
 import { ThemeType, Project, Certificate } from '@/types';
 import { getThemeColors } from '@/utils/theme';
-import { Code2, Cpu, Globe, Database, Award, ExternalLink } from 'lucide-react';
+import { Code2, Cpu, Globe, Database, Award, ExternalLink, Mail, MessageCircle, Github, Linkedin, ArrowRight, ArrowLeft, Pause, Play } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 export default function HomeClient({ 
   initialProjects, 
-  initialCertificates 
+  initialCertificates,
+  initialSettings = {}
 }: { 
   initialProjects: Project[], 
-  initialCertificates: Certificate[] 
+  initialCertificates: Certificate[],
+  initialSettings?: Record<string, string>
 }) {
   const [theme, setTheme] = useState<ThemeType>('all');
   const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
+  const [isCVModalOpen, setIsCVModalOpen] = useState(false);
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const [activeCertificate, setActiveCertificate] = useState<Certificate | null>(null);
+
+  const isAnyModalOpen = !!activeProject || !!activeCertificate || isCVModalOpen;
   const themeColors = getThemeColors(theme);
+
+  // Carousel Logic (Infinite Drag + Momentum)
+  const [isPaused, setIsPaused] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const x = useMotionValue(0);
+  const baseVelocity = -60; // Pixels per second
+  const totalItems = initialCertificates.length;
+  const [itemWidth, setItemWidth] = useState(420);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setItemWidth(window.innerWidth < 768 ? 340 : 420);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const totalWidth = totalItems * itemWidth;
+
+  const carouselCertificates = useMemo(() => {
+    if (totalItems === 0) return [];
+    return [...initialCertificates, ...initialCertificates, ...initialCertificates, ...initialCertificates];
+  }, [initialCertificates, totalItems]);
+
+  useEffect(() => {
+    x.set(-totalWidth);
+  }, [totalWidth, x]);
+
+  useAnimationFrame((t, delta) => {
+    if (isPaused || isAnyModalOpen || isDragging || totalItems === 0) return;
+    const move = baseVelocity * (delta / 1000);
+    x.set(x.get() + move);
+  });
+
+  useEffect(() => {
+    const unsub = x.on("change", (latest) => {
+      if (latest <= -totalWidth * 2) {
+        x.set(latest + totalWidth);
+      } else if (latest >= -totalWidth / 2) {
+        x.set(latest - totalWidth);
+      }
+    });
+    return () => unsub();
+  }, [totalWidth, x]);
 
   const withTransition = (fn: () => void) => {
     // @ts-ignore
@@ -62,7 +118,7 @@ export default function HomeClient({
   };
 
   return (
-    <main className="min-h-screen bg-[#050505] relative overflow-hidden font-sans">
+    <main className="min-h-screen bg-[#050505] relative overflow-hidden font-sans scroll-smooth">
       {/* Background Effects */}
       <div className="fixed inset-0 grid-bg pointer-events-none" />
       <div 
@@ -72,22 +128,27 @@ export default function HomeClient({
         }}
       />
       
-      <Navbar themeColor={themeColors.hex} />
+      <Navbar themeColor={themeColors.hex} onOpenCV={() => setIsCVModalOpen(true)} />
 
       <section className="relative pt-32 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center">
         {/* Hero Section */}
-        <div className="text-center mb-16 animate-fade-in animate-delay-[100ms]">
-          <span className="inline-block px-4 py-1 rounded-full text-[10px] font-bold bg-white/5 border border-white/10 mb-6 uppercase tracking-[0.3em] animate-slide-in-top" style={{ color: themeColors.hex }}>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-16"
+        >
+          <span className="inline-block px-4 py-1 rounded-full text-[10px] font-bold bg-white/5 border border-white/10 mb-6 uppercase tracking-[0.3em] transition-colors" style={{ color: themeColors.hex }}>
             {theme === 'research' ? 'Laboratorio Activo' : 'Disponible para nuevos proyectos'}
           </span>
-          <h1 className="text-6xl md:text-8xl font-black mb-6 tracking-tighter leading-tight text-white animate-blurred-fade-in">
+          <h1 className="text-6xl md:text-8xl font-black mb-6 tracking-tighter leading-tight text-white">
             SubaruDev
             <br />
             <span className="text-2xl md:text-3xl font-light tracking-[0.2em] transition-colors duration-1000 uppercase block mt-2" style={{ color: themeColors.hex }}>
               Ingeniero Civil Informático
             </span>
           </h1>
-          <p className="text-gray-400 max-w-2xl mx-auto text-lg mb-10 leading-relaxed font-light animate-fade-in animate-delay-[500ms]">
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg mb-10 leading-relaxed font-light">
             {theme === 'all' && 'Explorando la arquitectura técnica y la innovación constante. Un registro de mi evolución y maduración como profesional.'}
             {theme === 'frontend' && 'Diseño de interfaces funcionales y sistemas escalables. Enfoque en accesibilidad, rendimiento y buenas prácticas visuales.'}
             {theme === 'backend' && 'Implementación de lógica de negocio, bases de datos y servicios robustos para entornos de alta exigencia.'}
@@ -96,26 +157,43 @@ export default function HomeClient({
             {theme === 'other' && 'Proyectos técnicos y herramientas especializadas: utilidades de terminal, algoritmos, simulaciones y desafíos de ingeniería.'}
           </p>
           
-          <div className="flex gap-4 justify-center animate-zoom-in animate-delay-[700ms]">
-            <button 
-                className="px-8 py-3 rounded-full font-bold transition-all hover:scale-105 active:scale-95 shadow-lg duration-500"
+          <div className="flex gap-4 justify-center">
+            <a 
+                href="#proyectos-anchor"
+                className="px-8 py-3 rounded-full font-bold transition-all hover:scale-105 active:scale-95 shadow-lg duration-500 flex items-center gap-2"
                 style={{ backgroundColor: themeColors.hex, color: '#000', boxShadow: `0 0 20px ${themeColors.hex}40` }}
             >
-              Contáctame
-            </button>
-            <button className="px-8 py-3 rounded-full font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white">
-              Saber más
+              Ver Proyectos
+            </a>
+            <button 
+              onClick={() => setIsCVModalOpen(true)}
+              className="px-8 py-3 rounded-full font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white flex items-center gap-2"
+            >
+              Descargar CV
             </button>
           </div>
-        </div>
+        </motion.div>
+
+        {/* Anchor point for correct scrolling - Land above the controller */}
+        <div id="proyectos-anchor" className="h-52 -mt-52" />
 
         {/* Metamorphosis Controller */}
-        <div className="animate-fade-in animate-delay-[900ms]">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mb-12"
+        >
           <ThemeSwitch currentTheme={theme} setTheme={(t) => withTransition(() => setTheme(t))} />
-        </div>
+        </motion.div>
 
         {/* Technology Filters */}
-        <div className="w-full mb-12 flex flex-wrap justify-center gap-3 animate-fade-in animate-delay-[1000ms]">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="w-full mb-12 flex flex-wrap justify-center gap-3"
+        >
           {allAvailableTechs.map(tech => (
             <button
               key={tech}
@@ -129,17 +207,24 @@ export default function HomeClient({
               />
             </button>
           ))}
-        </div>
+        </motion.div>
 
         {/* Projects Grid */}
         <div id="proyectos" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full min-h-[400px]">
           {filteredProjects.map((project, index) => (
-            <ProjectCard 
-              key={project.id} 
-              project={project} 
-              themeColor={themeColors.hex}
-              className={`animate-delay-[${(index % 6) * 100}ms]`}
-            />
+            <motion.div
+              key={project.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: (index % 3) * 0.1 }}
+            >
+              <ProjectCard 
+                project={project} 
+                themeColor={themeColors.hex}
+                onSelect={setActiveProject}
+              />
+            </motion.div>
           ))}
         </div>
       </section>
@@ -147,7 +232,12 @@ export default function HomeClient({
       {/* About Section */}
       <section id="sobre-mi" className="py-32 px-6 border-t border-white/5 bg-black/30 relative overflow-hidden">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <div className="animate-swing-drop-in">
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
             <h2 className="text-4xl font-black mb-8 tracking-tight uppercase text-white">Sobre <span style={{ color: themeColors.hex }}>Mí</span></h2>
             <div className="space-y-6 text-gray-400 text-lg leading-relaxed font-light">
               <p>
@@ -164,9 +254,15 @@ export default function HomeClient({
                 <StatItem value="Ingeniero Civil Informático" label="Título Profesional" />
               </div>
             </div>
-          </div>
+          </motion.div>
           
-          <div className="space-y-8 animate-zoom-in">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="space-y-8"
+          >
              <div className="p-8 bg-white/[0.02] border border-white/5 rounded-3xl group">
                <div className="flex items-center gap-4 mb-4">
                  <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 group-hover:border-white/30 transition-all">
@@ -188,35 +284,157 @@ export default function HomeClient({
                <FeatureBox icon={Code2} title="Liderazgo" color={themeColors.hex} />
                <FeatureBox icon={Database} title="Gestión Corfo / Santander X" color={themeColors.hex} />
              </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Certificates Carousel */}
         <div className="max-w-7xl mx-auto mt-32">
-          <div className="flex items-center gap-4 mb-12">
-            <h2 className="text-2xl font-black uppercase tracking-widest text-white">Certificaciones <span className="text-gray-600">&</span> Logros</h2>
-            <div className="h-px flex-1 bg-white/10" />
+          <div className="flex items-center justify-between gap-4 mb-12">
+            <div className="flex items-center gap-4 flex-1">
+              <h2 className="text-2xl font-black uppercase tracking-widest text-white">Certificaciones <span className="text-gray-600">&</span> Logros</h2>
+              <div className="h-px flex-1 bg-white/10" />
+            </div>
+            
+            <div className="flex items-center gap-3">
+               <button 
+                onClick={() => animate(x, x.get() + itemWidth, { type: "spring", stiffness: 300, damping: 30 })}
+                className="p-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all text-white/50 hover:text-white"
+               >
+                 <ArrowLeft size={18} />
+               </button>
+               <button 
+                onClick={() => setIsPaused(!isPaused)}
+                className="p-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all text-white/50 hover:text-white"
+               >
+                 {isPaused ? <Play size={18} /> : <Pause size={18} />}
+               </button>
+               <button 
+                onClick={() => animate(x, x.get() - itemWidth, { type: "spring", stiffness: 300, damping: 30 })}
+                className="p-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all text-white/50 hover:text-white"
+               >
+                 <ArrowRight size={18} />
+               </button>
+            </div>
           </div>
           
-          <div className="flex gap-6 overflow-x-auto pb-8 snap-x no-scrollbar">
-            {initialCertificates.map((cert) => (
-              <CertificateCard 
-                key={cert.id} 
-                certificate={cert} 
-                themeColor={themeColors.hex} 
-              />
-            ))}
+          <div className="relative overflow-hidden pt-4 pb-12 cursor-grab active:cursor-grabbing">
+            <motion.div 
+              className="flex gap-10"
+              style={{ x }}
+              drag="x"
+              onDragStart={() => setIsDragging(true)}
+              onDragEnd={() => {
+                // Pequeño delay para evitar que el click se dispare justo al soltar el drag
+                setTimeout(() => setIsDragging(false), 50);
+              }}
+              // No constraints needed because we wrap manually in useEffect
+              dragConstraints={{ left: -totalWidth * 2.5, right: 0 }}
+              dragTransition={{ power: 0.8, timeConstant: 200 }}
+            >
+              {carouselCertificates.map((cert, idx) => (
+                <div key={`${cert.id}-${idx}`} className="shrink-0 w-[380px] flex select-none">
+                  <CertificateCard 
+                    certificate={cert} 
+                    themeColor={themeColors.hex} 
+                    onSelect={(c) => !isDragging && setActiveCertificate(c)}
+                  />
+                </div>
+              ))}
+            </motion.div>
           </div>
         </div>
       </section>
 
-      <footer className="py-20 border-t border-white/5 text-center">
-        <div className="flex justify-center gap-8 mb-8 text-gray-500 font-bold text-xs uppercase tracking-widest animate-fade-in">
-           <a href="https://linkedin.com/in/subarudev0" className="hover:text-white hover:animate-tada transition-colors" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-           <a href="https://github.com/subarudev0" className="hover:text-white hover:animate-tada transition-colors" target="_blank" rel="noopener noreferrer">GitHub</a>
+      {/* Contact Section */}
+      <section id="contacto" className="py-32 px-6 relative overflow-hidden">
+        <div className="max-w-4xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-500 mb-4 block">Conectemos</span>
+              <h2 className="text-4xl md:text-6xl font-black text-white mb-12 tracking-tight uppercase">
+                ¿Buscas <span style={{ color: themeColors.hex }}>Sumar Talento</span> a tu equipo?
+              </h2>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+               <motion.a 
+                 href="mailto:subaru0.dev@gmail.com"
+                 initial={{ opacity: 0, x: -20 }}
+                 whileInView={{ opacity: 1, x: 0 }}
+                 viewport={{ once: true }}
+                 transition={{ delay: 0.1 }}
+                 className="p-6 bg-white/[0.02] border border-white/10 rounded-3xl flex flex-col items-center gap-3 hover:bg-white/[0.05] transition-all group"
+               >
+                 <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                    <Mail size={28} style={{ color: themeColors.hex }} />
+                 </div>
+                 <h3 className="text-white font-bold text-lg">Gmail</h3>
+                 <p className="text-gray-500 font-light text-sm">subaru0.dev@gmail.com</p>
+                 <span className="text-[10px] uppercase tracking-widest font-black mt-2 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: themeColors.hex }}>Enviar Correo</span>
+               </motion.a>
+
+               <motion.a 
+                 href="https://wa.me/56954971044"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 initial={{ opacity: 0, x: 20 }}
+                 whileInView={{ opacity: 1, x: 0 }}
+                 viewport={{ once: true }}
+                 transition={{ delay: 0.2 }}
+                 className="p-6 bg-white/[0.02] border border-white/10 rounded-3xl flex flex-col items-center gap-3 hover:bg-white/[0.05] transition-all group"
+               >
+                 <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                    <MessageCircle size={28} style={{ color: themeColors.hex }} />
+                 </div>
+                 <h3 className="text-white font-bold text-lg">WhatsApp</h3>
+                 <p className="text-gray-500 font-light text-sm">+56 9 5497 1044</p>
+                 <span className="text-[10px] uppercase tracking-widest font-black mt-2 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: themeColors.hex }}>Enviar Mensaje</span>
+               </motion.a>
+            </div>
+
+            <div className="mt-12 flex justify-center gap-6">
+                <a href="https://linkedin.com/in/subarudev0" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-white/30 transition-all text-gray-400 hover:text-white active:scale-95">
+                  <Linkedin size={24} />
+                </a>
+                <a href="https://github.com/subarudev0" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-white/30 transition-all text-gray-400 hover:text-white active:scale-95">
+                  <Github size={24} />
+                </a>
+            </div>
         </div>
+      </section>
+
+      <footer className="py-20 border-t border-white/5 text-center">
         <p className="text-gray-600 text-[10px] uppercase tracking-[0.5em]">© 2026 SUBARUDEV // J.S.M. SUBARU</p>
       </footer>
+
+      {activeProject && (
+        <ProjectModal 
+          project={activeProject}
+          isOpen={!!activeProject}
+          onClose={() => setActiveProject(null)}
+          themeColor={themeColors.hex}
+        />
+      )}
+
+      {activeCertificate && (
+        <CertificateModal 
+          certificate={activeCertificate}
+          isOpen={!!activeCertificate}
+          onClose={() => setActiveCertificate(null)}
+          themeColor={themeColors.hex}
+        />
+      )}
+
+      <CVModal 
+        isOpen={isCVModalOpen} 
+        onClose={() => setIsCVModalOpen(false)} 
+        cvUrl={initialSettings.cv_url}
+        description={initialSettings.cv_description}
+        themeColor={themeColors.hex}
+      />
     </main>
   );
 }

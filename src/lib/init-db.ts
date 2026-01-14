@@ -38,6 +38,14 @@ export async function initDatabase() {
       )
     `;
 
+    // Create portfolio settings table
+    await sql`
+      CREATE TABLE IF NOT EXISTS portfolio_settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+      )
+    `;
+
     console.log('Tables created successfully.');
 
     // Migrate projects
