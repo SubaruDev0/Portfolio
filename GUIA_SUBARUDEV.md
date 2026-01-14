@@ -195,3 +195,30 @@ Luego abre [http://localhost:3001](http://localhost:3001).
 3. **Midu animations**: Si ves una clase que empieza por `animate-`, viene de la configuración que le "robamos" a la librería de midudev para que te funcione a ti.
 
 ¡Ahora eres un Ingeniero de Metamorfosis Digital! A seguir construyendo. 🚀🔥
+
+---
+
+## 🛠️ Explicación Técnica para un Ingeniero: El Stack Moderno
+
+Javier, aquí te explico por qué usamos estas herramientas en lugar de las tradicionales:
+
+### ⚡ ¿Por qué Next.js 14 en lugar de React básico?
+Next.js es un **framework**, mientras que React es solo una **librería**.
+- **Server Components**: Next.js procesa parte del código en el servidor antes de mandarlo al cliente. Esto hace que Google te quiera más (SEO) y que la página cargue mucho más rápido.
+- **Rutas Automáticas**: No necesitas configurar un router. Si creas un archivo en `app/contacto/page.tsx`, la URL `/contacto` ya existe.
+- **Optimización de Imágenes**: Next.js comprime y cambia el tamaño de tus fotos automáticamente según el dispositivo del usuario.
+
+### 🎨 Tailwind CSS: El fin del "Spaghetti Code"
+En lugar de tener un archivo `estilos.css` de 2000 líneas donde te pierdes buscando la clase `.card-container-inner-fixed-v2`, Tailwind te da **clases utilitarias**.
+- **Productividad**: `flex items-center justify-center` es universal. No tienes que inventar nombres.
+- **Peso**: Tailwind analiza tu código y **solo mete en el archivo final de producción el CSS que realmente estás usando**. El resultado es un sitio web ligerísimo.
+
+### 🔷 TypeScript: Tu seguro contra errores
+Usamos `.tsx` en lugar de `.js` por el sistema de **Tipado**.
+- **Autocompletado**: Si tienes un objeto `Proyecto`, TypeScript sabe que tiene un `titulo` pero no una `fecha_nacimiento`. Si intentas escribir `proyecto.fecha`, te avisará del error **antes** de que abras el navegador.
+- **Refactorización**: Si decides cambiar el nombre de una propiedad en el futuro, TypeScript te mostrará todos los lugares donde se rompió el código para que los arregles en segundos.
+
+### ✨ Animaciones: Framer Motion vs CSS Puro
+CSS es bueno para cosas simples, pero para el **Carrusel Físico** usamos Framer Motion.
+- **Spring Physics**: Las animaciones no son lineales; tienen "rebote" y "peso" real.
+- **Gestos**: Detectar draggings, flicks y velocities es casi imposible solo con CSS. Framer Motion nos permite tratar los elementos de la pantalla como si fueran objetos físicos.

@@ -346,63 +346,86 @@ export default function HomeClient({
       </section>
 
       {/* Contact Section */}
-      <section id="contacto" className="py-32 px-6 relative overflow-hidden">
-        <div className="max-w-4xl mx-auto text-center">
+      <section id="contacto" className="py-24 px-6 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
+              className="bg-white/[0.02] border border-white/10 rounded-[3rem] p-8 md:p-16 relative overflow-hidden group"
             >
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-500 mb-4 block">Conectemos</span>
-              <h2 className="text-4xl md:text-6xl font-black text-white mb-12 tracking-tight uppercase">
-                ¿Buscas <span style={{ color: themeColors.hex }}>Sumar Talento</span> a tu equipo?
-              </h2>
+              {/* Luz de fondo sutil */}
+              <div 
+                className="absolute -top-24 -right-24 w-64 h-64 blur-[120px] rounded-full opacity-20 transition-colors duration-1000"
+                style={{ backgroundColor: themeColors.hex }}
+              />
+
+              <div className="flex flex-col lg:flex-row gap-12 items-center justify-between relative z-10">
+                <div className="text-center lg:text-left max-w-xl">
+                  <span className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-500 mb-4 block">Conectemos</span>
+                  <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight uppercase leading-none">
+                    ¿Buscas <br />
+                    <span style={{ color: themeColors.hex }}>Sumar Talento</span> <br />
+                    a tu equipo?
+                  </h2>
+                  <p className="text-gray-400 text-lg font-light leading-relaxed">
+Estoy disponible. Conversemos sobre cómo puedo integrarme a tu equipo y contribuir en los próximos desafíos.                  </p>
+                </div>
+
+                <div className="flex flex-col gap-4 w-full max-w-sm">
+                   <motion.a 
+                     href="mailto:subaru0.dev@gmail.com"
+                     whileHover={{ x: 8, backgroundColor: "rgba(255,255,255,0.08)" }}
+                     whileTap={{ scale: 0.98 }}
+                     transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                     className="p-5 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between hover:border-white/20 transition-colors group/link"
+                   >
+                     <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover/link:scale-110 transition-transform">
+                           <Mail size={20} style={{ color: themeColors.hex }} />
+                        </div>
+                        <div>
+                           <h3 className="text-white font-bold text-sm">Gmail</h3>
+                           <p className="text-gray-500 text-xs">subaru0.dev@gmail.com</p>
+                        </div>
+                     </div>
+                     <ArrowRight size={16} className="text-gray-600 group-hover/link:translate-x-1 transition-transform" />
+                   </motion.a>
+
+                   <motion.a 
+                     href="https://wa.me/56954971044"
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     whileHover={{ x: 8, backgroundColor: "rgba(255,255,255,0.08)" }}
+                     whileTap={{ scale: 0.98 }}
+                     transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                     className="p-5 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between hover:border-white/20 transition-colors group/link"
+                   >
+                     <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover/link:scale-110 transition-transform">
+                           <MessageCircle size={20} style={{ color: themeColors.hex }} />
+                        </div>
+                        <div>
+                           <h3 className="text-white font-bold text-sm">WhatsApp</h3>
+                           <p className="text-gray-500 text-xs">+56 9 5497 1044</p>
+                        </div>
+                     </div>
+                     <ArrowRight size={16} className="text-gray-600 group-hover/link:translate-x-1 transition-transform" />
+                   </motion.a>
+
+                   <div className="grid grid-cols-2 gap-4">
+                      <a href="https://linkedin.com/in/subarudev0" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-3 text-gray-400 hover:text-white">
+                        <Linkedin size={20} />
+                        <span className="text-xs font-bold uppercase tracking-widest">LinkedIn</span>
+                      </a>
+                      <a href="https://github.com/subarudev0" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-all flex items-center justify-center gap-3 text-gray-400 hover:text-white">
+                        <Github size={20} />
+                        <span className="text-xs font-bold uppercase tracking-widest">GitHub</span>
+                      </a>
+                   </div>
+                </div>
+              </div>
             </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-               <motion.a 
-                 href="mailto:subaru0.dev@gmail.com"
-                 initial={{ opacity: 0, x: -20 }}
-                 whileInView={{ opacity: 1, x: 0 }}
-                 viewport={{ once: true }}
-                 transition={{ delay: 0.1 }}
-                 className="p-6 bg-white/[0.02] border border-white/10 rounded-3xl flex flex-col items-center gap-3 hover:bg-white/[0.05] transition-all group"
-               >
-                 <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                    <Mail size={28} style={{ color: themeColors.hex }} />
-                 </div>
-                 <h3 className="text-white font-bold text-lg">Gmail</h3>
-                 <p className="text-gray-500 font-light text-sm">subaru0.dev@gmail.com</p>
-                 <span className="text-[10px] uppercase tracking-widest font-black mt-2 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: themeColors.hex }}>Enviar Correo</span>
-               </motion.a>
-
-               <motion.a 
-                 href="https://wa.me/56954971044"
-                 target="_blank"
-                 rel="noopener noreferrer"
-                 initial={{ opacity: 0, x: 20 }}
-                 whileInView={{ opacity: 1, x: 0 }}
-                 viewport={{ once: true }}
-                 transition={{ delay: 0.2 }}
-                 className="p-6 bg-white/[0.02] border border-white/10 rounded-3xl flex flex-col items-center gap-3 hover:bg-white/[0.05] transition-all group"
-               >
-                 <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                    <MessageCircle size={28} style={{ color: themeColors.hex }} />
-                 </div>
-                 <h3 className="text-white font-bold text-lg">WhatsApp</h3>
-                 <p className="text-gray-500 font-light text-sm">+56 9 5497 1044</p>
-                 <span className="text-[10px] uppercase tracking-widest font-black mt-2 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: themeColors.hex }}>Enviar Mensaje</span>
-               </motion.a>
-            </div>
-
-            <div className="mt-12 flex justify-center gap-6">
-                <a href="https://linkedin.com/in/subarudev0" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-white/30 transition-all text-gray-400 hover:text-white active:scale-95">
-                  <Linkedin size={24} />
-                </a>
-                <a href="https://github.com/subarudev0" target="_blank" rel="noopener noreferrer" className="p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-white/30 transition-all text-gray-400 hover:text-white active:scale-95">
-                  <Github size={24} />
-                </a>
-            </div>
         </div>
       </section>
 
