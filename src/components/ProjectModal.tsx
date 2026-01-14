@@ -94,8 +94,18 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor }: P
               </span>
               
               {project.isRealWorld && (
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-black uppercase tracking-[0.3em] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-                  <Briefcase size={10} fill="currentColor" /> Producción
+                <div className="group/real relative">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] bg-black/80 border border-emerald-500/50 text-emerald-400 hover:bg-black hover:border-emerald-400 transition-all cursor-help shadow-lg backdrop-blur-md">
+                    <Briefcase size={10} fill="currentColor" /> Producción
+                  </div>
+                  
+                  {/* Tooltip en el Modal */}
+                  <div className="absolute left-0 top-full mt-2 w-64 p-4 bg-[#0a0a0a]/95 backdrop-blur-xl border border-white/20 rounded-2xl text-[11px] leading-relaxed text-gray-300 opacity-0 group-hover/real:opacity-100 transition-all duration-300 pointer-events-none shadow-2xl z-50 translate-y-2 group-hover/real:translate-y-0">
+                    <p className="font-bold text-emerald-400 mb-2 flex items-center gap-1 uppercase tracking-tight">
+                       <CheckCircle size={12} /> Calidad Industrial
+                    </p>
+                    Este sistema ha sido validado en un entorno de producción real, resolviendo necesidades operativas con altos estándares de fiabilidad y rendimiento.
+                  </div>
                 </div>
               )}
               

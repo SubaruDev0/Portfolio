@@ -88,7 +88,7 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
             style={{ backgroundColor: themeColor, color: '#000' }}
           >
             <Download size={20} />
-            Descargar PDF Real
+            Descargar PDF
           </a>
         </div>
       </div>

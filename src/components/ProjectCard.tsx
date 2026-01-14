@@ -33,20 +33,20 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
         className={`group relative bg-[#0a0a0a] border border-white/10 rounded-3xl overflow-hidden hover:border-white/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 cursor-pointer ${className}`}
       >
         {/* Badge de Categoría y Real World */}
-        <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+        <div className="absolute top-4 left-4 z-40 flex flex-col gap-2">
           <span className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-md border bg-black/40 border-white/20 text-white/70 group-hover:bg-black/90 group-hover:border-white/40 group-hover:text-white transition-all duration-500 shadow-2xl">
             {categoryLabels[project.category] || project.category}
           </span>
           
           {project.isRealWorld && (
             <div className="group/real relative">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-emerald-500/5 border border-emerald-500/10 text-emerald-400/40 backdrop-blur-md group-hover:bg-emerald-500/20 group-hover:border-emerald-500/40 group-hover:text-emerald-400 transition-all duration-500 shadow-lg">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-black/80 border border-emerald-500/50 text-emerald-400 group-hover:bg-black group-hover:border-emerald-400 transition-all duration-500 shadow-2xl backdrop-blur-md">
                 <Briefcase size={10} fill="currentColor" /> Producción
               </div>
               
-              {/* Tooltip Contextual */}
-              <div className="absolute left-0 top-full mt-2 w-48 p-3 bg-black/95 backdrop-blur-xl border border-white/10 rounded-xl text-[10px] leading-relaxed text-gray-300 opacity-0 group-hover/real:opacity-100 transition-opacity pointer-events-none shadow-2xl z-50">
-                <p className="font-bold text-emerald-400 mb-1 flex items-center gap-1">
+              {/* Tooltip Contextual - Elevado con z-50 */}
+              <div className="absolute left-0 top-full mt-2 w-48 p-3 bg-black/95 backdrop-blur-xl border border-white/20 rounded-xl text-[10px] leading-relaxed text-gray-300 opacity-0 group-hover/real:opacity-100 transition-all duration-300 pointer-events-none shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-50 translate-y-2 group-hover/real:translate-y-0">
+                <p className="font-bold text-emerald-400 mb-1 flex items-center gap-1 uppercase tracking-tighter">
                    <CheckCircle size={10} /> Calidad Industrial
                 </p>
                 Este sistema ha sido validado en un entorno de producción real, resolviendo necesidades operativas con altos estándares de fiabilidad y rendimiento.
@@ -56,7 +56,7 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
         </div>
 
         {project.isStarred && (
-          <div className="absolute top-4 right-4 z-20 bg-yellow-500/20 backdrop-blur-md border border-yellow-500/50 p-1.5 rounded-full text-yellow-500 animate-pulse">
+          <div className="absolute top-4 right-4 z-40 bg-yellow-500/20 backdrop-blur-md border border-yellow-500/40 p-1.5 rounded-full text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)] group-hover:bg-yellow-500/40 group-hover:border-yellow-500 transition-all duration-500">
             <Star size={14} fill="currentColor" />
           </div>
         )}
