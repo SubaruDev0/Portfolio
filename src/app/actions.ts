@@ -1,27 +1,24 @@
 'use server'
 
-import fs from 'fs/promises';
-import path from 'path';
+import { put } from '@vercel/blob';
 import { Project, Certificate } from '@/types';
 import { sql } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
-// Image Upload remains the same for now (local storage)
+// Image Upload using Vercel Blob (Cloud Storage)
 export async function uploadImageAction(formData: FormData) {
   try {
     const file = formData.get('file') as File;
     if (!file) throw new Error('No file provided');
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
     const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-    const publicPath = path.join(process.cwd(), 'public/projects', fileName);
     
-    await fs.mkdir(path.dirname(publicPath), { recursive: true });
-    await fs.writeFile(publicPath, buffer);
+    // Subir a Vercel Blob
+    const blob = await put(`projects/${fileName}`, file, {
+      access: 'public',
+    });
 
-    return { success: true, url: `/projects/${fileName}` };
+    return { success: true, url: blob.url };
   } catch (error) {
     console.error('Upload error:', error);
     return { success: false, error: String(error) };
