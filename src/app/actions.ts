@@ -1,24 +1,23 @@
 'use server'
 
-import { put } from '@vercel/blob';
 import { Project, Certificate } from '@/types';
 import { sql } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
-// Image Upload using Vercel Blob (Cloud Storage)
+// Image Upload - Convert to Base64 to store in Database
 export async function uploadImageAction(formData: FormData) {
   try {
     const file = formData.get('file') as File;
     if (!file) throw new Error('No file provided');
 
-    const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-    
-    // Subir a Vercel Blob
-    const blob = await put(`projects/${fileName}`, file, {
-      access: 'public',
-    });
+    // Convert file to Buffer and then to Base64
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const base64 = buffer.toString('base64');
+    const dataUrl = `data:${file.type};base64,${base64}`;
 
-    return { success: true, url: blob.url };
+    // Returning the Data URL to be stored in Neon DB column image_url
+    return { success: true, url: dataUrl };
   } catch (error) {
     console.error('Upload error:', error);
     return { success: false, error: String(error) };
