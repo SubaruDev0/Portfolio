@@ -20,8 +20,8 @@ const themes: { id: ThemeType; label: string; icon: any; color: string }[] = [
   { id: 'frontend', label: 'Front-end', icon: Layout, color: 'text-cyan-400' },
   { id: 'backend', label: 'Back-end', icon: Server, color: 'text-red-500' },
   { id: 'fullstack', label: 'Full-stack', icon: Layers, color: 'text-purple-500' },
-  { id: 'research', label: 'Research', icon: Microscope, color: 'text-emerald-400' },
-  { id: 'other', label: 'Other', icon: Boxes, color: 'text-slate-400' },
+  { id: 'research', label: 'Investigación', icon: Microscope, color: 'text-emerald-400' },
+  { id: 'other', label: 'Otros', icon: Boxes, color: 'text-slate-400' },
 ];
 
 export default function ThemeSwitch({ currentTheme, setTheme }: ThemeSwitchProps) {
