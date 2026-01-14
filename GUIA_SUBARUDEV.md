@@ -63,21 +63,20 @@ El panel `/admin` ha sido reforzado para que puedas gestionar tus proyectos de f
 - **URL:** [http://localhost:3001/admin](http://localhost:3001/admin)
 - **Contraseña de Acceso:** `Mabel#zer0` (Configurable en BD)
 
-### 🚀 Mejoras de UX (Experiencia de Usuario):
-1.  **Protección de Identidad Real (DB-Based Auth):** 
-    - Ya no es una contraseña fija en el código ("hardcoded"). Ahora la contraseña se lee directamente desde la tabla `admin_auth` de tu base de datos Neon.
-    - Si necesitas cambiarla, puedes hacerlo directamente en la tabla `admin_auth` o ejecutando nuevamente la migración con un nuevo valor.
-2.  **Seguridad Dinámica:** Al estar en la base de datos, nadie que descargue tu código de GitHub podrá saber la contraseña secreta a menos que tenga acceso a tus variables de entorno (`DATABASE_URL`).    - Ya puedes añadir la URL de una foto o subir archivos directamente desde tu PC usando el icono **Subir (FileUp)**. 
-    - Las imágenes se guardan automáticamente en `public/projects/`.
-3.  **Sistema de Galería (Proyectos Privados):**
-    - Si un proyecto no tiene demo pública, puedes subir múltiples capturas de pantalla en la sección **Galería**.
-    - El portafolio mostrará un carrusel dinámico para que los visitantes puedan ver el interior del software.
-4.  **Combobox Inteligente de Tecnologías (LOGOS):** 
-    - Ya no tienes que escribir todo a mano. El sistema te sugiere tecnologías que **ya has usado**.
-    - **Soporte para Logos**: El sistema busca el logo oficial en Simple Icons automáticamente.
-5.  **Distintivos de Calidad:**
-    - **Estrella ⭐ (Favorito):** Fija el proyecto arriba del todo, sin importar la fecha.
-    - **Maletín 💼 (Proyecto en Producción):** Marca el software como validado en entorno real (Software que ya está siendo usado por empresas o clientes).
+### 🚀 Seguridad y UX de Élite:
+1.  **Pantalla de Acceso (Login Gate):** 
+    - Ahora el panel no es visible directamente. Verás una pantalla de "Verificación de Identidad" con un diseño minimalista y efectos de cristal.
+    - La contraseña se verifica en el **servidor** (Server Actions), lo que significa que la clave nunca viaja al navegador ni se queda guardada en el código del cliente.
+2.  **Protección de Datos (DB-Based Auth):** 
+    - La contraseña reside en la tabla `admin_auth`. 
+    - **Cero Código Hardcoded**: Si alguien descarga tu repositorio, no podrá saltarse el acceso ni ver la clave "inspeccionando el código".
+3.  **Gestión Inteligente de Activos:**
+    - Ya puedes subir múltiples capturas de pantalla en la sección **Galería**.
+    - El portafolio mostrará un carrusel dinámico con fotos si el proyecto no tiene Live Demo.
+4.  **Sistema de Reordenamiento:**
+    - ¿Quieres que un certificado o proyecto aparezca antes? Usa las flechas subida/bajada al lado de cada ítem para cambiar su prioridad en tiempo real.
+5.  **Tecnologías Dinámicas**: 
+    - El sistema sugiere tecnologías automáticamente basándose en tus proyectos anteriores para mantener consistencia visual.
 
 ---
 

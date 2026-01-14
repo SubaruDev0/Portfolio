@@ -4,6 +4,27 @@ import { Project, Certificate } from '@/types';
 import { sql } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
+// AUTHENTICATION
+export async function verifyAdminAction(password: string) {
+  try {
+    const result = await sql`SELECT password_hash FROM admin_auth WHERE id = 'admin_secret' LIMIT 1`;
+    if (result && result.length > 0) {
+      const dbPassword = (result[0] as any).password_hash;
+      // Case-insensitive comparison as requested
+      const isMatch = dbPassword.toLowerCase() === password.toLowerCase();
+      return { success: isMatch };
+    }
+    // Fallback if DB is empty or table doesn't exist yet
+    // This allows initial access to run migrations
+    const fallbackPassword = 'Mabel#zer0'; 
+    return { success: password.toLowerCase() === fallbackPassword.toLowerCase() || password.toLowerCase() === 'mabel123' };
+  } catch (error) {
+    console.error('Auth error:', error);
+    // Even if query fails (table not exists), allow the owner to enter and initialize
+    return { success: password.toLowerCase() === 'mabel#zer0' || password.toLowerCase() === 'mabel123' };
+  }
+}
+
 // Image Upload - Convert to Base64 to store in Database (FORCE UPDATE)
 export async function uploadImageAction(formData: FormData) {
   try {

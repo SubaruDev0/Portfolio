@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { ProjectCategory, Project, Certificate } from '@/types';
-import { Plus, Github, Link as LinkIcon, Save, Image as ImageIcon, Lock, X, Search, FileUp, Star, Briefcase, Award, ChevronUp, ChevronDown, Eye, EyeOff, Pencil, Database } from 'lucide-react';
-import { addProjectAction, deleteProjectAction, uploadImageAction, addCertificateAction, deleteCertificateAction, reorderAction, updateProjectAction, updateCertificateAction, runMigration, updateSettingsAction } from '@/app/actions';
+import { Plus, Github, Link as LinkIcon, Save, Image as ImageIcon, Lock, X, Search, FileUp, Star, Briefcase, Award, ChevronUp, ChevronDown, Eye, EyeOff, Pencil, Database, LogIn } from 'lucide-react';
+import { addProjectAction, deleteProjectAction, uploadImageAction, addCertificateAction, deleteCertificateAction, reorderAction, updateProjectAction, updateCertificateAction, runMigration, updateSettingsAction, verifyAdminAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { Trash2, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
 import TechBadge from '@/components/TechBadge';
@@ -18,19 +18,19 @@ function cn(...inputs: ClassValue[]) {
 export default function AdminPage({
   initialProjects: allProjects,
   initialCertificates: allCertificates,
-  initialSettings = {},
-  adminPassword
+  initialSettings = {}
 }: {
   initialProjects: Project[],
   initialCertificates: Certificate[],
-  initialSettings?: Record<string, string>,
-  adminPassword: string
+  initialSettings?: Record<string, string>
 }) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [newTech, setNewTech] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -103,13 +103,20 @@ export default function AdminPage({
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === adminPassword) {
+    setIsVerifying(true);
+    setError(false);
+    
+    const result = await verifyAdminAction(password);
+    if (result.success) {
       setIsAuthenticated(true);
     } else {
-      alert('Contraseña incorrecta');
+      setError(true);
+      setPassword('');
+      // Simple shake effect could be added here
     }
+    setIsVerifying(false);
   };
 
   const handleCertSubmit = async (e: React.FormEvent) => {
@@ -251,6 +258,83 @@ export default function AdminPage({
       alert('Error al guardar: ' + result.error);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#030303] flex items-center justify-center p-4 font-sans selection:bg-cyan-500/30">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-12">
+            <div className="w-20 h-20 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-white/10 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 relative group">
+              <div className="absolute inset-0 bg-cyan-500/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <Lock className="text-cyan-400 relative z-10" size={32} />
+            </div>
+            <h1 className="text-2xl font-black text-white uppercase tracking-[0.3em] mb-3">Panel de Acceso</h1>
+            <p className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-medium leading-relaxed">
+              Introduce la llave maestra para gestionar tu portafolio
+            </p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="relative group/input">
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                <Lock size={16} className={cn("transition-colors duration-300", error ? "text-red-500" : "text-gray-600 group-focus-within/input:text-cyan-400")} />
+              </div>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="CONTRASENA_DE_ACCESO"
+                className={cn(
+                  "w-full bg-white/[0.03] border text-white text-xs font-mono py-5 pl-14 pr-14 rounded-2xl outline-none transition-all duration-300 placeholder:text-gray-700 uppercase tracking-widest",
+                  error 
+                    ? "border-red-500/50 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.1)]" 
+                    : "border-white/5 focus:border-cyan-500/30 focus:bg-white/[0.05]"
+                )}
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-5 flex items-center text-gray-600 hover:text-white transition-colors"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+
+            {error && (
+              <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest text-center animate-pulse">
+                Acceso Denegado - Clave Incorrecta
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={isVerifying || !password}
+              className="w-full bg-white text-black py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-cyan-400 transition-all duration-500 active:scale-[0.98] disabled:opacity-50 disabled:grayscale"
+            >
+              {isVerifying ? (
+                <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+              ) : (
+                <>
+                  Verificar Identidad
+                  <LogIn size={14} />
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="mt-12 text-center">
+            <button 
+              onClick={() => router.push('/')}
+              className="text-[10px] text-gray-700 hover:text-gray-400 uppercase tracking-widest transition-colors inline-flex items-center gap-2"
+            >
+              <X size={12} /> VOLVER AL SITIO
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#050505] pt-32 pb-20 px-6 font-mono">
