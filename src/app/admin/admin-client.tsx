@@ -111,6 +111,8 @@ export default function AdminPage({
     const result = await verifyAdminAction(password);
     if (result.success) {
       setIsAuthenticated(true);
+      // Ejecutar migración silenciosa para asegurar que las tablas existan
+      runMigration().catch(console.error);
     } else {
       setError(true);
       setPassword('');
