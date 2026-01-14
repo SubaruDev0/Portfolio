@@ -90,8 +90,7 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor }: P
                  project.category === 'research' ? 'INVESTIGACIÓN' : 
                  project.category === 'frontend' ? 'FRONT-END' :
                  project.category === 'backend' ? 'BACK-END' :
-                 project.category === 'fullstack' ? 'FULL-STACK' : 
-                 project.category.toUpperCase()}
+                 'FULL-STACK'}
               </span>
               
               {project.isRealWorld && (
