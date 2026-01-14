@@ -1,0 +1,164 @@
+'use client';
+
+import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import { Project } from '@/types';
+import { X, Github, ExternalLink, Code, Star, Briefcase, CheckCircle } from 'lucide-react';
+import TechBadge from './TechBadge';
+
+interface ProjectModalProps {
+  project: Project;
+  isOpen: boolean;
+  onClose: () => void;
+  themeColor: string;
+}
+
+export default function ProjectModal({ project, isOpen, onClose, themeColor }: ProjectModalProps) {
+  const [activeImage, setActiveImage] = React.useState(project.imageUrl);
+
+  // Sincronizar activeImage cuando el proyecto cambia o se abre el modal
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveImage(project.imageUrl);
+    }
+  }, [project.imageUrl, isOpen]);
+  
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
+      {/* Overlay con blur dinámico */}
+      <div 
+        className="absolute inset-0 bg-black/95 backdrop-blur-xl animate-fade-in"
+        onClick={onClose}
+      />
+      
+      {/* Modal Container */}
+      <div 
+        className="relative w-full max-w-6xl bg-[#0a0a0a] border border-white/10 rounded-3xl overflow-hidden shadow-2xl animate-zoom-in flex flex-col lg:flex-row h-full max-h-[90vh] z-10"
+        style={{ boxShadow: `0 0 50px ${themeColor}20` }}
+      >
+        <button 
+          onClick={onClose}
+          className="absolute top-6 right-6 z-50 p-2 bg-black/50 hover:bg-white/10 rounded-full text-white/50 hover:text-white transition-all active:scale-95"
+        >
+          <X size={24} />
+        </button>
+
+        {/* Lado Izquierdo: Visualizador de Galería */}
+        <div className="w-full lg:w-[63%] bg-[#050505] flex flex-col p-4 lg:p-8 overflow-hidden h-full">
+          <div className="flex-1 relative rounded-2xl overflow-hidden bg-[#111] flex items-center justify-center">
+            {activeImage ? (
+              <img 
+                src={activeImage} 
+                alt={project.title} 
+                className="w-full h-full object-contain animate-blurred-fade-in"
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-white/5 space-y-4">
+                <Code size={100} strokeWidth={1} />
+                <span className="text-xs uppercase tracking-[0.5em]">Sin Previsualización</span>
+              </div>
+            )}
+          </div>
+
+          {/* Miniaturas de la galería */}
+          {(project.gallery && project.gallery.length > 0) && (
+            <div className="flex gap-4 mt-6 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shrink-0">
+              {[project.imageUrl, ...(project.gallery || [])].filter(Boolean).map((img, i) => (
+                <button 
+                  key={i}
+                  onClick={() => setActiveImage(img as string)}
+                  className={`relative shrink-0 w-24 aspect-video rounded-lg overflow-hidden border-2 transition-all ${activeImage === img ? 'border-emerald-500 scale-105' : 'border-white/10 hover:border-white/30'}`}
+                >
+                  <img src={img as string} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Lado Derecho: Contenido */}
+        <div className="w-full lg:w-[37%] p-8 lg:p-10 overflow-y-auto border-t lg:border-t-0 lg:border-l border-white/10 bg-[#0a0a0a] flex flex-col focus:outline-none">
+          <div className="mb-8">
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              <span 
+                className="text-[10px] font-black uppercase tracking-[0.3em] block px-2 py-1 bg-white/5 rounded border border-white/10"
+                style={{ color: themeColor }}
+              >
+                {project.category}
+              </span>
+              
+              {project.isRealWorld && (
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-black uppercase tracking-[0.3em] bg-emerald-500/20 border border-emerald-500/50 text-emerald-400">
+                  <Briefcase size={10} fill="currentColor" /> Proyecto en Producción
+                </div>
+              )}
+              
+              {project.isStarred && (
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-500 flex items-center gap-1">
+                  <Star size={10} fill="currentColor" /> Favorito
+                </span>
+              )}
+            </div>
+
+            {project.isRealWorld && (
+              <div className="mb-8 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl animate-fade-in ring-1 ring-emerald-500/10">
+                <p className="text-[11px] text-emerald-400/90 leading-relaxed font-medium">
+                  <CheckCircle size={10} className="inline mr-2" />
+                  **Calidad Industrial:** Este sistema ha sido validado en escenarios productivos reales, superando la fase de prototipo para cumplir con requerimientos de alta fiabilidad.
+                </p>
+              </div>
+            )}
+
+            <h2 className="text-4xl font-black text-white mb-6 tracking-tighter leading-tight italic">
+              {project.title}
+            </h2>
+            <div className="w-20 h-1 rounded-full mb-8" style={{ backgroundColor: themeColor }} />
+            
+            <div className="prose prose-invert prose-sm max-w-none space-y-4 text-gray-400 font-light mb-10 prose-headings:text-white prose-strong:text-white prose-a:text-cyan-400">
+              <ReactMarkdown>
+                {project.description}
+              </ReactMarkdown>
+            </div>
+
+            {/* Tecnologías */}
+            <div className="mb-10">
+              <h4 className="text-xs font-bold text-white/30 uppercase tracking-widest mb-4">Stack Tecnológico</h4>
+              <div className="flex flex-wrap gap-3">
+                {project.technologies.map((tech) => (
+                  <TechBadge key={tech} name={tech} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Botones de Acción */}
+          <div className="flex flex-col gap-4 mt-auto pb-4">
+            {project.liveUrl && (
+              <a 
+                href={project.liveUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-3 w-full py-4 rounded-xl text-black font-black transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-black/50"
+                style={{ backgroundColor: themeColor }}
+              >
+                <ExternalLink size={20} /> Ver Demo en Vivo
+              </a>
+            )}
+            {project.githubUrl && (
+              <a 
+                href={project.githubUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-3 w-full py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-bold transition-all active:scale-[0.98]"
+              >
+                <Github size={20} /> Ver Código Fuente
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
