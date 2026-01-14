@@ -4,7 +4,7 @@ import { Project, Certificate } from '@/types';
 import { sql } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 
-// Image Upload - Convert to Base64 to store in Database
+// Image Upload - Convert to Base64 to store in Database (FORCE UPDATE)
 export async function uploadImageAction(formData: FormData) {
   try {
     const file = formData.get('file') as File;
