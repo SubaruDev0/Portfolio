@@ -18,11 +18,13 @@ function cn(...inputs: ClassValue[]) {
 export default function AdminPage({
   initialProjects: allProjects,
   initialCertificates: allCertificates,
-  initialSettings = {}
+  initialSettings = {},
+  adminPassword
 }: {
   initialProjects: Project[],
   initialCertificates: Certificate[],
-  initialSettings?: Record<string, string>
+  initialSettings?: Record<string, string>,
+  adminPassword: string
 }) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -103,7 +105,7 @@ export default function AdminPage({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'mabel123') {
+    if (password === adminPassword) {
       setIsAuthenticated(true);
     } else {
       alert('Contraseña incorrecta');

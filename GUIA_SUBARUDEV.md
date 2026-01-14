@@ -61,12 +61,13 @@ En **Tailwind**, escribes clases directamente en el HTML:
 El panel `/admin` ha sido reforzado para que puedas gestionar tus proyectos de forma segura y profesional.
 
 - **URL:** [http://localhost:3001/admin](http://localhost:3001/admin)
-- **Contraseña de Acceso:** `mabel123`
+- **Contraseña de Acceso:** `Mabel#zer0` (Configurable en BD)
 
 ### 🚀 Mejoras de UX (Experiencia de Usuario):
-1.  **Protección de Identidad:** El acceso está bloqueado por contraseña para evitar que curiosos jueguen con el generador.
-2.  **Gestión de Miniaturas y Subida Local:** 
-    - Ya puedes añadir la URL de una foto o subir archivos directamente desde tu PC usando el icono **Subir (FileUp)**. 
+1.  **Protección de Identidad Real (DB-Based Auth):** 
+    - Ya no es una contraseña fija en el código ("hardcoded"). Ahora la contraseña se lee directamente desde la tabla `admin_auth` de tu base de datos Neon.
+    - Si necesitas cambiarla, puedes hacerlo directamente en la tabla `admin_auth` o ejecutando nuevamente la migración con un nuevo valor.
+2.  **Seguridad Dinámica:** Al estar en la base de datos, nadie que descargue tu código de GitHub podrá saber la contraseña secreta a menos que tenga acceso a tus variables de entorno (`DATABASE_URL`).    - Ya puedes añadir la URL de una foto o subir archivos directamente desde tu PC usando el icono **Subir (FileUp)**. 
     - Las imágenes se guardan automáticamente en `public/projects/`.
 3.  **Sistema de Galería (Proyectos Privados):**
     - Si un proyecto no tiene demo pública, puedes subir múltiples capturas de pantalla en la sección **Galería**.

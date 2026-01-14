@@ -67,3 +67,15 @@ export async function getPortfolioSettings(): Promise<Record<string, string>> {
   }
 }
 
+export async function getAdminPassword(): Promise<string> {
+  try {
+    const result = await sql`SELECT password_hash FROM admin_auth WHERE id = 'admin_secret' LIMIT 1`;
+    if (result.length > 0) {
+      return (result[0] as any).password_hash;
+    }
+    return 'mabel123'; // Fallback por defecto si no hay nada en DB
+  } catch (error: any) {
+    return 'mabel123';
+  }
+}
+

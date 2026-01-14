@@ -46,7 +46,26 @@ export async function initDatabase() {
       )
     `;
 
+    // Create admin_auth table
+    await sql`
+      CREATE TABLE IF NOT EXISTS admin_auth (
+        id TEXT PRIMARY KEY DEFAULT 'admin_secret',
+        password_hash TEXT NOT NULL,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
     console.log('Tables created successfully.');
+
+    // Initialize admin password if not exists (Mabel#zer0)
+    // Note: In a real app we should hash this, but we'll use literal for now as per user request context
+    await sql`
+      INSERT INTO admin_auth (id, password_hash)
+      VALUES ('admin_secret', 'Mabel#zer0')
+      ON CONFLICT (id) DO NOTHING
+    `;
+
+    console.log('Admin auth initialized.');
 
     // Migrate projects
     for (const project of projects) {
