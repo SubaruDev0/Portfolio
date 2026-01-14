@@ -80,9 +80,9 @@ El panel `/admin` ha sido reforzado para que puedas gestionar tus proyectos de f
 
 ---
 
-## 🎨 3. El Motor de Animaciones (Midu-Style)
+## 🎨 3. El Motor de Animaciones (Midu-Style) e Interacción de Élite
 
-Aquí es donde nos pusimos serios. Querías usar `tailwind-animations` de **midudev**, pero esa librería es para Tailwind v4 y nosotros estamos en v3 por compatibilidad con tu sistema (Node 18).
+Aquí es donde nos pusimos serios. Querías un portafolio de **Ingeniería**, y lo hemos llevado al siguiente nivel con detalles de micro-interacción:
 
 ### ¿Cómo lo hemos solucionado? (El "Bridge")
 Hemos creado un "Puente" en el archivo `tailwind.config.ts`. Si lo abres, verás una sección llamada `keyframes` y `animation`.
@@ -90,10 +90,18 @@ Hemos creado un "Puente" en el archivo `tailwind.config.ts`. Si lo abres, verás
 2. **Animation**: Es el nombre corto que le damos para usarlo en el código.
    - Ejemplo: `animate-blurred-fade-in` es puro estilo Midu.
 
-**Uso práctico**:
-- `animate-delay-[300ms]`: Retrasa la animación 300 milisegundos.
-- `hover:animate-shake`: Hace que algo tiemble cuando pasas el ratón.
-- `animate-jelly`: Ese efecto "gelatina" tan característico cuando algo aparece o es presionado.
+### 🧬 Detalles de Ingeniería (UX/UI de Alta Gama):
+- **Efecto de "Revelado" de Tecnologías**: 
+    - Las tecnologías en las tarjetas tienen un fondo oscuro (`bg-black/60`) y `backdrop-blur` para máxima legibilidad. 
+    - Al pasar el cursor por la **tarjeta entera**, los iconos cobran vida (pasan de una opacidad tenue a un blanco brillante).
+- **Tratamiento de Markdown para Previsualización**:
+    - Hemos creado una utilidad (`src/utils/text.ts`) que limpia los símbolos de Markdown (`###`, `**`, `>`) de las tarjetas.
+    - Esto asegura que la previsualización se vea fluida y profesional sin mostrar "basura" visual de código.
+- **Sincronía Cromática (Certificados)**:
+    - Los certificados ahora detectan el color de la "metamorfosis" actual (Frontend, Backend, etc.).
+    - Al pasar el ratón, el título del certificado cambia dinámicamente al color del tema seleccionado.
+- **Anti-Aliasing de Imágenes**:
+    - Las imágenes de las tarjetas usan `transform-gpu` y una escala base de `1.01`. Esto soluciona un bug clásico de los navegadores donde las imágenes muestran líneas blancas o bordes pixelados al escalarse.
 
 ---
 

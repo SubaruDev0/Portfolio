@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Certificate } from '@/types';
 import { Award, Maximize2 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import CertificateModal from '@/components/CertificateModal';
+import { removeMarkdown } from '@/utils/text';
 
 interface CertificateCardProps {
   certificate: Certificate;
@@ -14,10 +13,14 @@ interface CertificateCardProps {
 }
 
 export default function CertificateCard({ certificate, themeColor, onSelect }: CertificateCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <>
       <motion.div 
         onClick={() => onSelect?.(certificate)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         whileHover={{ y: -5 }}
         whileTap={{ scale: 0.98 }}
         className="min-w-[300px] md:min-w-[380px] snap-start group cursor-pointer w-full flex"
@@ -43,13 +46,16 @@ export default function CertificateCard({ certificate, themeColor, onSelect }: C
             </div>
           </div>
           
-          <h3 className="text-lg font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors uppercase tracking-tight">
+          <h3 
+            className="text-lg font-bold mb-2 transition-colors duration-500 uppercase tracking-tight"
+            style={{ color: isHovered ? themeColor : 'white' }}
+          >
             {certificate.title}
           </h3>
           
-          <div className="text-sm text-gray-500 mb-6 flex-1 font-light line-clamp-2 prose prose-invert prose-xs">
-            <ReactMarkdown>{certificate.description || ""}</ReactMarkdown>
-          </div>
+          <p className="text-sm text-gray-500 mb-6 flex-1 font-light line-clamp-3 leading-relaxed">
+            {removeMarkdown(certificate.description || "")}
+          </p>
           
           <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.2em]">
             <span className="text-gray-600">{certificate.date}</span>

@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Project } from '@/types';
 import { Github, ExternalLink, Code, Maximize2, Star, Briefcase, Info, CheckCircle } from 'lucide-react';
-import ProjectModal from './ProjectModal';
 import TechBadge from './TechBadge';
+import { removeMarkdown } from '@/utils/text';
 
 interface ProjectCardProps {
   project: Project;
@@ -19,8 +19,8 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
     frontend: 'Front-end',
     backend: 'Back-end',
     fullstack: 'Full-stack',
-    research: 'Research',
-    other: 'Other'
+    research: 'Investigación',
+    other: 'Otros'
   };
 
   return (
@@ -28,20 +28,20 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
       <motion.div
         style={{ viewTransitionName: `card-${project.id}` } as any}
         onClick={() => onSelect?.(project)}
-        whileHover={{ y: -8 }}
+        whileHover={{ y: -12, scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className={`group relative bg-[#0a0a0a] border border-white/10 rounded-3xl overflow-hidden hover:border-white/30 transition-all cursor-pointer ${className}`}
+        className={`group relative bg-[#0a0a0a] border border-white/10 rounded-3xl overflow-hidden hover:border-white/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-500 cursor-pointer ${className}`}
       >
         {/* Badge de Categoría y Real World */}
         <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
-          <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest backdrop-blur-md border bg-white/5 border-white/10 text-gray-400">
+          <span className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-md border bg-black/40 border-white/20 text-white/70 group-hover:bg-black/90 group-hover:border-white/40 group-hover:text-white transition-all duration-500 shadow-2xl">
             {categoryLabels[project.category] || project.category}
           </span>
           
           {project.isRealWorld && (
             <div className="group/real relative">
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 backdrop-blur-md">
-                <Briefcase size={10} fill="currentColor" /> Proyecto en Producción
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-emerald-500/5 border border-emerald-500/10 text-emerald-400/40 backdrop-blur-md group-hover:bg-emerald-500/20 group-hover:border-emerald-500/40 group-hover:text-emerald-400 transition-all duration-500 shadow-lg">
+                <Briefcase size={10} fill="currentColor" /> Producción
               </div>
               
               {/* Tooltip Contextual */}
@@ -60,38 +60,57 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
             <Star size={14} fill="currentColor" />
           </div>
         )}
-        <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-${themeColor} to-transparent opacity-0 group-hover:opacity-100 transition-opacity`} />
         
-        <div className="aspect-video w-full bg-[#111] relative overflow-hidden">
+        {/* Top accent line */}
+        <div 
+          className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity z-30" 
+          style={{ background: `linear-gradient(to right, transparent, ${themeColor}, transparent)` }}
+        />
+        
+        <div className="aspect-video w-full bg-[#0a0a0a] relative overflow-hidden">
           {project.imageUrl ? (
-            <img src={project.imageUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <img 
+              src={project.imageUrl} 
+              alt={project.title} 
+              className="w-full h-full object-cover block scale-[1.01] transform-gpu group-hover:scale-110 group-hover:brightness-110 transition-all duration-700 ease-out" 
+            />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-white/10">
+            <div className="w-full h-full flex items-center justify-center text-white/5">
               <Code size={48} />
             </div>
           )}
           
-          {/* Overlay suave al hover */}
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <div className="bg-white/10 backdrop-blur-md p-3 rounded-full text-white animate-zoom-in">
-              <Maximize2 size={24} />
+          {/* Action indicator - clean and pronounced */}
+          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+            <div className="bg-white/10 backdrop-blur-md p-4 rounded-full text-white scale-90 group-hover:scale-100 transition-all duration-500 border border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+              <Maximize2 size={24} strokeWidth={1.5} />
             </div>
           </div>
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
+          <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between z-20">
             <div className="flex gap-2">
               {project.technologies.slice(0, 3).map((tech, i) => (
-                <div key={tech} className={`animate-zoom-in animate-delay-[${i * 100}ms]`}>
-                  <TechBadge name={tech} showName={false} />
+                <div key={tech} className="transition-all duration-700 group-hover:scale-110 active:scale-95">
+                  <TechBadge 
+                    name={tech} 
+                    showName={false} 
+                  />
                 </div>
               ))}
+              {project.technologies.length > 3 && (
+                <div className="flex items-center justify-center px-2 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl text-[10px] font-black text-white group-hover:text-white transition-all duration-700 group-hover:bg-black group-hover:border-white/30">
+                  +{project.technologies.length - 3}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         <div className="p-6">
           <h3 className="text-xl font-bold mb-2 group-hover:text-white transition-colors">{project.title}</h3>
-          <p className="text-gray-400 text-sm mb-6 line-clamp-2">{project.description}</p>
+          <p className="text-gray-400 text-sm mb-6 line-clamp-2 leading-relaxed">
+            {removeMarkdown(project.description)}
+          </p>
           
           <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
             {project.githubUrl && (

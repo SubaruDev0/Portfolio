@@ -80,18 +80,23 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor }: P
 
         {/* Lado Derecho: Contenido */}
         <div className="w-full lg:w-[37%] p-8 lg:p-10 overflow-y-auto border-t lg:border-t-0 lg:border-l border-white/10 bg-[#0a0a0a] flex flex-col focus:outline-none">
-          <div className="mb-8">
+          <div className="mb-8 flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-6">
               <span 
-                className="text-[10px] font-black uppercase tracking-[0.3em] block px-2 py-1 bg-white/5 rounded border border-white/10"
+                className="text-[10px] font-black uppercase tracking-[0.3em] block px-3 py-1.5 bg-white/5 rounded-xl border border-white/10"
                 style={{ color: themeColor }}
               >
-                {project.category}
+                {project.category === 'other' ? 'OTROS' : 
+                 project.category === 'research' ? 'INVESTIGACIÓN' : 
+                 project.category === 'frontend' ? 'FRONT-END' :
+                 project.category === 'backend' ? 'BACK-END' :
+                 project.category === 'fullstack' ? 'FULL-STACK' : 
+                 project.category.toUpperCase()}
               </span>
               
               {project.isRealWorld && (
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-black uppercase tracking-[0.3em] bg-emerald-500/20 border border-emerald-500/50 text-emerald-400">
-                  <Briefcase size={10} fill="currentColor" /> Proyecto en Producción
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-black uppercase tracking-[0.3em] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                  <Briefcase size={10} fill="currentColor" /> Producción
                 </div>
               )}
               
@@ -102,59 +107,64 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor }: P
               )}
             </div>
 
-            {project.isRealWorld && (
-              <div className="mb-8 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl animate-fade-in ring-1 ring-emerald-500/10">
-                <p className="text-[11px] text-emerald-400/90 leading-relaxed font-medium">
-                  <CheckCircle size={10} className="inline mr-2" />
-                  **Calidad Industrial:** Este sistema ha sido validado en escenarios productivos reales, superando la fase de prototipo para cumplir con requerimientos de alta fiabilidad.
-                </p>
-              </div>
-            )}
-
             <h2 className="text-4xl font-black text-white mb-6 tracking-tighter leading-tight italic">
               {project.title}
             </h2>
             <div className="w-20 h-1 rounded-full mb-8" style={{ backgroundColor: themeColor }} />
-            
-            <div className="prose prose-invert prose-sm max-w-none space-y-4 text-gray-400 font-light mb-10 prose-headings:text-white prose-strong:text-white prose-a:text-cyan-400">
-              <ReactMarkdown>
-                {project.description}
-              </ReactMarkdown>
-            </div>
 
-            {/* Tecnologías */}
-            <div className="mb-10">
-              <h4 className="text-xs font-bold text-white/30 uppercase tracking-widest mb-4">Stack Tecnológico</h4>
-              <div className="flex flex-wrap gap-3">
-                {project.technologies.map((tech) => (
-                  <TechBadge key={tech} name={tech} />
-                ))}
+            {/* UX: Stack y Botones primero para acción rápida */}
+            <div className="mb-10 space-y-8">
+              <div>
+                <h4 className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4">Stack Tecnológico</h4>
+                <div className="flex flex-wrap gap-2.5">
+                  {project.technologies.map((tech) => (
+                    <TechBadge key={tech} name={tech} />
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                {project.liveUrl && (
+                  <a 
+                    href={project.liveUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3 w-full py-4 rounded-xl text-black font-black transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-black/50"
+                    style={{ backgroundColor: themeColor }}
+                  >
+                    <ExternalLink size={20} /> Ver Demo en Vivo
+                  </a>
+                )}
+                {project.githubUrl && (
+                  <a 
+                    href={project.githubUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-3 w-full py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-bold transition-all active:scale-[0.98]"
+                  >
+                    <Github size={20} /> Ver Código Fuente
+                  </a>
+                )}
               </div>
             </div>
-          </div>
+            
+            {/* Descripción después de los elementos de acción */}
+            <div className="pt-10 border-t border-white/5">
+              <h4 className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-6">Sobre el proyecto</h4>
+              <div className="prose prose-invert prose-sm max-w-none text-gray-400 font-light prose-headings:text-white prose-strong:text-emerald-400 prose-a:text-cyan-400 italic leading-relaxed">
+                <ReactMarkdown>
+                  {project.description}
+                </ReactMarkdown>
+              </div>
+            </div>
 
-          {/* Botones de Acción */}
-          <div className="flex flex-col gap-4 mt-auto pb-4">
-            {project.liveUrl && (
-              <a 
-                href={project.liveUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-3 w-full py-4 rounded-xl text-black font-black transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-black/50"
-                style={{ backgroundColor: themeColor }}
-              >
-                <ExternalLink size={20} /> Ver Demo en Vivo
-              </a>
-            )}
-            {project.githubUrl && (
-              <a 
-                href={project.githubUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-3 w-full py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-bold transition-all active:scale-[0.98]"
-              >
-                <Github size={20} /> Ver Código Fuente
-              </a>
+            {project.isRealWorld && (
+              <div className="mt-8 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl animate-fade-in ring-1 ring-emerald-500/5">
+                <p className="text-[10px] text-emerald-400/80 leading-relaxed font-bold uppercase tracking-wider">
+                  <CheckCircle size={10} className="inline mr-2" />
+                  Calidad Industrial Validada
+                </p>
+              </div>
             )}
           </div>
         </div>
