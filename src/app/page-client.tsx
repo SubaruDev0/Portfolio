@@ -126,7 +126,10 @@ export default function HomeClient({
           selectedTechs.some(tech => {
             if (tech === 'Producción') return p.isRealWorld;
             if (tech === 'Destacados') return p.isStarred;
-            return p.technologies.some(t => t.split(':')[0].trim() === tech);
+            return p.technologies.some(t => {
+              const cleanT = t.split(':')[0].trim().toLowerCase();
+              return cleanT === tech.toLowerCase();
+            });
           });
         return matchesCategory && matchesTech;
       })
@@ -158,7 +161,7 @@ export default function HomeClient({
   }, [theme, selectedTechs, initialProjects]);
 
   const allAvailableTechs = useMemo(() => {
-    const techs = new Set<string>();
+    const techsMap = new Map<string, string>(); // lowerCase -> originalCase
     
     // Forzamos filtros maestros al inicio
     const hasProduction = initialProjects.some(p => p.isRealWorld);
@@ -167,12 +170,23 @@ export default function HomeClient({
     initialProjects.forEach(p => p.technologies.forEach(t => {
       // Limpiamos el nombre si viene con slug (Nombre:slug)
       const cleanName = t.includes(':') ? t.split(':')[0].trim() : t;
-      if (cleanName.toLowerCase() !== 'producción') {
-        techs.add(cleanName);
+      const lowerName = cleanName.toLowerCase();
+      
+      if (lowerName !== 'producción' && lowerName !== 'destacados') {
+        // Guardamos la versión que tenga más mayúsculas o la primera que encontremos
+        if (!techsMap.has(lowerName)) {
+          techsMap.set(lowerName, cleanName);
+        } else {
+          // Si la versión guardada es todo minúsculas y la nueva no, la actualizamos
+          const existing = techsMap.get(lowerName)!;
+          if (existing === existing.toLowerCase() && cleanName !== cleanName.toLowerCase()) {
+            techsMap.set(lowerName, cleanName);
+          }
+        }
       }
     }));
 
-    const sortedTechs = Array.from(techs).sort((a, b) => a.localeCompare(b));
+    const sortedTechs = Array.from(techsMap.values()).sort((a, b) => a.localeCompare(b));
     
     const masterFilters = [];
     if (hasStarred) masterFilters.push('Destacados');

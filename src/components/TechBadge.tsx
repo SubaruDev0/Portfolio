@@ -111,7 +111,17 @@ export default function TechBadge({
   };
 
   const normalizedName = displayName.charAt(0).toUpperCase() + displayName.slice(1).toLowerCase();
-  const slug = customSlug || techMap[displayName] || techMap[normalizedName] || cleanForSlug(displayName);
+  
+  // Búsqueda insensible a mayúsculas en el mapa
+  const getSlugFromName = (name: string) => {
+    const lowerName = name.toLowerCase();
+    for (const [key, value] of Object.entries(techMap)) {
+      if (key.toLowerCase() === lowerName) return value;
+    }
+    return null;
+  };
+
+  const slug = customSlug || getSlugFromName(displayName) || getSlugFromName(normalizedName) || cleanForSlug(displayName);
   
   // Casos especiales para logos locales o externos específicos
   let iconUrl = `https://cdn.simpleicons.org/${slug}/${isDarkMode ? 'white' : 'black'}`;
