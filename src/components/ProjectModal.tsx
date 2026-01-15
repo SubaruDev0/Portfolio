@@ -83,7 +83,7 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor }: P
           <div className="mb-8 flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-6">
               <span 
-                className="text-[10px] font-black uppercase tracking-[0.3em] block px-3 py-1.5 bg-white/5 rounded-xl border border-white/10"
+                className="inline-flex items-center justify-center text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1.5 bg-white/5 rounded-xl border border-white/10 min-h-[26px]"
                 style={{ color: themeColor }}
               >
                 {project.category === 'other' ? 'OTROS' : 
@@ -95,7 +95,7 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor }: P
               
               {project.isRealWorld && (
                 <div className="group/real relative">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] bg-black/80 border border-emerald-500/50 text-emerald-400 hover:bg-black hover:border-emerald-400 transition-all cursor-help shadow-lg backdrop-blur-md">
+                  <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] bg-black/80 border border-emerald-500/50 text-emerald-400 hover:bg-black hover:border-emerald-400 transition-all cursor-help shadow-lg backdrop-blur-md min-h-[26px]">
                     <Briefcase size={10} fill="currentColor" /> Producción
                   </div>
                   

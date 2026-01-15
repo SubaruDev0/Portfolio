@@ -34,13 +34,13 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
       >
         {/* Badge de Categoría y Real World */}
         <div className="absolute top-4 left-4 z-40 flex flex-col gap-2">
-          <span className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-md border bg-black/40 border-white/20 text-white/70 group-hover:bg-black/90 group-hover:border-white/40 group-hover:text-white transition-all duration-500 shadow-2xl">
+          <span className="inline-flex items-center justify-center px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-md border bg-black/40 border-white/20 text-white/70 group-hover:bg-black/90 group-hover:border-white/40 group-hover:text-white transition-all duration-500 shadow-2xl min-h-[26px]">
             {categoryLabels[project.category] || project.category}
           </span>
           
           {project.isRealWorld && (
             <div className="group/real relative">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-black/80 border border-emerald-500/50 text-emerald-400 group-hover:bg-black group-hover:border-emerald-400 transition-all duration-500 shadow-2xl backdrop-blur-md">
+              <div className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-black/80 border border-emerald-500/50 text-emerald-400 group-hover:bg-black group-hover:border-emerald-400 transition-all duration-500 shadow-2xl backdrop-blur-md min-h-[26px]">
                 <Briefcase size={10} fill="currentColor" /> Producción
               </div>
               
