@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Flame, Briefcase } from 'lucide-react';
+import { Flame, Briefcase, Star } from 'lucide-react';
 
 interface TechBadgeProps {
   name: string;
   showName?: boolean;
   className?: string;
   variant?: 'default' | 'small';
+  isDarkMode?: boolean;
 }
 
 /**
@@ -75,13 +76,20 @@ const techMap: Record<string, string> = {
   'OpenStreetMap': 'openstreetmap',
   'Pandas': 'pandas',
   'Streamlit': 'streamlit',
+  'Análisis de Virus': 'eset',
+  'Ingeniería Inversa': 'radare2',
+  'Algoritmos': 'codeforces',
+  'Seguridad': 'fsecure',
+  'Virus': 'bitdefender',
+  'Reverse Engineering': 'radare2',
 };
 
 export default function TechBadge({ 
   name: rawName, 
   showName = true, 
   className = "", 
-  variant = 'default' 
+  variant = 'default',
+  isDarkMode = true
 }: TechBadgeProps) {
   const [error, setError] = useState(false);
   
@@ -94,17 +102,25 @@ export default function TechBadge({
     customSlug = parts[1].trim();
   }
 
+  // Limpieza de caracteres especiales para slugs automáticos
+  const cleanForSlug = (str: string) => {
+    return str.toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Quitar acentos
+      .replace(/[^a-z0-9]/g, "");    // Quedarse solo con alfanuméricos
+  };
+
   const normalizedName = displayName.charAt(0).toUpperCase() + displayName.slice(1).toLowerCase();
-  const slug = customSlug || techMap[displayName] || techMap[normalizedName] || displayName.toLowerCase().replace(/\s+/g, '');
+  const slug = customSlug || techMap[displayName] || techMap[normalizedName] || cleanForSlug(displayName);
   
   // Casos especiales para logos locales o externos específicos
-  let iconUrl = `https://cdn.simpleicons.org/${slug}/white`;
+  let iconUrl = `https://cdn.simpleicons.org/${slug}/${isDarkMode ? 'white' : 'black'}`;
 
   if (displayName.toLowerCase() === 'java') {
     iconUrl = "https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg";
   } else if (displayName.toLowerCase() === 'videojuego' || displayName.toLowerCase() === 'videojuegos') {
     iconUrl = "https://raw.githubusercontent.com/devicons/devicon/master/icons/unity/unity-original.svg";
-  } else if (displayName.toLowerCase() === 'producción') {
+  } else if (displayName.toLowerCase() === 'producción' || displayName.toLowerCase() === 'destacados') {
     iconUrl = ""; // Usaremos Lucide en este caso especial
   } else if (slug === 'uss') {
     iconUrl = "/logos/Logo_Universidad_san_sebastian.png";
@@ -114,25 +130,37 @@ export default function TechBadge({
 
   return (
     <div 
-      className={`flex items-center gap-2 ${isSmall ? 'px-2 py-1' : 'px-3 py-2'} bg-black/60 backdrop-blur-md border border-white/10 rounded-xl group/tech hover:border-white/40 hover:!bg-black group-hover:bg-black/80 transition-all duration-700 cursor-default relative ${className}`}
+      className={`flex items-center gap-2 ${isSmall ? 'px-2 py-1' : 'px-3 py-2'} backdrop-blur-md border rounded-xl group/tech transition-all duration-700 cursor-default relative ${className} ${
+        isDarkMode 
+          ? 'bg-black/60 border-white/10 hover:border-white/40 hover:!bg-black group-hover:bg-black/80' 
+          : 'bg-white/60 border-black/10 hover:border-black/20 hover:!bg-white group-hover:bg-white/80 shadow-sm'
+      }`}
     >
-      <div className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} flex items-center justify-center text-orange-500 opacity-100 group-hover/tech:scale-110 transition-all duration-700`}>
+      <div className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} flex items-center justify-center opacity-100 group-hover/tech:scale-110 transition-all duration-700 uppercase`}>
         {displayName.toLowerCase() === 'producción' ? (
-          <Briefcase size={isSmall ? 14 : 16} className="text-emerald-400" fill="currentColor" />
+          <Briefcase size={isSmall ? 14 : 16} className={isDarkMode ? "text-emerald-400" : "text-emerald-600"} fill="currentColor" />
+        ) : displayName.toLowerCase() === 'destacados' ? (
+          <Star size={isSmall ? 14 : 16} className={isDarkMode ? "text-amber-400" : "text-amber-500"} fill="currentColor" />
         ) : error ? (
-          <Flame size={isSmall ? 14 : 16} className="animate-pulse" />
+          <Flame size={isSmall ? 14 : 16} className={isDarkMode ? "text-orange-500 animate-pulse" : "text-orange-600 animate-pulse"} />
         ) : (
           <img 
             src={iconUrl} 
             alt={displayName}
-            className={`w-full h-full object-contain transition-all ${['java', 'videojuego', 'videojuegos'].includes(displayName.toLowerCase()) ? 'brightness-0 invert opacity-90 group-hover:opacity-100' : ''}`}
+            className={`w-full h-full object-contain transition-all ${
+                ['java', 'videojuego', 'videojuegos'].includes(displayName.toLowerCase()) 
+                  ? (isDarkMode ? 'brightness-0 invert opacity-90 group-hover:opacity-100' : 'opacity-90 group-hover:opacity-100') 
+                  : ''
+            }`}
             onError={() => setError(true)}
           />
         )}
       </div>
 
       {showName ? (
-        <span className={`${isSmall ? 'text-[8px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em] text-gray-500 group-hover/tech:text-white transition-colors duration-500`}>
+        <span className={`${isSmall ? 'text-[8px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em] transition-colors duration-500 ${
+            isDarkMode ? 'text-gray-500 group-hover/tech:text-white' : 'text-slate-900 group-hover/tech:text-black'
+        }`}>
           {displayName}
         </span>
       ) : (

@@ -16,7 +16,7 @@ interface ThemeSwitchProps {
 }
 
 const themes: { id: ThemeType; label: string; icon: any; color: string }[] = [
-  { id: 'all', label: 'Origen', icon: Zap, color: 'text-amber-400' },
+  { id: 'all', label: 'Todos', icon: Zap, color: 'text-amber-400' },
   { id: 'frontend', label: 'Front-end', icon: Layout, color: 'text-cyan-400' },
   { id: 'backend', label: 'Back-end', icon: Server, color: 'text-red-500' },
   { id: 'fullstack', label: 'Full-stack', icon: Layers, color: 'text-purple-500' },

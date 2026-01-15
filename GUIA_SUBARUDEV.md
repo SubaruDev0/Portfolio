@@ -113,104 +113,86 @@ Hemos creado un "Puente" en el archivo `tailwind.config.ts`. Si lo abres, verás
 
 ---
 
-## 🧬 4. La Lógica de "Metamorfosis" (State Management)
+## ⚔️ 4. Sistema de Temas Dinámicos (Modo Claro/Oscuro)
 
-En la página principal (`src/app/page-client.tsx`), verás una línea que dice:
-`const [theme, setTheme] = useState<ThemeType>('all');`
+Hemos implementado un sistema de **Doble Capa de Tematización** que permite alternar entre modo oscuro y claro con un contraste militar:
 
-Esto es el **Estado**. 
-- Cuando haces clic en el seleccionador de temas, `setTheme` cambia el valor.
-- React detecta ese cambio y **redibuja** toda la página instantáneamente con los nuevos colores de la categoría (Azul para Frontend, Rojo para Backend, etc.).
-- No hay recargas de página (F5), todo fluye en el navegador del usuario.
+- **Contraste Extremo**: En modo claro, hemos forzado el uso de `text-black` y `slate-900` para garantizar legibilidad total, eliminando grises tenues.
+- **Transición de Documento**: Usamos `document.startViewTransition` (si el navegador lo soporta) para que el cambio de tema tenga un fundido cinematográfico de 700ms.
+- **Inyección de Hex**: La función `getThemeColors(theme, isDarkMode)` en `src/utils/theme.ts` ahora detecta el brillo. Si es modo claro, satura los colores de "metamorfosis" (Frontend, Backend, etc.) para que no se pierdan sobre el fondo blanco.
 
-### ¿Cómo funciona el cambio de color dinámico?
-Usamos una función llamada `getThemeColors(theme)` ubicada en `src/utils/theme.ts`. Esta función devuelve un objeto con el color en formato HEX. 
-Luego, en el código, inyectamos ese color directamente en el atributo `style` de los elementos:
-```tsx
-style={{ color: themeColors.hex }} // Para texto
-style={{ backgroundColor: themeColors.hex }} // Para fondos
-```
+## 🛡️ 5. TechBadge e Iconografía Inteligente (SimpleIcons Integration)
 
-### El Filtro de Proyectos (`useMemo`)
-Usamos algo llamado `useMemo` para que, cada vez que cambies el tema o filtres por tecnología, la computadora no trabaje de más. Solo recalcula qué proyectos mostrar si realmente algo cambió.
+Los componentes `TechBadge.tsx` y las tarjetas ahora son plenamente conscientes del tema:
 
----
+- **Iconos Dinámicos**: Los iconos de tecnologías se solicitan dinámicamente a la API de SimpleIcons ajustando el color según el modo:
+  - Oscuro: `https://cdn.simpleicons.org/${slug}/white`
+  - Claro: `https://cdn.simpleicons.org/${slug}/black`
+- **Variantes Especiales**: Se añadió soporte para iconos de lógica de negocio (Lucide React):
+  - **Destacados**: Icono de Estrella (`Star`) en color naranja ámbar.
+  - **Producción**: Icono de Maletín (`Briefcase`).
+  - **Real World**: Icono de Fuego (`Flame`).
 
-## 🏎️ 5. El Carrusel de Alto Rendimiento (Framer Motion Physics)
+## ⚓ 6. Navegación e Ingeniería Interactiva
 
-Este no es un carrusel normal. Es un sistema de **físicas de partículas** aplicado a imágenes.
+La Navbar (`src/components/Navbar.tsx`) y los anclajes fueron re-diseñados para una experiencia fluida (Smooth UX):
 
-### El Secreto del Movimiento Infinito
-Usamos tres herramientas clave de la librería `framer-motion`:
-1.  **`useMotionValue(x)`**: Es un valor de posición súper rápido que no hace que React se ralentice.
-2.  **`useAnimationFrame`**: Es un bucle que corre 60 veces por segundo. En cada cuadro, calculamos `está posición + velocidad`.
-3.  **Wrapping Matemático**: 
-    ```tsx
-    if (latest <= -totalWidth * 2) x.set(latest + totalWidth);
-    ```
-    Cuando el carrusel se mueve hacia la izquierda y llega al final del segundo set de imágenes, lo movemos instantáneamente al inicio del primer set. Como todas las imágenes son clones, es un bucle infinito perfecto (sin saltos visuales).
+- **Scroll-MT (Margin Top)**: Todos los anclajes de sección tienen un `scroll-mt-20` o `scroll-mt-24`. Esto evita que la Navbar "pise" el título de la sección al bajar.
+- **Smooth Scroll Programático**: El botón "Inicio" utiliza `window.scrollTo({ top: 0, behavior: 'smooth' })`, eliminando saltos bruscos.
+- **Control de Scroll**: Implementamos un `useEffect` que bloquea el scroll del cuerpo (`overflow-hidden`) cuando un modal está abierto, evitando que el usuario se pierda.
 
-### Inercia y Momentum (Modo Divertido)
-Al añadir `drag="x"`, permitimos que uses el ratón como si estuvieras moviendo algo físico. 
-- Usamos `dragTransition={{ power: 0.8, timeConstant: 200 }}` para que, al soltarlo, el carrusel siga girando solo y se detenga gradualmente con fricción, como una rueda de la fortuna.
+## 📉 7. Lógica de Ordenamiento Industrial (Ranking de Proyectos)
 
----
+En el `page-client.tsx`, el filtrado de proyectos no es al azar. Hemos diseñado un algoritmo de prioridad de 5 niveles en el `useMemo`:
 
-## 🛠️ 6. Arquitectura de Modales Globales (Z-Index Fix)
+1.  **Prioridad 1 (Top Tier)**: Proyectos `isStarred` (Estrella) Y `isRealWorld` (Producción).
+2.  **Prioridad 2**: Proyectos `isStarred` (Destacados).
+3.  **Prioridad 3**: Proyectos `isRealWorld` (Listos para el mercado).
+4.  **Prioridad 4**: Proyectos con imágenes.
+5.  **Prioridad 5**: Resto de proyectos por orden de aparición.
 
-Tuvimos un problema técnico: los modales no se veían. Esto pasaba porque el carrusel tiene una propiedad llamada `transform` (para moverse), y en el mundo web, eso crea un "caparazón" que bloquea a los elementos con `position: fixed`.
+Esto asegura que tus mejores trabajos siempre se vendan primero a los reclutadores.
 
-### ¿Cómo lo arreglamos? (State Lifting)
-1.  **Sacamos los Modales del Carrusel**: Los movimos al final de `HomeClient`, cerca del `</footer>`.
-2.  **Referencia por Estado**: Creamos `activeProject` y `activeCertificate`. 
-3.  **Comunicación**: Cuando haces clic en una tarjeta, esta envía un mensaje: *"Oye, muéstrame a mí"*. `HomeClient` captura ese mensaje, guarda el objeto en el estado, y renderiza el modal correspondiente en la raíz de la página, por encima de todo.
+## 🧬 8. La Lógica de "Metamorfosis" (State Management)
+
+En la página principal (`src/app/page-client.tsx`), el estado `theme` controla la categoría:
+- Cuando haces clic en el seleccionador, `setTheme` cambia el valor.
+- React redibuja todo con los nuevos colores HEX inyectados directamente en el CSS dinámico.
 
 ---
 
-## 💾 7. Pipeline de Datos y Assets (Base64)
+## 🏎️ 9. El Carrusel de Alto Rendimiento (Framer Motion Physics)
 
-Para que el sitio funcione en **Vercel** sin problemas de permisos de escritura, cambiamos el sistema de archivos local por una base de datos **Neon (PostgreSQL)**.
+Sistema de **físicas de partículas** aplicado a imágenes:
+- **`useAnimationFrame`**: Un bucle a 60 FPS que calcula la posición inercial.
+- **Wrapping Matemático**: El carrusel es infinito. Cuando llega al final, se teletransporta al inicio sin que el ojo humano lo perciba.
+- **Inercia**: Al soltar el arrastre, el carrusel tiene fricción real.
 
-- **Imágenes como Texto**: Cuando subes una foto en el panel admin, la convertimos a una cadena **Base64** (un texto larguísimo que representa la imagen). 
-- **Ventaja**: El sitio es totalmente "Serverless". No necesitamos un servidor de archivos externo; todo vive dentro de tu base de datos.
-- **CV Inteligente**: Tu CV se guarda igual. Cuando alguien pulsa "Descargar CV", reconstruimos el PDF desde ese texto Base64 en un milisegundo.
+## 🛠️ 10. Arquitectura de Modales Globales (Z-Index Fix)
 
----
+Para evitar que el carrusel bloquee los modales, aplicamos **State Lifting**:
+- Los modales viven en la raíz del `page-client.tsx`.
+- Las tarjetas envían una señal con el proyecto seleccionado.
+- El modal "flota" por encima de todo el DOM, garantizando que siempre sea clickeable.
 
-## 📁 8. Estructura de Archivos (Para que no te pierdas)
+## 💾 11. Pipeline de Datos y Assets (Base64)
 
-- `/src/app/`: Las páginas del sitio.
-- `/src/components/`: Los botones, barras de navegación y tarjetas.
-- `/src/data/projects.ts`: **Tu base de datos**. Como no estamos usando una base de datos SQL como en Django (todavía), usamos este archivo de texto para guardar tus proyectos.
-- `/src/utils/theme.ts`: Aquí es donde definí los códigos de colores (HEX) para cada metamorfosis.
-- `/tailwind.config.ts`: El "cerebro" de los estilos y animaciones.
+- **PostgreSQL (Neon)**: Los datos no son estáticos, vienen de una base de datos real.
+- **Imágenes en Base64**: Las fotos se guardan como texto en la DB. Cero dependencias de servidores de archivos externos.
+- **CV Inteligente**: Tu currículum se genera al vuelo desde la base de datos.
 
----
+## 🚀 12. Cómo trabajar tú solo
 
-## 🚀 6. Cómo trabajar tú solo
+### Añadir un proyecto (Modo Admin)
+1. Entra en `localhost:3000/admin` (Pass: `mabel123`).
+2. Usa el panel para subir títulos, fotos y tecnologías.
+3. Si la tecnología no existe, la añades en caliente.
+4. **Guardar**: Los datos se inyectan en tu base de datos Neon.
 
-### Añadir un proyecto (El modo PRO)
-1. Entra en `localhost:3001/admin` y pon la contraseña `mabel123`.
-2. Completa el formulario con el título, descripción, urls y **selecciona las tecnologías del Combobox**.
-3. Si la tecnología no existe, escríbela y presiona "Añadir".
-4. Dale a **Guardar Proyecto**.
-5. Abre la consola de desarrollador (F12) en el navegador. Verás un objeto de código ya formateado.
-6. Copia ese objeto y pégalo dentro de la lista en `src/data/projects.ts`.
-
-### Probar cambios
-Asegúrate de tener la terminal abierta y escribir:
-`npm run dev` (o `npm run dev-port` si el puerto 3000 está ocupado).
-Luego abre [http://localhost:3001](http://localhost:3001).
-
----
-
-## ⚠️ 7. Recordatorios para SubaruDev
-
-1. **LinkedIn/GitHub**: Ya configuré tus enlaces a `SubaruDev0`. Si los cambias, edita el footer en `page.tsx`.
-2. **Imágenes**: Siempre pon las imágenes en la carpeta `public/`. Si no pones imagen, el sistema pondrá un icono de código por defecto automáticamente.
-3. **Midu animations**: Si ves una clase que empieza por `animate-`, viene de la configuración que le "robamos" a la librería de midudev para que te funcione a ti.
-
-¡Ahora eres un Ingeniero de Metamorfosis Digital! A seguir construyendo. 🚀🔥
+### Recordatorios para SubaruDev
+1. **GitHub/LinkedIn**: Configurados en el footer.
+2. **Imágenes**: Se recomienda subirlas vía Admin para que se procesen a Base64.
+3. **Animaciones**: Mantener las clases `animate-` para preservar el "feeling" profesional.
 
 ---
 
@@ -226,7 +208,7 @@ Next.js es un **framework**, mientras que React es solo una **librería**.
 
 ### 🎨 Tailwind CSS: El fin del "Spaghetti Code"
 En lugar de tener un archivo `estilos.css` de 2000 líneas donde te pierdes buscando la clase `.card-container-inner-fixed-v2`, Tailwind te da **clases utilitarias**.
-- **Productividad**: `flex items-center justify-center` es universal. No tienes que inventar nombres.
+- **Productivity**: `flex items-center justify-center` es universal. No tienes que inventar nombres.
 - **Peso**: Tailwind analiza tu código y **solo mete en el archivo final de producción el CSS que realmente estás usando**. El resultado es un sitio web ligerísimo.
 
 ### 🔷 TypeScript: Tu seguro contra errores
