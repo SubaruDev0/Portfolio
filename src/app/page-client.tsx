@@ -334,7 +334,7 @@ export default function HomeClient({
         </motion.div>
 
         {/* Anchor point for correct scrolling - Land above the controller */}
-        <div id="proyectos-anchor" className="h-40 -mt-40" />
+        <div id="proyectos-anchor" className="h-24 -mt-24" />
 
         {/* Metamorphosis Controller */}
         <div className="w-full max-w-7xl mb-8 flex flex-col items-center">
@@ -348,7 +348,7 @@ export default function HomeClient({
                   setTheme('all');
                   setSelectedTechs([]);
                 })}
-                className={`mt-4 flex items-center gap-2 px-4 py-1.5 border rounded-full transition-all text-[9px] font-black uppercase tracking-widest group ${
+                className={`mt-2 flex items-center gap-2 px-4 py-1.5 border rounded-full transition-all text-[9px] font-black uppercase tracking-widest group ${
                     isDarkMode ? 'bg-white/5 border-white/10 text-white/40 hover:text-white' : 'bg-black/5 border-black/10 text-slate-400 hover:text-slate-800'
                 }`}
               >
@@ -357,10 +357,10 @@ export default function HomeClient({
               </motion.button>
             )}
 
-            <div className="mt-4 w-full flex flex-col items-center space-y-2">
+            <div className="mt-2 w-full flex flex-col items-center space-y-2">
               <span className={`text-[9px] font-black uppercase tracking-[0.4em] transition-colors duration-700 ${isDarkMode ? 'text-white/20' : 'text-slate-300'}`}>Filtros</span>
               
-              <div className="flex flex-col items-center gap-4 mb-4">
+              <div className="flex flex-col items-center">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={theme + selectedTechs.join(',')}
@@ -387,7 +387,7 @@ export default function HomeClient({
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                className="w-full flex flex-wrap justify-center gap-2"
+                className="w-full flex flex-wrap justify-center gap-2 pt-1"
               >
                 {allAvailableTechs.map(tech => (
                   <button
