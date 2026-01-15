@@ -31,6 +31,12 @@ export default function HomeClient({
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [activeCertificate, setActiveCertificate] = useState<Certificate | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [visibleProjectsCount, setVisibleProjectsCount] = useState(6);
+
+  // Resetear paginación cuando cambian los filtros
+  useEffect(() => {
+    setVisibleProjectsCount(6);
+  }, [theme, selectedTechs]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -375,7 +381,7 @@ export default function HomeClient({
         <div id="proyectos" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full min-h-[400px] relative">
           <AnimatePresence mode='popLayout'>
             {filteredProjects.length > 0 ? (
-              filteredProjects.map((project, index) => (
+              filteredProjects.slice(0, visibleProjectsCount).map((project, index) => (
                 <motion.div
                   key={project.id}
                   layout
@@ -432,6 +438,41 @@ export default function HomeClient({
             )}
           </AnimatePresence>
         </div>
+
+        {/* Ver más button */}
+        {filteredProjects.length > visibleProjectsCount && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full flex justify-center mt-16"
+          >
+            <button
+              onClick={() => setVisibleProjectsCount(prev => prev + 6)}
+              className="group relative px-12 py-4 rounded-2xl overflow-hidden transition-all active:scale-95"
+              style={{ 
+                border: `1px solid ${themeColors.hex}40`,
+                backgroundColor: isDarkMode ? `${themeColors.hex}05` : `${themeColors.hex}08`
+              }}
+            >
+              <div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                style={{ backgroundColor: `${themeColors.hex}10` }}
+              />
+              <span 
+                className="relative z-10 font-black uppercase text-xs tracking-[0.4em] flex items-center gap-4 transition-colors duration-300 group-hover:text-white"
+                style={{ color: isDarkMode ? themeColors.hex : themeColors.hex }}
+              >
+                Ver Más Proyectos 
+                <motion.div
+                  animate={{ y: [0, 4, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <ChevronUp size={16} className="rotate-180" />
+                </motion.div>
+              </span>
+            </button>
+          </motion.div>
+        )}
       </section>
 
       {/* About Section */}
