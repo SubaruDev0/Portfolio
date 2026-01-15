@@ -33,6 +33,7 @@ export default function AdminPage({
   const [error, setError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [newTech, setNewTech] = useState('');
+  const [newTechIcon, setNewTechIcon] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [project, setProject] = useState({
     title: '',
@@ -194,10 +195,12 @@ export default function AdminPage({
     }
   };
 
-  const addTech = (tech: string) => {
-    if (tech && !project.technologies.includes(tech)) {
-      setProject({ ...project, technologies: [...project.technologies, tech] });
+  const addTech = (tech: string, iconSlug?: string) => {
+    const finalTech = iconSlug ? `${tech}:${iconSlug}` : tech;
+    if (tech && !project.technologies.includes(finalTech)) {
+      setProject({ ...project, technologies: [...project.technologies, finalTech] });
       setNewTech('');
+      setNewTechIcon('');
     }
   };
 
@@ -470,13 +473,37 @@ export default function AdminPage({
                   <div className="flex flex-wrap gap-1 mb-3">
                     {project.technologies.map(t => (
                       <div key={t} className="flex items-center gap-2 bg-white/5 border border-white/10 pl-3 pr-1 py-1 rounded-lg text-[9px] uppercase tracking-tighter text-white">
-                        {t} <button type="button" onClick={() => removeTech(t)} className="p-1 hover:bg-white/10 rounded text-gray-500 hover:text-white"><X size={10} /></button>
+                        {t.includes(':') ? (
+                          <span className="flex items-center gap-1.5">
+                            {t.split(':')[0]} 
+                            <span className="px-1.5 py-0.5 rounded-md bg-white/10 text-[8px] opacity-50">Slug: {t.split(':')[1]}</span>
+                          </span>
+                        ) : t} 
+                        <button type="button" onClick={() => removeTech(t)} className="p-1 hover:bg-white/10 rounded text-gray-500 hover:text-white"><X size={10} /></button>
                       </div>
                     ))}
                   </div>
                   <div className="flex gap-2">
-                    <input type="text" list="tech-list" className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-white transition-colors" placeholder="Añadir tech..." value={newTech} onChange={e => setNewTech(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTech(newTech))} />
-                    <button type="button" onClick={() => addTech(newTech)} className="bg-white/10 px-4 rounded-xl text-[10px] font-black uppercase text-white hover:bg-white/20">OK</button>
+                    <div className="flex-1 flex gap-2">
+                      <input 
+                        type="text" 
+                        list="tech-list" 
+                        className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-white transition-colors" 
+                        placeholder="Nombre (ej: Virus)" 
+                        value={newTech} 
+                        onChange={e => setNewTech(e.target.value)} 
+                        onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTech(newTech, newTechIcon))} 
+                      />
+                      <input 
+                        type="text" 
+                        className="w-1/3 bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-white transition-colors" 
+                        placeholder="Icon Slug (ej: platformio)" 
+                        value={newTechIcon} 
+                        onChange={e => setNewTechIcon(e.target.value)} 
+                        onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTech(newTech, newTechIcon))} 
+                      />
+                    </div>
+                    <button type="button" onClick={() => addTech(newTech, newTechIcon)} className="bg-white/10 px-4 rounded-xl text-[10px] font-black uppercase text-white hover:bg-white/20">OK</button>
                     <datalist id="tech-list">{existingTechs.map(t => <option key={t} value={t} />)}</datalist>
                   </div>
                 </div>

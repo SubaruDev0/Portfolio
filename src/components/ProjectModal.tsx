@@ -79,7 +79,7 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor }: P
         </div>
 
         {/* Lado Derecho: Contenido */}
-        <div className="w-full lg:w-[37%] p-8 lg:p-10 overflow-y-auto border-t lg:border-t-0 lg:border-l border-white/10 bg-[#0a0a0a] flex flex-col focus:outline-none">
+        <div className="w-full lg:w-[37%] p-8 lg:p-10 overflow-y-auto border-t lg:border-t-0 lg:border-l border-white/10 bg-[#0a0a0a] flex flex-col focus:outline-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <div className="mb-8 flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-6">
               <span 
