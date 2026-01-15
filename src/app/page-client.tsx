@@ -406,13 +406,15 @@ export default function HomeClient({
               filteredProjects.slice(0, visibleProjectsCount).map((project, index) => (
                 <motion.div
                   key={project.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  layout="position"
+                  initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
+                  exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
                   transition={{ 
-                    duration: 0.4,
-                    delay: index * 0.05 
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 20,
+                    delay: index % 6 * 0.05 
                   }}
                 >
                   <ProjectCard 
@@ -506,8 +508,7 @@ export default function HomeClient({
               >
                 <button
                   onClick={() => {
-                    setVisibleProjectsCount(6);
-                    document.getElementById('proyectos-anchor')?.scrollIntoView({ behavior: 'smooth' });
+                    setVisibleProjectsCount(prev => Math.max(6, prev - 6));
                   }}
                   className="group relative px-10 py-4 rounded-2xl overflow-hidden transition-all active:scale-95 border border-white/5 bg-white/5 hover:bg-white/10"
                 >
