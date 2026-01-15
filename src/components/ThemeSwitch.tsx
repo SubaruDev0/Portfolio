@@ -26,8 +26,8 @@ const themes: { id: ThemeType; label: string; icon: any; color: string }[] = [
 
 export default function ThemeSwitch({ currentTheme, setTheme }: ThemeSwitchProps) {
   return (
-    <div className="flex justify-center mb-12">
-      <div className="bg-white/5 p-1 rounded-full border border-white/10 flex gap-2 backdrop-blur-sm self-center shadow-2xl overflow-x-auto max-w-[90vw] md:max-w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex justify-center mb-12 py-4">
+      <div className="bg-white/5 p-1 rounded-full border border-white/10 flex gap-2 backdrop-blur-sm self-center shadow-2xl overflow-x-auto md:overflow-visible max-w-[90vw] md:max-w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {themes.map((theme) => (
           <button
             key={theme.id}
@@ -51,10 +51,11 @@ export default function ThemeSwitch({ currentTheme, setTheme }: ThemeSwitchProps
               />
             )}
             
-            {/* Tooltip sutil */}
+            {/* Tooltip mejorado */}
             {currentTheme !== theme.id && (
-              <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/90 backdrop-blur-xl border border-white/20 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] text-white opacity-0 group-hover/btn:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 translate-y-1 group-hover/btn:translate-y-0 shadow-2xl">
+              <span className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-black/95 backdrop-blur-xl border border-white/20 rounded-xl text-[9px] font-bold uppercase tracking-[0.2em] text-white opacity-0 group-hover/btn:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 translate-y-2 group-hover/btn:translate-y-0 shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex flex-col items-center">
                 {theme.label}
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#0a0a0a] border-r border-b border-white/20 rotate-45" />
               </span>
             )}
 
