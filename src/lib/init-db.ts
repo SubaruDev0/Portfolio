@@ -1,7 +1,5 @@
 
 import { sql } from './db';
-import { projects } from '../data/projects';
-import { certificates } from '../data/certificates';
 
 export async function initDatabase() {
   try {
@@ -77,33 +75,7 @@ export async function initDatabase() {
     `;
 
     console.log('Admin auth initialized.');
-
-    // Migrate projects
-    for (const project of projects) {
-      await sql`
-        INSERT INTO projects (
-          id, title, description, category, technologies, 
-          github_url, live_url, image_url, gallery, 
-          featured, is_starred, is_real_world, created_at
-        ) VALUES (
-          ${project.id}, ${project.title}, ${project.description}, ${project.category}, ${project.technologies},
-          ${project.githubUrl}, ${project.liveUrl}, ${project.imageUrl}, ${project.gallery},
-          ${project.featured}, ${project.isStarred}, ${project.isRealWorld}, ${project.createdAt}
-        )
-        ON CONFLICT (id) DO NOTHING
-      `;
-    }
-
-    // Migrate certificates
-    for (const cert of certificates) {
-      await sql`
-        INSERT INTO certificates (id, title, description, date, academy, image_url)
-        VALUES (${cert.id}, ${cert.title}, ${cert.description}, ${cert.date}, ${cert.academy}, ${cert.imageUrl})
-        ON CONFLICT (id) DO NOTHING
-      `;
-    }
-
-    console.log('Data migration completed.');
+    console.log('Database tables verified.');
   } catch (error) {
     console.error('Error initializing database:', error);
     throw error;

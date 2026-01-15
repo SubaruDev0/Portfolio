@@ -72,19 +72,20 @@ El panel `/admin` ha sido reforzado para que puedas gestionar tus proyectos de f
     - **Cero Código Hardcoded**: Si alguien descarga tu repositorio, no podrá saltarse el acceso ni ver la clave "inspeccionando el código".
 3.  **Gestión Inteligente de Activos:**
     - Ya puedes subir múltiples capturas de pantalla en la sección **Galería**.
-    - El portafolio mostrará un carrusel dinámico con fotos si el proyecto no tiene Live Demo.
-4.  **Sistema de Reordenamiento:**
-    - ¿Quieres que un certificado o proyecto aparezca antes? Usa las flechas subida/bajada al lado de cada ítem para cambiar su prioridad en tiempo real.
-5.  **Tecnologías Dinámicas**: 
-    - El sistema sugiere tecnologías automáticamente basándose en tus proyectos anteriores para mantener consistencia visual.
-6.  **Mapeo de Iconos Personalizado**: 
-    - Si una tecnología no tiene icono (ej: "Virus"), ahora puedes especificar un "Slug" en el panel de admin (ej: `platformio`) para que el sistema use ese logo manteniendo el nombre original.
+    - **Compresión Automática**: Si subes una imagen de más de 200KB, el sistema la comprime automáticamente en el cliente a JPEG (70% calidad) para que no falle la subida y el sitio cargue volando.
+4.  **Sistema de Reordenamiento (Drag & Drop):**
+    - ¡Olvídate de las flechas lentas! Ahora puedes **arrastrar y soltar** los proyectos y certificados para cambiar su orden. Es fluido y se guarda al instante.
+5.  **Tecnologías Dinámicas e Iconografía**: 
+    - El sistema sugiere tecnologías automáticamente.
+    - **Iconos Maestro**: Ahora puedes poner cualquier cosa de [Simple Icons](https://simpleicons.org/). Si escribes `Wikipedia:wikipedia` en el admin, te saldrá el icono oficial de Wikipedia. ¡Cualquiera de los 3000+ iconos funciona!
+6.  **Previsualización en Vivo**: 
+    - En el panel de admin, mientras escribes el nombre o el slug, verás una **PREVIEW** del icono al lado para confirmar que es el correcto.
 7.  **Prioridades Maestras del Portafolio**:
-    - El orden de los proyectos ahora sigue una jerarquía lógica de "Ingeniería":
-        1. **Destacado + Producción**: Máximo nivel (Estrella + Maletín).
+    - El orden sigue una jerarquía de "Ingeniería":
+        1. **Destacado + Producción**: El top tier (Estrella + Maletín).
         2. **Destacado**: (Estrella).
-        3. **Producción**: Sistemas reales validados (Maletín Emerald).
-        4. **Orden Manual**: El que establezcas con las flechas en el Admin.
+        3. **Producción**: (Maletín Emerald).
+        4. **Orden por Drag & Drop**: El que tú decidas arrastrando.
 
 ---
 

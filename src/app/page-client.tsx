@@ -126,9 +126,13 @@ export default function HomeClient({
           selectedTechs.some(tech => {
             if (tech === 'Producción') return p.isRealWorld;
             if (tech === 'Destacados') return p.isStarred;
+            
+            // Si el filtro tech tiene slug (Name:slug), extraemos solo el nombre para comparar
+            const filterName = tech.includes(':') ? tech.split(':')[0].trim().toLowerCase() : tech.toLowerCase();
+            
             return p.technologies.some(t => {
-              const cleanT = t.split(':')[0].trim().toLowerCase();
-              return cleanT === tech.toLowerCase();
+              const projectTechName = t.includes(':') ? t.split(':')[0].trim().toLowerCase() : t.toLowerCase();
+              return projectTechName === filterName;
             });
           });
         return matchesCategory && matchesTech;
@@ -168,25 +172,28 @@ export default function HomeClient({
     const hasStarred = initialProjects.some(p => p.isStarred);
     
     initialProjects.forEach(p => p.technologies.forEach(t => {
-      // Limpiamos el nombre si viene con slug (Nombre:slug)
-      const cleanName = t.includes(':') ? t.split(':')[0].trim() : t;
-      const lowerName = cleanName.toLowerCase();
+      // Guardamos el formato completo (Nombre:Slug) para que el Filtro tenga icono
+      const namePart = t.includes(':') ? t.split(':')[0].trim() : t;
+      const lowerName = namePart.toLowerCase();
       
       if (lowerName !== 'producción' && lowerName !== 'destacados') {
-        // Guardamos la versión que tenga más mayúsculas o la primera que encontremos
         if (!techsMap.has(lowerName)) {
-          techsMap.set(lowerName, cleanName);
+          techsMap.set(lowerName, t); // t es el formato original (ej: "Wikipedia:wikipedia")
         } else {
-          // Si la versión guardada es todo minúsculas y la nueva no, la actualizamos
+          // Si la versión guardada no tiene slug y la nueva sí, preferimos la que tiene slug
           const existing = techsMap.get(lowerName)!;
-          if (existing === existing.toLowerCase() && cleanName !== cleanName.toLowerCase()) {
-            techsMap.set(lowerName, cleanName);
+          if (!existing.includes(':') && t.includes(':')) {
+            techsMap.set(lowerName, t);
           }
         }
       }
     }));
 
-    const sortedTechs = Array.from(techsMap.values()).sort((a, b) => a.localeCompare(b));
+    const sortedTechs = Array.from(techsMap.values()).sort((a, b) => {
+      const nameA = a.includes(':') ? a.split(':')[0] : a;
+      const nameB = b.includes(':') ? b.split(':')[0] : b;
+      return nameA.localeCompare(nameB);
+    });
     
     const masterFilters = [];
     if (hasStarred) masterFilters.push('Destacados');

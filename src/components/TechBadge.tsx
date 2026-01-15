@@ -108,7 +108,10 @@ export default function TechBadge({
     return str.toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "") // Quitar acentos
-      .replace(/[^a-z0-9]/g, "");    // Quedarse solo con alfanuméricos
+      .replace(/[^a-z0-9]/g, "")    // Quedarse solo con alfanuméricos
+      .replace(/^nextjs$/, "nextdotjs")
+      .replace(/^nodejs$/, "nodedotjs")
+      .replace(/^d3$/, "d3dotjs");
   };
 
   const normalizedName = displayName.charAt(0).toUpperCase() + displayName.slice(1).toLowerCase();
@@ -122,8 +125,17 @@ export default function TechBadge({
     return null;
   };
 
+  // 1. Prioridad: Slug manual del admin (Nombre:Wikipedia)
+  // 2. Prioridad: Mapa de techMap de arriba (casos especiales)
+  // 3. Fallback: Limpiar el nombre para generar un slug automático
   const slug = customSlug || getSlugFromName(displayName) || getSlugFromName(normalizedName) || cleanForSlug(displayName);
   
+  // Si hemos tenido error con el slug generado o manual, reseteamos el error
+  // si el nombre cambia drásticamente.
+  React.useEffect(() => {
+    setError(false);
+  }, [rawName]);
+
   // Casos especiales para logos locales o externos específicos
   let iconUrl = `https://cdn.simpleicons.org/${slug}/${isDarkMode ? 'white' : 'black'}`;
 
@@ -153,7 +165,9 @@ export default function TechBadge({
         ) : displayName.toLowerCase() === 'destacados' ? (
           <Star size={isSmall ? 14 : 16} className={isDarkMode ? "text-amber-400" : "text-amber-500"} fill="currentColor" />
         ) : error ? (
-          <Flame size={isSmall ? 14 : 16} className={isDarkMode ? "text-orange-500 animate-pulse" : "text-orange-600 animate-pulse"} />
+          <div className="text-[10px] opacity-10 font-bold tracking-tighter overflow-hidden whitespace-nowrap">
+            {slug.substring(0, 4)}
+          </div>
         ) : (
           <img 
             src={iconUrl} 
