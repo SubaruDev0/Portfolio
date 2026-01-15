@@ -22,6 +22,7 @@ export async function initDatabase() {
         featured BOOLEAN DEFAULT false,
         is_starred BOOLEAN DEFAULT false,
         is_real_world BOOLEAN DEFAULT false,
+        sort_order INTEGER DEFAULT 0,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `;
@@ -34,7 +35,8 @@ export async function initDatabase() {
         description TEXT,
         date TEXT,
         academy TEXT,
-        image_url TEXT
+        image_url TEXT,
+        sort_order INTEGER DEFAULT 0
       )
     `;
 
@@ -56,6 +58,15 @@ export async function initDatabase() {
     `;
 
     console.log('Tables created successfully.');
+
+    // Add sort_order column to existing tables if it doesn't exist
+    try {
+      await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`;
+      await sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`;
+      console.log('Migration: sort_order columns added.');
+    } catch (e) {
+      console.log('Migration info:', e);
+    }
 
     // Initialize admin password if not exists (Mabel#zer0)
     // Note: In a real app we should hash this, but we'll use literal for now as per user request context

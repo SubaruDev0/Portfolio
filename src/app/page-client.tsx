@@ -100,9 +100,29 @@ export default function HomeClient({
         return matchesCategory && matchesTech;
       })
       .sort((a, b) => {
+        // Reglas de prioridad solicitadas por el usuario:
+        
+        // 1. Prioridad Máxima: Destacado Y Producción
+        const aMax = a.isStarred && a.isRealWorld;
+        const bMax = b.isStarred && b.isRealWorld;
+        if (aMax && !bMax) return -1;
+        if (!aMax && bMax) return 1;
+
+        // 2. Prioridad 1: Destacado
         if (a.isStarred && !b.isStarred) return -1;
         if (!a.isStarred && b.isStarred) return 1;
-        return 0;
+
+        // 3. Prioridad 2: Producción
+        if (a.isRealWorld && !b.isRealWorld) return -1;
+        if (!a.isRealWorld && b.isRealWorld) return 1;
+
+        // 4. Orden natural (establecido en Admin)
+        const aOrder = a.sortOrder || 0;
+        const bOrder = b.sortOrder || 0;
+        if (aOrder !== bOrder) return aOrder - bOrder;
+
+        // 5. Por fecha de creación si todo lo demás es igual
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
   }, [theme, selectedTechs, initialProjects]);
 

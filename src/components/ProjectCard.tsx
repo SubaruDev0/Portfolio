@@ -56,14 +56,9 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
         </div>
 
         {project.isStarred && (
-          <div className="absolute top-4 right-4 z-40 group/starred">
-            <div className="bg-yellow-500/20 backdrop-blur-md border border-yellow-500/40 p-1.5 rounded-full text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)] group-hover:bg-yellow-500/40 group-hover:border-yellow-500 transition-all duration-500 cursor-help">
+          <div className="absolute top-4 right-4 z-40">
+            <div className="bg-yellow-500/20 backdrop-blur-md border border-yellow-500/40 p-1.5 rounded-full text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)] group-hover:bg-yellow-500/40 group-hover:border-yellow-500 transition-all duration-500">
               <Star size={14} fill="currentColor" />
-            </div>
-            
-            {/* Tooltip Destacado */}
-            <div className="absolute right-0 top-full mt-2 px-2 py-1 bg-black/95 border border-white/20 rounded-lg text-[10px] uppercase tracking-widest text-white opacity-0 group-hover/starred:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50">
-              Destacado
             </div>
           </div>
         )}
@@ -94,18 +89,19 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
             </div>
           </div>
 
-          <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between z-20">
+          <div className="absolute bottom-4 left-6 right-6 flex items-end justify-between z-20">
             <div className="flex gap-2">
               {project.technologies.slice(0, 3).map((tech, i) => (
                 <div key={tech} className="transition-all duration-700 group-hover:scale-110 active:scale-95">
                   <TechBadge 
                     name={tech} 
                     showName={false} 
+                    variant="small"
                   />
                 </div>
               ))}
               {project.technologies.length > 3 && (
-                <div className="flex items-center justify-center px-2 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl text-[10px] font-black text-white group-hover:text-white transition-all duration-700 group-hover:bg-black group-hover:border-white/30">
+                <div className="flex items-center justify-center px-2 py-0.5 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl text-[9px] font-black text-white group-hover:text-white transition-all duration-700 group-hover:bg-black group-hover:border-white/30">
                   +{project.technologies.length - 3}
                 </div>
               )}

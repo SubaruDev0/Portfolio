@@ -13,6 +13,7 @@ export interface Project {
   featured?: boolean;
   isStarred?: boolean;
   isRealWorld?: boolean;
+  sortOrder?: number;
   createdAt: string;
 }
 
@@ -23,6 +24,7 @@ export interface Certificate {
   date: string;
   academy: string;
   imageUrl?: string;
+  sortOrder?: number;
 }
 
 export type ThemeType = 'all' | 'frontend' | 'backend' | 'fullstack' | 'research' | 'other';

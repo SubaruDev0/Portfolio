@@ -7,6 +7,7 @@ interface TechBadgeProps {
   name: string;
   showName?: boolean;
   className?: string;
+  variant?: 'default' | 'small';
 }
 
 /**
@@ -76,7 +77,12 @@ const techMap: Record<string, string> = {
   'Streamlit': 'streamlit',
 };
 
-export default function TechBadge({ name: rawName, showName = true, className = "" }: TechBadgeProps) {
+export default function TechBadge({ 
+  name: rawName, 
+  showName = true, 
+  className = "", 
+  variant = 'default' 
+}: TechBadgeProps) {
   const [error, setError] = useState(false);
   
   let displayName = rawName;
@@ -104,15 +110,17 @@ export default function TechBadge({ name: rawName, showName = true, className = 
     iconUrl = "/logos/Logo_Universidad_san_sebastian.png";
   }
 
+  const isSmall = variant === 'small';
+
   return (
     <div 
-      className={`flex items-center gap-2 px-3 py-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl group/tech hover:border-white/40 hover:!bg-black group-hover:bg-black/80 transition-all duration-700 cursor-default relative ${className}`}
+      className={`flex items-center gap-2 ${isSmall ? 'px-2 py-1' : 'px-3 py-2'} bg-black/60 backdrop-blur-md border border-white/10 rounded-xl group/tech hover:border-white/40 hover:!bg-black group-hover:bg-black/80 transition-all duration-700 cursor-default relative ${className}`}
     >
-      <div className="w-5 h-5 flex items-center justify-center text-orange-500 opacity-100 group-hover/tech:scale-110 transition-all duration-700">
+      <div className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} flex items-center justify-center text-orange-500 opacity-100 group-hover/tech:scale-110 transition-all duration-700`}>
         {displayName.toLowerCase() === 'producción' ? (
-          <Briefcase size={16} className="text-emerald-400" fill="currentColor" />
+          <Briefcase size={isSmall ? 14 : 16} className="text-emerald-400" fill="currentColor" />
         ) : error ? (
-          <Flame size={16} className="animate-pulse" />
+          <Flame size={isSmall ? 14 : 16} className="animate-pulse" />
         ) : (
           <img 
             src={iconUrl} 
@@ -124,7 +132,7 @@ export default function TechBadge({ name: rawName, showName = true, className = 
       </div>
 
       {showName ? (
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 group-hover/tech:text-white transition-colors duration-500">
+        <span className={`${isSmall ? 'text-[8px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em] text-gray-500 group-hover/tech:text-white transition-colors duration-500`}>
           {displayName}
         </span>
       ) : (

@@ -77,6 +77,14 @@ El panel `/admin` ha sido reforzado para que puedas gestionar tus proyectos de f
     - ¿Quieres que un certificado o proyecto aparezca antes? Usa las flechas subida/bajada al lado de cada ítem para cambiar su prioridad en tiempo real.
 5.  **Tecnologías Dinámicas**: 
     - El sistema sugiere tecnologías automáticamente basándose en tus proyectos anteriores para mantener consistencia visual.
+6.  **Mapeo de Iconos Personalizado**: 
+    - Si una tecnología no tiene icono (ej: "Virus"), ahora puedes especificar un "Slug" en el panel de admin (ej: `platformio`) para que el sistema use ese logo manteniendo el nombre original.
+7.  **Prioridades Maestras del Portafolio**:
+    - El orden de los proyectos ahora sigue una jerarquía lógica de "Ingeniería":
+        1. **Destacado + Producción**: Máximo nivel (Estrella + Maletín).
+        2. **Destacado**: (Estrella).
+        3. **Producción**: Sistemas reales validados (Maletín Emerald).
+        4. **Orden Manual**: El que establezcas con las flechas en el Admin.
 
 ---
 

@@ -52,11 +52,13 @@ export async function addProjectAction(project: Project) {
       INSERT INTO projects (
         id, title, description, category, technologies, 
         github_url, live_url, image_url, gallery, 
-        featured, is_starred, is_real_world, created_at
+        featured, is_starred, is_real_world, sort_order, created_at
       ) VALUES (
         ${project.id}, ${project.title}, ${project.description}, ${project.category}, ${project.technologies},
         ${project.githubUrl || ''}, ${project.liveUrl || ''}, ${project.imageUrl || ''}, ${project.gallery || []},
-        ${project.featured ?? true}, ${project.isStarred ?? false}, ${project.isRealWorld ?? false}, ${project.createdAt || new Date().toISOString()}
+        ${project.featured ?? true}, ${project.isStarred ?? false}, ${project.isRealWorld ?? false},
+        COALESCE((SELECT MAX(sort_order) FROM projects), 0) + 1,
+        ${project.createdAt || new Date().toISOString()}
       )
     `;
     revalidatePath('/');
@@ -110,8 +112,16 @@ export async function deleteProjectAction(id: string) {
 export async function addCertificateAction(certificate: Certificate) {
   try {
     await sql`
-      INSERT INTO certificates (id, title, description, date, academy, image_url)
-      VALUES (${certificate.id}, ${certificate.title}, ${certificate.description || ''}, ${certificate.date}, ${certificate.academy}, ${certificate.imageUrl || ''})
+      INSERT INTO certificates (id, title, description, date, academy, image_url, sort_order)
+      VALUES (
+        ${certificate.id}, 
+        ${certificate.title}, 
+        ${certificate.description || ''}, 
+        ${certificate.date}, 
+        ${certificate.academy}, 
+        ${certificate.imageUrl || ''},
+        COALESCE((SELECT MAX(sort_order) FROM certificates), 0) + 1
+      )
     `;
     revalidatePath('/');
     revalidatePath('/admin');
@@ -173,7 +183,51 @@ export async function updateSettingsAction(settings: Record<string, string>) {
 }
 
 export async function reorderAction(type: 'projects' | 'certificates', id: string, direction: 'up' | 'down') {
-  return { success: true };
+  try {
+    const isProjects = type === 'projects';
+    const items = isProjects 
+      ? await sql`SELECT id, sort_order FROM projects ORDER BY sort_order ASC, created_at DESC`
+      : await sql`SELECT id, sort_order FROM certificates ORDER BY sort_order ASC, date DESC`;
+    
+    // Normalize sort_order if they are all 0 or duplicates
+    let normalized = false;
+    const orders = new Set(items.map(i => i.sort_order));
+    if (orders.size < items.length) {
+      for (let i = 0; i < items.length; i++) {
+        if (isProjects) {
+          await sql`UPDATE projects SET sort_order = ${i} WHERE id = ${items[i].id}`;
+        } else {
+          await sql`UPDATE certificates SET sort_order = ${i} WHERE id = ${items[i].id}`;
+        }
+        items[i].sort_order = i;
+      }
+      normalized = true;
+    }
+
+    const index = items.findIndex(item => item.id === id);
+    if (index === -1) return { success: false, error: 'Item no encontrado' };
+
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= items.length) return { success: true };
+
+    const currentItem = items[index];
+    const targetItem = items[targetIndex];
+
+    if (isProjects) {
+      await sql`UPDATE projects SET sort_order = ${targetItem.sort_order} WHERE id = ${currentItem.id}`;
+      await sql`UPDATE projects SET sort_order = ${currentItem.sort_order} WHERE id = ${targetItem.id}`;
+    } else {
+      await sql`UPDATE certificates SET sort_order = ${targetItem.sort_order} WHERE id = ${currentItem.id}`;
+      await sql`UPDATE certificates SET sort_order = ${currentItem.sort_order} WHERE id = ${targetItem.id}`;
+    }
+
+    revalidatePath('/');
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error) {
+    console.error('Reorder error:', error);
+    return { success: false, error: String(error) };
+  }
 }
 
 export async function runMigration() {
