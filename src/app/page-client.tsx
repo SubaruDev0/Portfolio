@@ -366,7 +366,9 @@ export default function HomeClient({
                     </span>
                     <div className="h-4 w-px bg-white/10" />
                     <span className="text-[9px] uppercase font-black tracking-widest text-white/30">
-                      {theme === 'all' ? 'Colección Total' : theme}
+                      {theme === 'all' ? 'Colección Total' : 
+                       theme === 'research' ? 'Investigación' :
+                       theme === 'other' ? 'Otros' : theme}
                     </span>
                   </motion.div>
                 </AnimatePresence>
