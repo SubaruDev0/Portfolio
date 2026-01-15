@@ -97,9 +97,10 @@ export default function TechBadge({
   let customSlug = "";
   
   if (rawName.includes(':')) {
-    const parts = rawName.split(':');
-    displayName = parts[0].trim();
-    customSlug = parts[1].trim();
+    // Si hay múltiples colones, el último es el slug, el resto es el nombre
+    const lastColonIndex = rawName.lastIndexOf(':');
+    displayName = rawName.substring(0, lastColonIndex).trim();
+    customSlug = rawName.substring(lastColonIndex + 1).trim();
   }
 
   // Limpieza de caracteres especiales para slugs automáticos

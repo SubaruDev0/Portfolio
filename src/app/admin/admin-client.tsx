@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/Navbar';
 import { ProjectCategory, Project, Certificate } from '@/types';
 import { Plus, Github, Link as LinkIcon, Save, Image as ImageIcon, Lock, X, Search, FileUp, Star, Briefcase, Award, ChevronUp, ChevronDown, Eye, EyeOff, Pencil, Database, LogIn } from 'lucide-react';
@@ -63,7 +63,23 @@ export default function AdminPage({
 
   const [activeTab, setActiveTab] = useState<'projects' | 'certificates' | 'settings'>('projects');
 
-  const existingTechs = Array.from(new Set(allProjects.flatMap(p => p.technologies)));
+  // Mapa de tecnologías existentes para autocompletar nombre y slug
+  const techSuggestions = useMemo(() => {
+    const suggestions: Record<string, string> = {};
+    allProjects.forEach(p => p.technologies.forEach(t => {
+      if (t.includes(':')) {
+        const lastColon = t.lastIndexOf(':');
+        const name = t.substring(0, lastColon).trim();
+        const slug = t.substring(lastColon + 1).trim();
+        suggestions[name] = slug;
+      } else if (!suggestions[t]) {
+        suggestions[t] = '';
+      }
+    }));
+    return suggestions;
+  }, [allProjects]);
+
+  const uniqueTechNames = Object.keys(techSuggestions).sort();
 
   // Función para comprimir imágenes en el cliente antes de subir
   const compressImage = (file: File): Promise<File> => {
@@ -253,8 +269,17 @@ export default function AdminPage({
   };
 
   const addTech = (tech: string, iconSlug?: string) => {
-    const finalTech = iconSlug ? `${tech}:${iconSlug}` : tech;
-    if (tech && !project.technologies.includes(finalTech)) {
+    let finalTech = tech.trim();
+    const slug = iconSlug?.trim();
+    
+    // Si el usuario pegó "Nombre:Slug" en el campo de nombre, lo manejamos
+    if (finalTech.includes(':') && !slug) {
+       // Ya viene con formato, no hacemos nada extra
+    } else if (slug) {
+      finalTech = `${finalTech}:${slug}`;
+    }
+
+    if (finalTech && !project.technologies.includes(finalTech)) {
       setProject({ ...project, technologies: [...project.technologies, finalTech] });
       setNewTech('');
       setNewTechIcon('');
@@ -548,7 +573,14 @@ export default function AdminPage({
                         className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-white transition-colors" 
                         placeholder="Nombre (ej: Virus)" 
                         value={newTech} 
-                        onChange={e => setNewTech(e.target.value)} 
+                        onChange={e => {
+                          const val = e.target.value;
+                          setNewTech(val);
+                          // Autocompletar slug si existe en sugerencias
+                          if (techSuggestions[val]) {
+                            setNewTechIcon(techSuggestions[val]);
+                          }
+                        }} 
                         onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTech(newTech, newTechIcon))} 
                       />
                       <input 
@@ -561,7 +593,7 @@ export default function AdminPage({
                       />
                     </div>
                     <button type="button" onClick={() => addTech(newTech, newTechIcon)} className="bg-white/10 px-4 rounded-xl text-[10px] font-black uppercase text-white hover:bg-white/20">OK</button>
-                    <datalist id="tech-list">{existingTechs.map(t => <option key={t} value={t} />)}</datalist>
+                    <datalist id="tech-list">{uniqueTechNames.map(t => <option key={t} value={t} />)}</datalist>
                   </div>
                 </div>
 
