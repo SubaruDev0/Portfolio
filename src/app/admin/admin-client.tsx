@@ -65,11 +65,67 @@ export default function AdminPage({
 
   const existingTechs = Array.from(new Set(allProjects.flatMap(p => p.technologies)));
 
+  // Función para comprimir imágenes en el cliente antes de subir
+  const compressImage = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const maxWidth = 1200;
+      const quality = 0.7;
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+            height = (maxWidth / width) * height;
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                  type: 'image/jpeg',
+                  lastModified: Date.now(),
+                });
+                resolve(compressedFile);
+              } else {
+                reject(new Error('Error al comprimir imagen'));
+              }
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isGallery = false) => {
-    const file = e.target.files?.[0];
+    let file = e.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
+    
+    // Si es una imagen pesada, la comprimimos
+    if (file.type.startsWith('image/') && file.size > 200 * 1024) {
+      try {
+        file = await compressImage(file);
+      } catch (err) {
+        console.error('Compression error:', err);
+      }
+    }
+
     const formData = new FormData();
     formData.append('file', file);
 
