@@ -40,21 +40,14 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
         </button>
 
         {/* Preview (Left) */}
-        <div className={`w-full md:w-1/2 flex flex-col h-[400px] md:h-auto overflow-hidden transition-colors duration-700 relative group/preview ${isDarkMode ? 'bg-black' : 'bg-slate-50'}`}>
+        <div className={`w-full md:w-1/2 flex flex-col h-[400px] md:h-auto overflow-hidden transition-colors duration-700 ${isDarkMode ? 'bg-black' : 'bg-slate-50'}`}>
           {cvUrl ? (
-            <>
-              <iframe 
-                src={`${cvUrl}#toolbar=0`} 
-                className="w-full h-full border-none"
-                title="CV Preview"
-              />
-              <button 
-                onClick={() => window.open(cvUrl, '_blank')}
-                className="absolute bottom-6 right-6 p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl text-white opacity-0 group-hover/preview:opacity-100 transition-all duration-500 hover:scale-110 active:scale-95 shadow-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]"
-              >
-                <Maximize2 size={16} /> Pantalla Completa
-              </button>
-            </>
+            <iframe 
+              src={`${cvUrl}#toolbar=0&navpanes=0&scrollbar=0`} 
+              className="w-full h-full border-none pointer-events-none"
+              title="CV Preview"
+              loading="lazy"
+            />
           ) : (
             <div className={`flex-1 flex flex-col items-center justify-center p-12 text-center ${isDarkMode ? 'text-white/10' : 'text-black/10'}`}>
               <Download size={64} className="mb-4" />
@@ -100,15 +93,37 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
             </div>
           </div>
 
-          <a 
-            href={cvUrl}
-            download="CV_SubaruDev.pdf"
-            className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all transform hover:scale-[1.02] active:scale-95 shadow-xl"
-            style={{ backgroundColor: themeColor, color: '#000' }}
-          >
-            <Download size={20} />
-            Descargar PDF
-          </a>
+          <div className="flex flex-col gap-3">
+            <a 
+              href={cvUrl}
+              download="CV_SubaruDev.pdf"
+              className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all transform hover:scale-[1.02] active:scale-95 shadow-xl"
+              style={{ backgroundColor: themeColor, color: '#000' }}
+            >
+              <Download size={20} />
+              Descargar PDF
+            </a>
+            
+            {cvUrl && (
+              <button 
+                onClick={() => {
+                  const win = window.open();
+                  if (win) {
+                    win.document.write(`<iframe src="${cvUrl}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+                    win.document.title = "CV SubaruDev - Previsualización";
+                  }
+                }}
+                className={`w-full py-3 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all border ${
+                  isDarkMode 
+                    ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' 
+                    : 'bg-black/5 border-black/10 text-slate-800 hover:bg-black/10'
+                }`}
+              >
+                <Maximize2 size={18} />
+                Vista Pantalla Completa
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
