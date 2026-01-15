@@ -76,12 +76,12 @@ const techMap: Record<string, string> = {
   'OpenStreetMap': 'openstreetmap',
   'Pandas': 'pandas',
   'Streamlit': 'streamlit',
-  'Análisis de Virus': 'eset',
-  'Ingeniería Inversa': 'radare2',
+  'Análisis de Virus': 'virustotal',
+  'Ingeniería Inversa': 'metasploit',
   'Algoritmos': 'codeforces',
   'Seguridad': 'fsecure',
   'Virus': 'bitdefender',
-  'Reverse Engineering': 'radare2',
+  'Reverse Engineering': 'metasploit',
 };
 
 export default function TechBadge({ 
