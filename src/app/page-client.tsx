@@ -93,7 +93,10 @@ export default function HomeClient({
       .filter(p => {
         const matchesCategory = theme === 'all' ? true : p.category === theme;
         const matchesTech = selectedTechs.length === 0 || 
-          selectedTechs.some(tech => p.technologies.includes(tech));
+          selectedTechs.some(tech => {
+            if (tech.toLowerCase() === 'producción') return p.isRealWorld;
+            return p.technologies.includes(tech);
+          });
         return matchesCategory && matchesTech;
       })
       .sort((a, b) => {
@@ -105,8 +108,24 @@ export default function HomeClient({
 
   const allAvailableTechs = useMemo(() => {
     const techs = new Set<string>();
-    initialProjects.forEach(p => p.technologies.forEach(t => techs.add(t)));
-    return Array.from(techs);
+    
+    // Forzamos "Producción" al inicio si existe algún proyecto con esa propiedad
+    const hasProduction = initialProjects.some(p => p.isRealWorld);
+    
+    initialProjects.forEach(p => p.technologies.forEach(t => {
+      // Evitamos duplicar Producción si ya viene en la lista de tecnologías
+      if (t.toLowerCase() !== 'producción') {
+        techs.add(t);
+      }
+    }));
+
+    const sortedTechs = Array.from(techs).sort((a, b) => a.localeCompare(b));
+    
+    if (hasProduction) {
+      return ['Producción', ...sortedTechs];
+    }
+    
+    return sortedTechs;
   }, [initialProjects]);
 
   const toggleTech = (tech: string) => {

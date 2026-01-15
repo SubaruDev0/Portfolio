@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Flame } from 'lucide-react';
+import { Flame, Briefcase } from 'lucide-react';
 
 interface TechBadgeProps {
   name: string;
@@ -67,6 +67,7 @@ const techMap: Record<string, string> = {
   'REST API': 'postman',
   'GraphQL': 'graphql',
   'Microservicios': 'kubernetes',
+  'Producción': 'briefcase',
 };
 
 export default function TechBadge({ name, showName = true, className = "" }: TechBadgeProps) {
@@ -81,6 +82,9 @@ export default function TechBadge({ name, showName = true, className = "" }: Tec
     iconUrl = "https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg";
   } else if (name.toLowerCase() === 'videojuego' || name.toLowerCase() === 'videojuegos') {
     iconUrl = "https://raw.githubusercontent.com/devicons/devicon/master/icons/unity/unity-original.svg";
+  } else if (name.toLowerCase() === 'producción') {
+    iconUrl = ""; // Usaremos Lucide en este caso especial si falla la imagen, o simplemente forzamos el error para que use Flame. 
+    // Mejor aún, usemos un slug que no exista y manejemos Lucide internamente.
   } else if (slug === 'uss') {
     iconUrl = "/logos/Logo_Universidad_san_sebastian.png";
   }
@@ -90,7 +94,9 @@ export default function TechBadge({ name, showName = true, className = "" }: Tec
       className={`flex items-center gap-2 px-3 py-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl group/tech hover:border-white/40 hover:!bg-black group-hover:bg-black/80 transition-all duration-700 cursor-default relative ${className}`}
     >
       <div className="w-5 h-5 flex items-center justify-center text-orange-500 opacity-100 group-hover/tech:scale-110 transition-all duration-700">
-        {error ? (
+        {name.toLowerCase() === 'producción' ? (
+          <Briefcase size={16} className="text-emerald-400" fill="currentColor" />
+        ) : error ? (
           <Flame size={16} className="animate-pulse" />
         ) : (
           <img 
