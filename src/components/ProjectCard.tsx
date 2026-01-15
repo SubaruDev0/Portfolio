@@ -96,29 +96,19 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
 
           <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between z-20">
             <div className="flex gap-2">
-              {(() => {
-                const combinedTechs = project.isRealWorld 
-                  ? ['Producción', ...project.technologies.filter(t => t.toLowerCase() !== 'producción')]
-                  : project.technologies;
-                
-                return (
-                  <>
-                    {combinedTechs.slice(0, 3).map((tech, i) => (
-                      <div key={tech} className="transition-all duration-700 group-hover:scale-110 active:scale-95">
-                        <TechBadge 
-                          name={tech} 
-                          showName={false} 
-                        />
-                      </div>
-                    ))}
-                    {combinedTechs.length > 3 && (
-                      <div className="flex items-center justify-center px-2 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl text-[10px] font-black text-white group-hover:text-white transition-all duration-700 group-hover:bg-black group-hover:border-white/30">
-                        +{combinedTechs.length - 3}
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
+              {project.technologies.slice(0, 3).map((tech, i) => (
+                <div key={tech} className="transition-all duration-700 group-hover:scale-110 active:scale-95">
+                  <TechBadge 
+                    name={tech} 
+                    showName={false} 
+                  />
+                </div>
+              ))}
+              {project.technologies.length > 3 && (
+                <div className="flex items-center justify-center px-2 py-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl text-[10px] font-black text-white group-hover:text-white transition-all duration-700 group-hover:bg-black group-hover:border-white/30">
+                  +{project.technologies.length - 3}
+                </div>
+              )}
             </div>
           </div>
         </div>

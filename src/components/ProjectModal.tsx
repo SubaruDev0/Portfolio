@@ -126,15 +126,9 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor }: P
               <div>
                 <h4 className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4">Stack Tecnológico</h4>
                 <div className="flex flex-wrap gap-2.5">
-                  {(() => {
-                    const combinedTechs = project.isRealWorld 
-                      ? ['Producción', ...project.technologies.filter(t => t.toLowerCase() !== 'producción')]
-                      : project.technologies;
-                    
-                    return combinedTechs.map((tech) => (
-                      <TechBadge key={tech} name={tech} />
-                    ));
-                  })()}
+                  {project.technologies.map((tech) => (
+                    <TechBadge key={tech} name={tech} />
+                  ))}
                 </div>
               </div>
 

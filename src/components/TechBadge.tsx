@@ -68,6 +68,12 @@ const techMap: Record<string, string> = {
   'GraphQL': 'graphql',
   'Microservicios': 'kubernetes',
   'Producción': 'briefcase',
+  'Claude': 'anthropic',
+  'Godot Engine': 'godotengine',
+  'Moodle': 'moodle',
+  'OpenStreetMap': 'openstreetmap',
+  'Pandas': 'pandas',
+  'Streamlit': 'streamlit',
 };
 
 export default function TechBadge({ name, showName = true, className = "" }: TechBadgeProps) {
