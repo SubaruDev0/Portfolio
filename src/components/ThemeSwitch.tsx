@@ -53,7 +53,7 @@ export default function ThemeSwitch({ currentTheme, setTheme }: ThemeSwitchProps
             
             {/* Tooltip sutil */}
             {currentTheme !== theme.id && (
-              <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-white/10 backdrop-blur-md border border-white/10 rounded text-[10px] uppercase tracking-widest text-white opacity-0 group-hover/btn:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+              <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/90 backdrop-blur-xl border border-white/20 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] text-white opacity-0 group-hover/btn:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 translate-y-1 group-hover/btn:translate-y-0 shadow-2xl">
                 {theme.label}
               </span>
             )}

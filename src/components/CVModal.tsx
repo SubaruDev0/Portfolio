@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Download, Mail, MessageCircle } from 'lucide-react';
+import { X, Download, Mail, MessageCircle, Maximize2 } from 'lucide-react';
 
 interface CVModalProps {
   isOpen: boolean;
@@ -40,13 +40,21 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
         </button>
 
         {/* Preview (Left) */}
-        <div className={`w-full md:w-1/2 flex flex-col h-[400px] md:h-auto overflow-hidden transition-colors duration-700 ${isDarkMode ? 'bg-black' : 'bg-slate-50'}`}>
+        <div className={`w-full md:w-1/2 flex flex-col h-[400px] md:h-auto overflow-hidden transition-colors duration-700 relative group/preview ${isDarkMode ? 'bg-black' : 'bg-slate-50'}`}>
           {cvUrl ? (
-            <iframe 
-              src={`${cvUrl}#toolbar=0`} 
-              className="w-full h-full border-none"
-              title="CV Preview"
-            />
+            <>
+              <iframe 
+                src={`${cvUrl}#toolbar=0`} 
+                className="w-full h-full border-none"
+                title="CV Preview"
+              />
+              <button 
+                onClick={() => window.open(cvUrl, '_blank')}
+                className="absolute bottom-6 right-6 p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl text-white opacity-0 group-hover/preview:opacity-100 transition-all duration-500 hover:scale-110 active:scale-95 shadow-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]"
+              >
+                <Maximize2 size={16} /> Pantalla Completa
+              </button>
+            </>
           ) : (
             <div className={`flex-1 flex flex-col items-center justify-center p-12 text-center ${isDarkMode ? 'text-white/10' : 'text-black/10'}`}>
               <Download size={64} className="mb-4" />
