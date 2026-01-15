@@ -87,6 +87,11 @@ El panel `/admin` ha sido reforzado para que puedas gestionar tus proyectos de f
         3. **Producción**: (Maletín Emerald).
         4. **Orden por Drag & Drop**: El que tú decidas arrastrando.
 
+8. **Paginación Inteligente y Control de Scroll**:
+    - **Lotes de 6**: Para no saturar al usuario, los proyectos se cargan en grupos de 6.
+    - **Ver Menos con Scroll Inverso**: Al reducir la lista ("Ver Menos"), la cámara sube automáticamente ~1000px. Esto evita que el usuario quede "perdido" en un espacio en blanco cuando los proyectos desaparecen.
+    - **Contador Dinámico**: Se muestra exactamente cuántos proyectos hay visibles vs el total filtrado (ej: *Mostrando 6 de 12 Proyectos*).
+
 ---
 
 ## 🎨 3. El Motor de Animaciones (Midu-Style) e Interacción de Élite

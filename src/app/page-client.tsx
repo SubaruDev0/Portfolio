@@ -124,6 +124,14 @@ export default function HomeClient({
     }
   };
 
+  const handleShowLess = () => {
+    setVisibleProjectsCount(prev => Math.max(6, prev - 6));
+    // Pequeño delay para que la animación de salida empiece antes del scroll
+    setTimeout(() => {
+      window.scrollBy({ top: -800, behavior: 'smooth' });
+    }, 100);
+  };
+
   const filteredProjects = useMemo(() => {
     return initialProjects
       .filter(p => {
@@ -326,10 +334,10 @@ export default function HomeClient({
         </motion.div>
 
         {/* Anchor point for correct scrolling - Land above the controller */}
-        <div id="proyectos-anchor" className="h-52 -mt-52" />
+        <div id="proyectos-anchor" className="h-40 -mt-40" />
 
         {/* Metamorphosis Controller */}
-        <div className="w-full max-w-7xl mb-16 flex flex-col items-center">
+        <div className="w-full max-w-7xl mb-8 flex flex-col items-center">
             <ThemeSwitch currentTheme={theme} setTheme={(t) => withTransition(() => setTheme(t))} />
             
             {(theme !== 'all' || selectedTechs.length > 0) && (
@@ -349,10 +357,10 @@ export default function HomeClient({
               </motion.button>
             )}
 
-            <div className="mt-12 w-full flex flex-col items-center space-y-4">
+            <div className="mt-4 w-full flex flex-col items-center space-y-2">
               <span className={`text-[9px] font-black uppercase tracking-[0.4em] transition-colors duration-700 ${isDarkMode ? 'text-white/20' : 'text-slate-300'}`}>Filtros</span>
               
-              <div className="flex flex-col items-center gap-6 mb-8">
+              <div className="flex flex-col items-center gap-4 mb-4">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={theme + selectedTechs.join(',')}
@@ -507,9 +515,7 @@ export default function HomeClient({
                 animate={{ opacity: 1, y: 0 }}
               >
                 <button
-                  onClick={() => {
-                    setVisibleProjectsCount(prev => Math.max(6, prev - 6));
-                  }}
+                  onClick={handleShowLess}
                   className="group relative px-10 py-4 rounded-2xl overflow-hidden transition-all active:scale-95 border border-white/5 bg-white/5 hover:bg-white/10"
                 >
                   <span className="relative z-10 font-black uppercase text-[10px] tracking-[0.3em] flex items-center gap-3 text-gray-500 group-hover:text-white transition-colors">
