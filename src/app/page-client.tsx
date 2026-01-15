@@ -352,6 +352,26 @@ export default function HomeClient({
             <div className="mt-12 w-full flex flex-col items-center space-y-4">
               <span className={`text-[9px] font-black uppercase tracking-[0.4em] transition-colors duration-700 ${isDarkMode ? 'text-white/20' : 'text-slate-300'}`}>Filtros</span>
               
+              <div className="flex flex-col items-center gap-6 mb-8">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={theme + selectedTechs.join(',')}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`flex items-center gap-3 px-6 py-2 rounded-full border bg-white/[0.02] transition-colors duration-700 ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}
+                  >
+                    <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-gray-500">
+                      Mostrando <span style={{ color: themeColors.hex }} className="text-sm font-black transition-colors duration-500">{filteredProjects.length}</span> {filteredProjects.length === 1 ? 'Proyecto' : 'Proyectos'}
+                    </span>
+                    <div className="h-4 w-px bg-white/10" />
+                    <span className="text-[9px] uppercase font-black tracking-widest text-white/30">
+                      {theme === 'all' ? 'Colección Total' : theme}
+                    </span>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
               {/* Technology Filters */}
               <motion.div 
                 initial={{ opacity: 0 }}
