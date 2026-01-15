@@ -71,6 +71,8 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
               <div className="flex flex-wrap gap-4">
                 <a 
                   href="mailto:subaru0.dev@gmail.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={`flex items-center gap-3 px-4 py-2 border rounded-xl transition-all text-sm group ${
                       isDarkMode ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-black/5 border-black/5 hover:bg-black/10'
                   }`}

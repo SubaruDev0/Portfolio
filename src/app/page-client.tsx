@@ -706,6 +706,8 @@ export default function HomeClient({
                 <div className="flex flex-col gap-4 w-full max-w-sm">
                    <motion.a 
                      href="mailto:subaru0.dev@gmail.com"
+                     target="_blank"
+                     rel="noopener noreferrer"
                      whileHover={{ x: 8, backgroundColor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)" }}
                      whileTap={{ scale: 0.98 }}
                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
