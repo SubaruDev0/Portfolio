@@ -169,7 +169,7 @@ export default function TechBadge({
 
       {showName ? (
         <span className={`${isSmall ? 'text-[8px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em] transition-colors duration-500 ${
-            isDarkMode ? 'text-gray-500 group-hover/tech:text-white' : 'text-slate-900 group-hover/tech:text-black'
+            isDarkMode ? 'text-gray-400 group-hover/tech:text-white' : 'text-slate-900 group-hover/tech:text-black'
         }`}>
           {displayName}
         </span>

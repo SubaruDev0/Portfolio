@@ -354,7 +354,7 @@ export default function HomeClient({
                   >
                     <TechBadge 
                       name={tech} 
-                      className={selectedTechs.includes(tech) ? (isDarkMode ? "!border-white/40 !bg-white/10" : "!border-black/40 !bg-black/10") : "opacity-40 hover:opacity-100"}
+                      className={selectedTechs.includes(tech) ? (isDarkMode ? "!border-white/40 !bg-white/10" : "!border-black/40 !bg-black/10") : "opacity-60 hover:opacity-100"}
                       showName={true}
                       isDarkMode={isDarkMode}
                     />
