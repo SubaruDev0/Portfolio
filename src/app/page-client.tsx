@@ -628,8 +628,8 @@ export default function HomeClient({
                    </motion.a>
 
                    <div className="grid grid-cols-2 gap-4">
-                      <SocialIcon href="https://linkedin.com/in/javiersubaru" icon={Linkedin} color={themeColors.hex} title="LinkedIn" isDarkMode={isDarkMode} />
-                      <SocialIcon href="https://github.com/subaru-dev" icon={Github} color={themeColors.hex} title="GitHub" isDarkMode={isDarkMode} />
+                      <SocialIcon href="https://www.linkedin.com/in/subarudev0/" icon={Linkedin} color={themeColors.hex} title="LinkedIn" isDarkMode={isDarkMode} />
+                      <SocialIcon href="https://github.com/SubaruDev0" icon={Github} color={themeColors.hex} title="GitHub" isDarkMode={isDarkMode} />
                    </div>
                 </div>
               </div>

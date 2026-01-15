@@ -72,5 +72,5 @@ Este proyecto está bajo la licencia MIT. Siéntete libre de usar el código par
 
 ### 📬 Contacto
 **Javier Sebastián Morales Subaru**  
-🔗 [LinkedIn](https://linkedin.com/in/subarudev0)  
+🔗 [LinkedIn](https://www.linkedin.com/in/subarudev0/)  
 🌐 [Portfolio en Vivo](https://portfolio-subarudev.vercel.app)
