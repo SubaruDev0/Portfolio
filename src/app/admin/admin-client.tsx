@@ -168,8 +168,9 @@ export default function AdminPage({
     const result = await verifyAdminAction(password);
     if (result.success) {
       setIsAuthenticated(true);
-      // Ejecutar migración silenciosa para asegurar que las tablas existan
-      runMigration().catch(console.error);
+      // No ejecutamos la migración automáticamente para evitar sobrescribir datos reales
+      // con los datos hardcodeados de los archivos .ts locales.
+      // runMigration().catch(console.error);
     } else {
       setError(true);
       setPassword('');

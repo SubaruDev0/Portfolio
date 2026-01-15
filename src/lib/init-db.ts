@@ -90,18 +90,7 @@ export async function initDatabase() {
           ${project.githubUrl}, ${project.liveUrl}, ${project.imageUrl}, ${project.gallery},
           ${project.featured}, ${project.isStarred}, ${project.isRealWorld}, ${project.createdAt}
         )
-        ON CONFLICT (id) DO UPDATE SET
-          title = EXCLUDED.title,
-          description = EXCLUDED.description,
-          category = EXCLUDED.category,
-          technologies = EXCLUDED.technologies,
-          github_url = EXCLUDED.github_url,
-          live_url = EXCLUDED.live_url,
-          image_url = EXCLUDED.image_url,
-          gallery = EXCLUDED.gallery,
-          featured = EXCLUDED.featured,
-          is_starred = EXCLUDED.is_starred,
-          is_real_world = EXCLUDED.is_real_world
+        ON CONFLICT (id) DO NOTHING
       `;
     }
 
@@ -110,12 +99,7 @@ export async function initDatabase() {
       await sql`
         INSERT INTO certificates (id, title, description, date, academy, image_url)
         VALUES (${cert.id}, ${cert.title}, ${cert.description}, ${cert.date}, ${cert.academy}, ${cert.imageUrl})
-        ON CONFLICT (id) DO UPDATE SET
-          title = EXCLUDED.title,
-          description = EXCLUDED.description,
-          date = EXCLUDED.date,
-          academy = EXCLUDED.academy,
-          image_url = EXCLUDED.image_url
+        ON CONFLICT (id) DO NOTHING
       `;
     }
 
