@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/Navbar';
 import { ProjectCategory, Project, Certificate } from '@/types';
-import { Plus, Github, Link as LinkIcon, Save, Image as ImageIcon, Lock, X, Search, FileUp, Star, Briefcase, Award, ChevronUp, ChevronDown, Eye, EyeOff, Pencil, Database, LogIn } from 'lucide-react';
-import { addProjectAction, deleteProjectAction, uploadImageAction, addCertificateAction, deleteCertificateAction, reorderAction, updateProjectAction, updateCertificateAction, runMigration, updateSettingsAction, verifyAdminAction } from '@/app/actions';
+import { Plus, Github, Link as LinkIcon, Save, Image as ImageIcon, Lock, X, Search, FileUp, Star, Briefcase, Award, ChevronUp, ChevronDown, Eye, EyeOff, Pencil, Database, LogIn, MoveVertical, GripVertical } from 'lucide-react';
+import { addProjectAction, deleteProjectAction, uploadImageAction, addCertificateAction, deleteCertificateAction, reorderAction, updateProjectAction, updateCertificateAction, runMigration, updateSettingsAction, verifyAdminAction, saveOrderAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { Trash2, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
 import TechBadge from '@/components/TechBadge';
+import { Reorder, AnimatePresence } from 'framer-motion';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -60,6 +61,17 @@ export default function AdminPage({
     cv_url: initialSettings.cv_url || '',
     cv_description: initialSettings.cv_description || '',
   });
+
+  const [localProjects, setLocalProjects] = useState<Project[]>(allProjects);
+  const [localCertificates, setLocalCertificates] = useState<Certificate[]>(allCertificates);
+
+  useEffect(() => {
+    setLocalProjects(allProjects);
+  }, [allProjects]);
+
+  useEffect(() => {
+    setLocalCertificates(allCertificates);
+  }, [allCertificates]);
 
   const [activeTab, setActiveTab] = useState<'projects' | 'certificates' | 'settings'>('projects');
 
@@ -265,6 +277,18 @@ export default function AdminPage({
     const result = await reorderAction(type, id, direction);
     if (result.success) {
       router.refresh();
+    }
+  };
+
+  const handleDragReorder = async (type: 'projects' | 'certificates', newItems: any[]) => {
+    if (type === 'projects') {
+      setLocalProjects(newItems);
+      const ids = newItems.map(i => i.id);
+      await saveOrderAction('projects', ids);
+    } else {
+      setLocalCertificates(newItems);
+      const ids = newItems.map(i => i.id);
+      await saveOrderAction('certificates', ids);
     }
   };
 
@@ -552,47 +576,66 @@ export default function AdminPage({
 
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Tecnologías</label>
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {project.technologies.map(t => (
-                      <div key={t} className="flex items-center gap-2 bg-white/5 border border-white/10 pl-3 pr-1 py-1 rounded-lg text-[9px] uppercase tracking-tighter text-white">
-                        {t.includes(':') ? (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {project.technologies.map(t => {
+                      const lastColon = t.lastIndexOf(':');
+                      const name = lastColon !== -1 ? t.substring(0, lastColon) : t;
+                      return (
+                        <div key={t} className="flex items-center gap-2 bg-white/5 border border-white/10 pl-2 pr-1 py-1 rounded-xl text-[9px] uppercase tracking-tighter text-white group/tech relative">
+                          <TechBadge name={t} showName={false} className="scale-75 -mx-1" />
                           <span className="flex items-center gap-1.5">
-                            {t.split(':')[0]} 
-                            <span className="px-1.5 py-0.5 rounded-md bg-white/10 text-[8px] opacity-50">Slug: {t.split(':')[1]}</span>
+                            {name} 
+                            {lastColon !== -1 && (
+                              <span className="px-1.5 py-0.5 rounded-md bg-white/10 text-[8px] opacity-30 group-hover/tech:opacity-100 transition-opacity">
+                                SLUG: {t.substring(lastColon + 1)}
+                              </span>
+                            )}
                           </span>
-                        ) : t} 
-                        <button type="button" onClick={() => removeTech(t)} className="p-1 hover:bg-white/10 rounded text-gray-500 hover:text-white"><X size={10} /></button>
-                      </div>
-                    ))}
+                          <button type="button" onClick={() => removeTech(t)} className="p-1 hover:bg-white/10 rounded text-gray-500 hover:text-white transition-colors">
+                            <X size={10} />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-end">
                     <div className="flex-1 flex gap-2">
-                      <input 
-                        type="text" 
-                        list="tech-list" 
-                        className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-white transition-colors" 
-                        placeholder="Nombre (ej: Virus)" 
-                        value={newTech} 
-                        onChange={e => {
-                          const val = e.target.value;
-                          setNewTech(val);
-                          // Autocompletar slug si existe en sugerencias
-                          if (techSuggestions[val]) {
-                            setNewTechIcon(techSuggestions[val]);
-                          }
-                        }} 
-                        onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTech(newTech, newTechIcon))} 
-                      />
-                      <input 
-                        type="text" 
-                        className="w-1/3 bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white text-xs focus:outline-none focus:border-white transition-colors" 
-                        placeholder="Icon Slug (ej: platformio)" 
-                        value={newTechIcon} 
-                        onChange={e => setNewTechIcon(e.target.value)} 
-                        onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTech(newTech, newTechIcon))} 
-                      />
+                      <div className="flex-1">
+                        <input 
+                          type="text" 
+                          list="tech-list" 
+                          className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:outline-none focus:border-white transition-colors" 
+                          placeholder="Nombre (ej: Python)" 
+                          value={newTech} 
+                          onChange={e => {
+                            const val = e.target.value;
+                            setNewTech(val);
+                            // Autocompletar slug si existe en sugerencias
+                            if (techSuggestions[val]) {
+                              setNewTechIcon(techSuggestions[val]);
+                            }
+                          }} 
+                          onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTech(newTech, newTechIcon))} 
+                        />
+                      </div>
+                      <div className="w-1/3 relative">
+                        <input 
+                          type="text" 
+                          className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:outline-none focus:border-white transition-colors" 
+                          placeholder="Slug" 
+                          value={newTechIcon} 
+                          onChange={e => setNewTechIcon(e.target.value)} 
+                          onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTech(newTech, newTechIcon))} 
+                        />
+                      </div>
                     </div>
-                    <button type="button" onClick={() => addTech(newTech, newTechIcon)} className="bg-white/10 px-4 rounded-xl text-[10px] font-black uppercase text-white hover:bg-white/20">OK</button>
+                    {newTech && (
+                      <div className="mb-1 p-2 bg-white/5 border border-white/10 rounded-xl flex items-center gap-2 animate-in fade-in zoom-in duration-300">
+                        <TechBadge name={newTechIcon ? `${newTech}:${newTechIcon}` : newTech} showName={false} />
+                        <span className="text-[8px] text-gray-500 font-bold uppercase tracking-widest">PREVIEW</span>
+                      </div>
+                    )}
+                    <button type="button" onClick={() => addTech(newTech, newTechIcon)} className="bg-white px-6 py-3 rounded-xl text-[10px] font-black uppercase text-black hover:bg-cyan-400 transition-all">AGREGAR</button>
                     <datalist id="tech-list">{uniqueTechNames.map(t => <option key={t} value={t} />)}</datalist>
                   </div>
                 </div>
@@ -703,51 +746,75 @@ export default function AdminPage({
           </h2>
           <div className="space-y-4 overflow-y-auto pr-4 custom-scrollbar">
             {activeTab === 'projects' && (
-              allProjects.map(p => (
-                <div key={p.id} className="flex items-center justify-between p-4 bg-black/30 border border-white/5 rounded-2xl hover:border-white/10 transition-all group">
-                  <div className="flex items-center gap-4 overflow-hidden">
-                    <div className="w-12 h-12 rounded-xl border border-white/10 overflow-hidden flex-shrink-0">
-                      <img src={p.imageUrl} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="truncate">
-                      <h3 className="text-xs font-bold text-white uppercase tracking-tight truncate">{p.title}</h3>
-                      <p className="text-[9px] text-gray-600 uppercase font-mono mt-1">{p.category}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => startEditProject(p)} className="p-3 text-gray-700 hover:text-yellow-500 hover:bg-yellow-500/10 rounded-xl transition-all" title="Editar"><Pencil size={16} /></button>
-                    <div className="flex flex-col">
-                      <button onClick={() => handleReorder('projects', p.id, 'up')} className="p-1 text-gray-700 hover:text-white transition-colors"><ChevronUp size={14} /></button>
-                      <button onClick={() => handleReorder('projects', p.id, 'down')} className="p-1 text-gray-700 hover:text-white transition-colors"><ChevronDown size={14} /></button>
-                    </div>
-                    <button onClick={() => handleDelete(p.id, p.title)} className="p-3 text-gray-700 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"><Trash2 size={16} /></button>
-                  </div>
-                </div>
-              ))
+              <Reorder.Group axis="y" values={localProjects} onReorder={(items) => handleDragReorder('projects', items)} className="space-y-4">
+                <AnimatePresence mode="popLayout">
+                  {localProjects.map(p => (
+                    <Reorder.Item 
+                      key={p.id} 
+                      value={p}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="flex items-center justify-between p-4 bg-black/30 border border-white/5 rounded-2xl hover:border-white/10 transition-all group cursor-grab active:cursor-grabbing"
+                    >
+                      <div className="flex items-center gap-4 overflow-hidden pointer-events-none select-none">
+                        <div className="text-gray-700 group-hover:text-white transition-colors">
+                          <GripVertical size={18} />
+                        </div>
+                        <div className="w-12 h-12 rounded-xl border border-white/10 overflow-hidden flex-shrink-0">
+                          <img src={p.imageUrl} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="truncate">
+                          <h3 className="text-xs font-bold text-white uppercase tracking-tight truncate">{p.title}</h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-[9px] text-gray-600 uppercase font-mono">{p.category}</p>
+                            {p.isStarred && <Star size={10} className="text-yellow-500 fill-yellow-500" />}
+                            {p.isRealWorld && <Briefcase size={10} className="text-emerald-500" />}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => startEditProject(p)} className="p-3 text-gray-700 hover:text-yellow-500 hover:bg-yellow-500/10 rounded-xl transition-all" title="Editar"><Pencil size={16} /></button>
+                        <button onClick={() => handleDelete(p.id, p.title)} className="p-3 text-gray-700 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"><Trash2 size={16} /></button>
+                      </div>
+                    </Reorder.Item>
+                  ))}
+                </AnimatePresence>
+              </Reorder.Group>
             )}
             
             {activeTab === 'certificates' && (
-              allCertificates.map(c => (
-                <div key={c.id} className="flex items-center justify-between p-4 bg-black/30 border border-white/5 rounded-2xl hover:border-white/10 transition-all group">
-                  <div className="flex items-center gap-4 overflow-hidden">
-                    <div className="w-12 h-12 rounded-xl border border-white/10 overflow-hidden flex-shrink-0">
-                      <img src={c.imageUrl} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="truncate">
-                      <h3 className="text-xs font-bold text-white uppercase tracking-tight truncate">{c.title}</h3>
-                      <p className="text-[9px] text-gray-600 uppercase font-mono mt-1">{c.academy} • {c.date}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => startEditCert(c)} className="p-3 text-gray-700 hover:text-yellow-500 hover:bg-yellow-500/10 rounded-xl transition-all" title="Editar"><Pencil size={16} /></button>
-                    <div className="flex flex-col">
-                      <button onClick={() => handleReorder('certificates', c.id, 'up')} className="p-1 text-gray-700 hover:text-white transition-colors"><ChevronUp size={14} /></button>
-                      <button onClick={() => handleReorder('certificates', c.id, 'down')} className="p-1 text-gray-700 hover:text-white transition-colors"><ChevronDown size={14} /></button>
-                    </div>
-                    <button onClick={() => handleCertDelete(c.id, c.title)} className="p-3 text-gray-700 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"><Trash2 size={16} /></button>
-                  </div>
-                </div>
-              ))
+              <Reorder.Group axis="y" values={localCertificates} onReorder={(items) => handleDragReorder('certificates', items)} className="space-y-4">
+                <AnimatePresence mode="popLayout">
+                  {localCertificates.map(c => (
+                    <Reorder.Item 
+                      key={c.id} 
+                      value={c}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="flex items-center justify-between p-4 bg-black/30 border border-white/5 rounded-2xl hover:border-white/10 transition-all group cursor-grab active:cursor-grabbing"
+                    >
+                      <div className="flex items-center gap-4 overflow-hidden pointer-events-none select-none">
+                        <div className="text-gray-700 group-hover:text-white transition-colors">
+                          <GripVertical size={18} />
+                        </div>
+                        <div className="w-12 h-12 rounded-xl border border-white/10 overflow-hidden flex-shrink-0">
+                          <img src={c.imageUrl} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="truncate">
+                          <h3 className="text-xs font-bold text-white uppercase tracking-tight truncate">{c.title}</h3>
+                          <p className="text-[9px] text-gray-600 uppercase font-mono mt-1">{c.academy} • {c.date}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => startEditCert(c)} className="p-3 text-gray-700 hover:text-yellow-500 hover:bg-yellow-500/10 rounded-xl transition-all" title="Editar"><Pencil size={16} /></button>
+                        <button onClick={() => handleCertDelete(c.id, c.title)} className="p-3 text-gray-700 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"><Trash2 size={16} /></button>
+                      </div>
+                    </Reorder.Item>
+                  ))}
+                </AnimatePresence>
+              </Reorder.Group>
             )}
             
             {activeTab === 'settings' && (

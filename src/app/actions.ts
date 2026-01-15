@@ -182,6 +182,30 @@ export async function updateSettingsAction(settings: Record<string, string>) {
   }
 }
 
+export async function saveOrderAction(type: 'projects' | 'certificates', orderedIds: string[]) {
+  try {
+    const isProjects = type === 'projects';
+    const tableName = isProjects ? 'projects' : 'certificates';
+    
+    // Usamos transacciones implícitas de Postgres simplemente ejecutando los updates
+    // Para mejorar performance, podríamos usar una sola query pero con subaru esto es más seguro
+    for (let i = 0; i < orderedIds.length; i++) {
+        if (isProjects) {
+            await sql`UPDATE projects SET sort_order = ${i} WHERE id = ${orderedIds[i]}`;
+        } else {
+            await sql`UPDATE certificates SET sort_order = ${i} WHERE id = ${orderedIds[i]}`;
+        }
+    }
+    
+    revalidatePath('/');
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error) {
+    console.error('Error al guardar orden:', error);
+    return { success: false, error: String(error) };
+  }
+}
+
 export async function reorderAction(type: 'projects' | 'certificates', id: string, direction: 'up' | 'down') {
   try {
     const isProjects = type === 'projects';
