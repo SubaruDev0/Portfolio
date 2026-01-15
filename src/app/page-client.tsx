@@ -459,40 +459,70 @@ export default function HomeClient({
           </AnimatePresence>
         </div>
 
-        {/* Ver más button */}
-        {filteredProjects.length > visibleProjectsCount && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full flex justify-center mt-16"
-          >
-            <button
-              onClick={() => setVisibleProjectsCount(prev => prev + 6)}
-              className="group relative px-12 py-4 rounded-2xl overflow-hidden transition-all active:scale-95"
-              style={{ 
-                border: `1px solid ${themeColors.hex}40`,
-                backgroundColor: isDarkMode ? `${themeColors.hex}05` : `${themeColors.hex}08`
-              }}
-            >
-              <div 
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                style={{ backgroundColor: `${themeColors.hex}10` }}
-              />
-              <span 
-                className="relative z-10 font-black uppercase text-xs tracking-[0.4em] flex items-center gap-4 transition-colors duration-300 group-hover:text-white"
-                style={{ color: isDarkMode ? themeColors.hex : themeColors.hex }}
+        {/* Paginación de proyectos */}
+        <div className="w-full flex flex-col items-center gap-4 mt-16">
+          <div className="flex flex-wrap justify-center gap-6">
+            {/* Ver más button */}
+            {filteredProjects.length > visibleProjectsCount && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
               >
-                Ver Más Proyectos 
-                <motion.div
-                  animate={{ y: [0, 4, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                <button
+                  onClick={() => setVisibleProjectsCount(prev => prev + 6)}
+                  className="group relative px-10 py-4 rounded-2xl overflow-hidden transition-all active:scale-95 border"
+                  style={{ 
+                    borderColor: `${themeColors.hex}40`,
+                    backgroundColor: isDarkMode ? `${themeColors.hex}05` : `${themeColors.hex}08`
+                  }}
                 >
-                  <ChevronUp size={16} className="rotate-180" />
-                </motion.div>
-              </span>
-            </button>
-          </motion.div>
-        )}
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                    style={{ backgroundColor: `${themeColors.hex}10` }}
+                  />
+                  <span 
+                    className="relative z-10 font-black uppercase text-[10px] tracking-[0.3em] flex items-center gap-3 transition-colors duration-300"
+                    style={{ color: themeColors.hex }}
+                  >
+                    Ver Más Proyectos 
+                    <motion.div
+                      animate={{ y: [0, 4, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <ChevronUp size={14} className="rotate-180" />
+                    </motion.div>
+                  </span>
+                </button>
+              </motion.div>
+            )}
+
+            {/* Ver menos button */}
+            {visibleProjectsCount > 6 && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <button
+                  onClick={() => {
+                    setVisibleProjectsCount(6);
+                    document.getElementById('proyectos-anchor')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="group relative px-10 py-4 rounded-2xl overflow-hidden transition-all active:scale-95 border border-white/5 bg-white/5 hover:bg-white/10"
+                >
+                  <span className="relative z-10 font-black uppercase text-[10px] tracking-[0.3em] flex items-center gap-3 text-gray-500 group-hover:text-white transition-colors">
+                    Ver Menos
+                    <motion.div
+                      animate={{ y: [0, -4, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      <ChevronUp size={14} />
+                    </motion.div>
+                  </span>
+                </button>
+              </motion.div>
+            )}
+          </div>
+        </div>
       </section>
 
       {/* About Section */}
