@@ -3,6 +3,7 @@
 import { Project, Certificate } from '@/types';
 import { sql } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
+import { put, del } from '@vercel/blob';
 
 // AUTHENTICATION
 export async function verifyAdminAction(password: string) {
@@ -25,22 +26,41 @@ export async function verifyAdminAction(password: string) {
   }
 }
 
-// Image Upload - Convert to Base64 to store in Database (FORCE UPDATE)
+// Image Upload - Upload to Vercel Blob Storage
 export async function uploadImageAction(formData: FormData) {
   try {
     const file = formData.get('file') as File;
     if (!file) throw new Error('No file provided');
 
-    // Convert file to Buffer and then to Base64
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64 = buffer.toString('base64');
-    const dataUrl = `data:${file.type};base64,${base64}`;
+    // Generate unique filename
+    const timestamp = Date.now();
+    const extension = file.name.split('.').pop() || 'png';
+    const filename = `portfolio/${timestamp}-${Math.random().toString(36).substring(7)}.${extension}`;
 
-    // Returning the Data URL to be stored in Neon DB column image_url
-    return { success: true, url: dataUrl };
+    // Upload to Vercel Blob
+    const blob = await put(filename, file, {
+      access: 'public',
+      addRandomSuffix: false,
+    });
+
+    // Return the public URL
+    return { success: true, url: blob.url };
   } catch (error) {
     console.error('Upload error:', error);
+    return { success: false, error: String(error) };
+  }
+}
+
+// Delete image from Vercel Blob (optional cleanup)
+export async function deleteImageAction(url: string) {
+  try {
+    // Only delete if it's a Vercel Blob URL (not base64)
+    if (url && url.includes('blob.vercel-storage.com')) {
+      await del(url);
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('Delete image error:', error);
     return { success: false, error: String(error) };
   }
 }
@@ -50,11 +70,11 @@ export async function addProjectAction(project: Project) {
   try {
     await sql`
       INSERT INTO projects (
-        id, title, description, category, technologies, 
+        id, title, description, category, secondary_category, technologies, 
         github_url, live_url, image_url, gallery, 
         featured, is_starred, is_real_world, sort_order, created_at
       ) VALUES (
-        ${project.id}, ${project.title}, ${project.description}, ${project.category}, ${project.technologies},
+        ${project.id}, ${project.title}, ${project.description}, ${project.category}, ${project.secondaryCategory || null}, ${project.technologies},
         ${project.githubUrl || ''}, ${project.liveUrl || ''}, ${project.imageUrl || ''}, ${project.gallery || []},
         ${project.featured ?? true}, ${project.isStarred ?? false}, ${project.isRealWorld ?? false},
         COALESCE((SELECT MAX(sort_order) FROM projects), 0) + 1,
@@ -77,6 +97,7 @@ export async function updateProjectAction(project: Project) {
         title = ${project.title},
         description = ${project.description},
         category = ${project.category},
+        secondary_category = ${project.secondaryCategory || null},
         technologies = ${project.technologies},
         github_url = ${project.githubUrl || ''},
         live_url = ${project.liveUrl || ''},

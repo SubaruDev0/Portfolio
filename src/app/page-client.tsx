@@ -32,6 +32,8 @@ export default function HomeClient({
   const [activeCertificate, setActiveCertificate] = useState<Certificate | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [visibleProjectsCount, setVisibleProjectsCount] = useState(6);
+  const [showAllFilters, setShowAllFilters] = useState(false);
+  const INITIAL_FILTERS_COUNT = 8; // Cuántos filtros mostrar inicialmente
 
   // Resetear paginación cuando cambian los filtros
   useEffect(() => {
@@ -135,7 +137,8 @@ export default function HomeClient({
   const filteredProjects = useMemo(() => {
     return initialProjects
       .filter(p => {
-        const matchesCategory = theme === 'all' ? true : p.category === theme;
+        // Un proyecto coincide si su categoría principal O secundaria coincide con el filtro
+        const matchesCategory = theme === 'all' ? true : (p.category === theme || p.secondaryCategory === theme);
         const matchesTech = selectedTechs.length === 0 || 
           selectedTechs.some(tech => {
             if (tech === 'Producción') return p.isRealWorld;
@@ -179,7 +182,7 @@ export default function HomeClient({
   }, [theme, selectedTechs, initialProjects]);
 
   const allAvailableTechs = useMemo(() => {
-    const techsMap = new Map<string, string>(); // lowerCase -> originalCase
+    const techsMap = new Map<string, { original: string; count: number }>(); // lowerCase -> {original, count}
     
     // Forzamos filtros maestros al inicio
     const hasProduction = initialProjects.some(p => p.isRealWorld);
@@ -192,22 +195,29 @@ export default function HomeClient({
       
       if (lowerName !== 'producción' && lowerName !== 'destacados') {
         if (!techsMap.has(lowerName)) {
-          techsMap.set(lowerName, t); // t es el formato original (ej: "Wikipedia:wikipedia")
+          techsMap.set(lowerName, { original: t, count: 1 });
         } else {
-          // Si la versión guardada no tiene slug y la nueva sí, preferimos la que tiene slug
           const existing = techsMap.get(lowerName)!;
-          if (!existing.includes(':') && t.includes(':')) {
-            techsMap.set(lowerName, t);
+          existing.count++;
+          // Si la versión guardada no tiene slug y la nueva sí, preferimos la que tiene slug
+          if (!existing.original.includes(':') && t.includes(':')) {
+            existing.original = t;
           }
         }
       }
     }));
 
-    const sortedTechs = Array.from(techsMap.values()).sort((a, b) => {
-      const nameA = a.includes(':') ? a.split(':')[0] : a;
-      const nameB = b.includes(':') ? b.split(':')[0] : b;
-      return nameA.localeCompare(nameB);
-    });
+    // Ordenar por frecuencia (más usados primero), luego alfabéticamente
+    const sortedTechs = Array.from(techsMap.values())
+      .sort((a, b) => {
+        // Primero por cantidad (descendente)
+        if (b.count !== a.count) return b.count - a.count;
+        // Luego alfabéticamente
+        const nameA = a.original.includes(':') ? a.original.split(':')[0] : a.original;
+        const nameB = b.original.includes(':') ? b.original.split(':')[0] : b.original;
+        return nameA.localeCompare(nameB);
+      })
+      .map(item => item.original);
     
     const masterFilters = [];
     if (hasStarred) masterFilters.push('Destacados');
@@ -387,22 +397,48 @@ export default function HomeClient({
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                className="w-full flex flex-wrap justify-center gap-2 pt-1"
+                className="w-full flex flex-col items-center gap-2 pt-1"
               >
-                {allAvailableTechs.map(tech => (
-                  <button
-                    key={tech}
-                    onClick={() => toggleTech(tech)}
-                    className="transition-all active:scale-95"
+                <div className="flex flex-wrap justify-center gap-2">
+                  {(showAllFilters ? allAvailableTechs : allAvailableTechs.slice(0, INITIAL_FILTERS_COUNT)).map(tech => (
+                    <button
+                      key={tech}
+                      onClick={() => toggleTech(tech)}
+                      className="transition-all active:scale-95"
+                    >
+                      <TechBadge 
+                        name={tech} 
+                        className={selectedTechs.includes(tech) ? (isDarkMode ? "!border-white/40 !bg-white/10" : "!border-black/40 !bg-black/10") : "opacity-60 hover:opacity-100"}
+                        showName={true}
+                        isDarkMode={isDarkMode}
+                      />
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Botón Ver más / Ver menos filtros */}
+                {allAvailableTechs.length > INITIAL_FILTERS_COUNT && (
+                  <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    onClick={() => setShowAllFilters(!showAllFilters)}
+                    className={`mt-2 flex items-center gap-2 px-4 py-1.5 border rounded-full transition-all text-[9px] font-black uppercase tracking-widest group ${
+                        isDarkMode ? 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:border-white/20' : 'bg-black/5 border-black/10 text-slate-400 hover:text-slate-800 hover:border-black/20'
+                    }`}
                   >
-                    <TechBadge 
-                      name={tech} 
-                      className={selectedTechs.includes(tech) ? (isDarkMode ? "!border-white/40 !bg-white/10" : "!border-black/40 !bg-black/10") : "opacity-60 hover:opacity-100"}
-                      showName={true}
-                      isDarkMode={isDarkMode}
-                    />
-                  </button>
-                ))}
+                    {showAllFilters ? (
+                      <>
+                        <ChevronUp size={12} className="group-hover:-translate-y-0.5 transition-transform" />
+                        Ver menos filtros
+                      </>
+                    ) : (
+                      <>
+                        <Filter size={10} />
+                        Ver {allAvailableTechs.length - INITIAL_FILTERS_COUNT} filtros más
+                      </>
+                    )}
+                  </motion.button>
+                )}
               </motion.div>
             </div>
         </div>

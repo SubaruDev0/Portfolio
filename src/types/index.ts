@@ -5,6 +5,7 @@ export interface Project {
   title: string;
   description: string;
   category: ProjectCategory;
+  secondaryCategory?: ProjectCategory | null; // Segunda categoría opcional
   technologies: string[];
   githubUrl?: string;
   liveUrl?: string;

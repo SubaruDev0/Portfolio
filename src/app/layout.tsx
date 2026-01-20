@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const mono = JetBrains_Mono({
-  variable: "--font-mono",
   subsets: ["latin"],
 });
 
@@ -24,8 +19,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        {/* Cascadia Code PL desde CDN */}
+        <link 
+          href="https://cdn.jsdelivr.net/npm/@fontsource/cascadia-code@4.2.1/index.min.css" 
+          rel="stylesheet" 
+        />
+      </head>
       <body
-        className={`${inter.variable} ${mono.variable} antialiased font-sans`}
+        className={`${inter.variable} antialiased`}
       >
         {children}
       </body>

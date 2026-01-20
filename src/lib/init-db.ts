@@ -12,6 +12,7 @@ export async function initDatabase() {
         title TEXT NOT NULL,
         description TEXT,
         category TEXT,
+        secondary_category TEXT,
         technologies TEXT[],
         github_url TEXT,
         live_url TEXT,
@@ -61,7 +62,8 @@ export async function initDatabase() {
     try {
       await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`;
       await sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`;
-      console.log('Migration: sort_order columns added.');
+      await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS secondary_category TEXT`;
+      console.log('Migration: sort_order and secondary_category columns added.');
     } catch (e) {
       console.log('Migration info:', e);
     }

@@ -10,6 +10,7 @@ export async function getProjects(): Promise<Project[]> {
         title, 
         description, 
         category, 
+        secondary_category as "secondaryCategory",
         technologies, 
         github_url as "githubUrl", 
         live_url as "liveUrl", 
@@ -30,20 +31,35 @@ export async function getProjects(): Promise<Project[]> {
       return [];
     }
     
-    // Si falta la columna sort_order, intentamos la consulta vieja como fallback
-    if (error.message?.includes('column "sort_order" does not exist')) {
-      console.log('Columna "sort_order" no existe, usando fallback...');
-      const fallbackResult = await sql`
-        SELECT 
-          id, title, description, category, technologies, 
-          github_url as "githubUrl", live_url as "liveUrl", 
-          image_url as "imageUrl", gallery, featured, 
-          is_starred as "isStarred", is_real_world as "isRealWorld", 
-          created_at as "createdAt"
-        FROM projects 
-        ORDER BY created_at DESC
-      `;
-      return fallbackResult as unknown as Project[];
+    // Si falta la columna sort_order o secondary_category, intentamos fallback
+    if (error.message?.includes('column') && error.message?.includes('does not exist')) {
+      console.log('Columna faltante, usando fallback...');
+      try {
+        const fallbackResult = await sql`
+          SELECT 
+            id, title, description, category, technologies, 
+            github_url as "githubUrl", live_url as "liveUrl", 
+            image_url as "imageUrl", gallery, featured, 
+            is_starred as "isStarred", is_real_world as "isRealWorld", 
+            sort_order as "sortOrder",
+            created_at as "createdAt"
+          FROM projects 
+          ORDER BY sort_order ASC, created_at DESC
+        `;
+        return fallbackResult as unknown as Project[];
+      } catch {
+        const basicFallback = await sql`
+          SELECT 
+            id, title, description, category, technologies, 
+            github_url as "githubUrl", live_url as "liveUrl", 
+            image_url as "imageUrl", gallery, featured, 
+            is_starred as "isStarred", is_real_world as "isRealWorld", 
+            created_at as "createdAt"
+          FROM projects 
+          ORDER BY created_at DESC
+        `;
+        return basicFallback as unknown as Project[];
+      }
     }
     
     throw error;

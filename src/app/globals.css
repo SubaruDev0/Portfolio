@@ -9,12 +9,13 @@ html {
 :root {
   --background: #050505;
   --foreground: #ffffff;
+  --font-cascadia: 'Cascadia Code', 'Cascadia Code PL', monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-cascadia), ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
   overflow-x: hidden;
 }
 

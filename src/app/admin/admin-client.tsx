@@ -40,6 +40,7 @@ export default function AdminPage({
     title: '',
     description: '',
     category: 'frontend' as ProjectCategory,
+    secondaryCategory: null as ProjectCategory | null,
     technologies: [] as string[],
     githubUrl: '',
     liveUrl: '',
@@ -235,6 +236,7 @@ export default function AdminPage({
       title: p.title,
       description: p.description,
       category: p.category,
+      secondaryCategory: p.secondaryCategory || null,
       technologies: p.technologies,
       githubUrl: p.githubUrl || '',
       liveUrl: p.liveUrl || '',
@@ -357,6 +359,7 @@ export default function AdminPage({
         title: '',
         description: '',
         category: 'frontend',
+        secondaryCategory: null,
         technologies: [],
         githubUrl: '',
         liveUrl: '',
@@ -512,7 +515,7 @@ export default function AdminPage({
                   <button 
                     onClick={() => {
                       setEditingId(null);
-                      setProject({ title: '', description: '', category: 'frontend', technologies: [], githubUrl: '', liveUrl: '', imageUrl: '', gallery: [], isStarred: false, isRealWorld: false });
+                      setProject({ title: '', description: '', category: 'frontend', secondaryCategory: null, technologies: [], githubUrl: '', liveUrl: '', imageUrl: '', gallery: [], isStarred: false, isRealWorld: false });
                     }}
                     className="text-[10px] font-bold text-gray-500 hover:text-white transition-colors"
                   >
@@ -528,7 +531,7 @@ export default function AdminPage({
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Categoría</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Categoría Principal</label>
                     <div className="relative">
                       <select className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-xs appearance-none cursor-pointer" value={project.category} onChange={e => setProject({...project, category: e.target.value as ProjectCategory})}>
                         <option value="frontend">Front-end</option>
@@ -543,13 +546,36 @@ export default function AdminPage({
                     </div>
                   </div>
                   <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">2da Categoría <span className="text-gray-700">(opcional)</span></label>
+                    <div className="relative">
+                      <select 
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-xs appearance-none cursor-pointer" 
+                        value={project.secondaryCategory || ''} 
+                        onChange={e => setProject({...project, secondaryCategory: e.target.value ? e.target.value as ProjectCategory : null})}
+                      >
+                        <option value="">Sin 2da categoría</option>
+                        <option value="frontend" disabled={project.category === 'frontend'}>Front-end</option>
+                        <option value="backend" disabled={project.category === 'backend'}>Back-end</option>
+                        <option value="fullstack" disabled={project.category === 'fullstack'}>Full-stack</option>
+                        <option value="research" disabled={project.category === 'research'}>Research</option>
+                        <option value="other" disabled={project.category === 'other'}>Other</option>
+                      </select>
+                      {project.secondaryCategory && (
+                        <div className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none scale-75">
+                          <TechBadge name={project.secondaryCategory} showName={false} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
                     <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Miniatura Principal</label>
                     <label className="flex w-full bg-white/5 border border-white/10 p-3 rounded-xl hover:bg-white/10 cursor-pointer transition-colors items-center justify-center gap-2 text-xs text-gray-400 overflow-hidden">
                       <FileUp size={16} className={isUploading ? "animate-bounce" : ""} />
                       <span className="truncate">{project.imageUrl ? 'Imagen lista' : 'Subir archivo'}</span>
                       <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, false)} disabled={isUploading} />
                     </label>
-                  </div>
                 </div>
 
                 <div>
@@ -746,36 +772,47 @@ export default function AdminPage({
           </h2>
           <div className="space-y-4 overflow-y-auto pr-4 custom-scrollbar">
             {activeTab === 'projects' && (
-              <Reorder.Group axis="y" values={localProjects} onReorder={(items) => handleDragReorder('projects', items)} className="space-y-4">
+              <Reorder.Group axis="y" values={localProjects} onReorder={(items) => handleDragReorder('projects', items)} className="space-y-3">
                 <AnimatePresence mode="popLayout">
-                  {localProjects.map(p => (
+                  {localProjects.map((p, index) => (
                     <Reorder.Item 
                       key={p.id} 
                       value={p}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="flex items-center justify-between p-4 bg-black/30 border border-white/5 rounded-2xl hover:border-white/10 transition-all group cursor-grab active:cursor-grabbing"
+                      whileDrag={{ 
+                        scale: 1.02, 
+                        boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)",
+                        zIndex: 50,
+                        cursor: "grabbing"
+                      }}
+                      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                      className="flex items-center justify-between p-4 bg-black/30 border border-white/5 rounded-2xl hover:border-white/20 hover:bg-white/5 transition-all group cursor-grab active:cursor-grabbing select-none"
                     >
-                      <div className="flex items-center gap-4 overflow-hidden pointer-events-none select-none">
-                        <div className="text-gray-700 group-hover:text-white transition-colors">
-                          <GripVertical size={18} />
+                      <div className="flex items-center gap-4 overflow-hidden">
+                        <div className="flex flex-col items-center gap-1">
+                          <span className="text-[9px] font-bold text-gray-600 tabular-nums">#{index + 1}</span>
+                          <div className="text-gray-600 group-hover:text-cyan-400 transition-colors p-1 rounded hover:bg-white/10">
+                            <GripVertical size={18} />
+                          </div>
                         </div>
-                        <div className="w-12 h-12 rounded-xl border border-white/10 overflow-hidden flex-shrink-0">
-                          <img src={p.imageUrl} className="w-full h-full object-cover" />
+                        <div className="w-14 h-14 rounded-xl border border-white/10 overflow-hidden flex-shrink-0 bg-black/50">
+                          {p.imageUrl && <img src={p.imageUrl} className="w-full h-full object-cover" />}
                         </div>
                         <div className="truncate">
-                          <h3 className="text-xs font-bold text-white uppercase tracking-tight truncate">{p.title}</h3>
+                          <h3 className="text-xs font-bold text-white uppercase tracking-tight truncate max-w-[200px]">{p.title}</h3>
                           <div className="flex items-center gap-2 mt-1">
                             <p className="text-[9px] text-gray-600 uppercase font-mono">{p.category}</p>
+                            {p.secondaryCategory && <p className="text-[9px] text-gray-700 uppercase font-mono">+ {p.secondaryCategory}</p>}
                             {p.isStarred && <Star size={10} className="text-yellow-500 fill-yellow-500" />}
                             {p.isRealWorld && <Briefcase size={10} className="text-emerald-500" />}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <button onClick={() => startEditProject(p)} className="p-3 text-gray-700 hover:text-yellow-500 hover:bg-yellow-500/10 rounded-xl transition-all" title="Editar"><Pencil size={16} /></button>
-                        <button onClick={() => handleDelete(p.id, p.title)} className="p-3 text-gray-700 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"><Trash2 size={16} /></button>
+                      <div className="flex items-center gap-1 pointer-events-auto">
+                        <button onClick={(e) => { e.stopPropagation(); startEditProject(p); }} className="p-3 text-gray-700 hover:text-yellow-500 hover:bg-yellow-500/10 rounded-xl transition-all" title="Editar"><Pencil size={16} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDelete(p.id, p.title); }} className="p-3 text-gray-700 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"><Trash2 size={16} /></button>
                       </div>
                     </Reorder.Item>
                   ))}
