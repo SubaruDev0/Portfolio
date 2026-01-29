@@ -1,14 +1,15 @@
 'use server'
 
 import { Project, Certificate } from '@/types';
-import { sql } from '@/lib/db';
+import { getSql } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { put, del } from '@vercel/blob';
 
 // AUTHENTICATION
 export async function verifyAdminAction(password: string) {
   try {
-    const result = await sql`SELECT password_hash FROM admin_auth WHERE id = 'admin_secret' LIMIT 1`;
+    const sql = getSql();
+    const result = await getSql()`SELECT password_hash FROM admin_auth WHERE id = 'admin_secret' LIMIT 1`;
     if (result && result.length > 0) {
       const dbPassword = (result[0] as any).password_hash;
       // Case-insensitive comparison as requested
@@ -68,7 +69,7 @@ export async function deleteImageAction(url: string) {
 // PROJECTS
 export async function addProjectAction(project: Project) {
   try {
-    await sql`
+    await getSql()`
       INSERT INTO projects (
         id, title, description, category, secondary_category, technologies, 
         github_url, live_url, image_url, gallery, 
@@ -92,7 +93,7 @@ export async function addProjectAction(project: Project) {
 
 export async function updateProjectAction(project: Project) {
   try {
-    await sql`
+    await getSql()`
       UPDATE projects SET
         title = ${project.title},
         description = ${project.description},
@@ -119,7 +120,7 @@ export async function updateProjectAction(project: Project) {
 
 export async function deleteProjectAction(id: string) {
   try {
-    await sql`DELETE FROM projects WHERE id = ${id}`;
+    await getSql()`DELETE FROM projects WHERE id = ${id}`;
     revalidatePath('/');
     revalidatePath('/admin');
     return { success: true };
@@ -132,7 +133,7 @@ export async function deleteProjectAction(id: string) {
 // CERTIFICATES
 export async function addCertificateAction(certificate: Certificate) {
   try {
-    await sql`
+    await getSql()`
       INSERT INTO certificates (id, title, description, date, academy, image_url, sort_order)
       VALUES (
         ${certificate.id}, 
@@ -155,7 +156,7 @@ export async function addCertificateAction(certificate: Certificate) {
 
 export async function updateCertificateAction(certificate: Certificate) {
   try {
-    await sql`
+    await getSql()`
       UPDATE certificates SET
         title = ${certificate.title},
         description = ${certificate.description || ''},
@@ -175,7 +176,7 @@ export async function updateCertificateAction(certificate: Certificate) {
 
 export async function deleteCertificateAction(id: string) {
   try {
-    await sql`DELETE FROM certificates WHERE id = ${id}`;
+    await getSql()`DELETE FROM certificates WHERE id = ${id}`;
     revalidatePath('/');
     revalidatePath('/admin');
     return { success: true };
@@ -188,7 +189,7 @@ export async function deleteCertificateAction(id: string) {
 export async function updateSettingsAction(settings: Record<string, string>) {
   try {
     for (const [key, value] of Object.entries(settings)) {
-      await sql`
+      await getSql()`
         INSERT INTO portfolio_settings (key, value)
         VALUES (${key}, ${value})
         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
@@ -212,9 +213,9 @@ export async function saveOrderAction(type: 'projects' | 'certificates', ordered
     // Para mejorar performance, podríamos usar una sola query pero con subaru esto es más seguro
     for (let i = 0; i < orderedIds.length; i++) {
         if (isProjects) {
-            await sql`UPDATE projects SET sort_order = ${i} WHERE id = ${orderedIds[i]}`;
+            await getSql()`UPDATE projects SET sort_order = ${i} WHERE id = ${orderedIds[i]}`;
         } else {
-            await sql`UPDATE certificates SET sort_order = ${i} WHERE id = ${orderedIds[i]}`;
+            await getSql()`UPDATE certificates SET sort_order = ${i} WHERE id = ${orderedIds[i]}`;
         }
     }
     
@@ -230,19 +231,19 @@ export async function saveOrderAction(type: 'projects' | 'certificates', ordered
 export async function reorderAction(type: 'projects' | 'certificates', id: string, direction: 'up' | 'down') {
   try {
     const isProjects = type === 'projects';
-    const items = isProjects 
-      ? await sql`SELECT id, sort_order FROM projects ORDER BY sort_order ASC, created_at DESC`
-      : await sql`SELECT id, sort_order FROM certificates ORDER BY sort_order ASC, date DESC`;
+    const items = (isProjects
+      ? await getSql()`SELECT id, sort_order FROM projects ORDER BY sort_order ASC, created_at DESC`
+      : await getSql()`SELECT id, sort_order FROM certificates ORDER BY sort_order ASC, date DESC`) as { id: string; sort_order: number }[];
     
     // Normalize sort_order if they are all 0 or duplicates
     let normalized = false;
-    const orders = new Set(items.map(i => i.sort_order));
+  const orders = new Set(items.map((i) => i.sort_order));
     if (orders.size < items.length) {
       for (let i = 0; i < items.length; i++) {
         if (isProjects) {
-          await sql`UPDATE projects SET sort_order = ${i} WHERE id = ${items[i].id}`;
+          await getSql()`UPDATE projects SET sort_order = ${i} WHERE id = ${items[i].id}`;
         } else {
-          await sql`UPDATE certificates SET sort_order = ${i} WHERE id = ${items[i].id}`;
+          await getSql()`UPDATE certificates SET sort_order = ${i} WHERE id = ${items[i].id}`;
         }
         items[i].sort_order = i;
       }
@@ -259,11 +260,11 @@ export async function reorderAction(type: 'projects' | 'certificates', id: strin
     const targetItem = items[targetIndex];
 
     if (isProjects) {
-      await sql`UPDATE projects SET sort_order = ${targetItem.sort_order} WHERE id = ${currentItem.id}`;
-      await sql`UPDATE projects SET sort_order = ${currentItem.sort_order} WHERE id = ${targetItem.id}`;
+      await getSql()`UPDATE projects SET sort_order = ${targetItem.sort_order} WHERE id = ${currentItem.id}`;
+      await getSql()`UPDATE projects SET sort_order = ${currentItem.sort_order} WHERE id = ${targetItem.id}`;
     } else {
-      await sql`UPDATE certificates SET sort_order = ${targetItem.sort_order} WHERE id = ${currentItem.id}`;
-      await sql`UPDATE certificates SET sort_order = ${currentItem.sort_order} WHERE id = ${targetItem.id}`;
+      await getSql()`UPDATE certificates SET sort_order = ${targetItem.sort_order} WHERE id = ${currentItem.id}`;
+      await getSql()`UPDATE certificates SET sort_order = ${currentItem.sort_order} WHERE id = ${targetItem.id}`;
     }
 
     revalidatePath('/');

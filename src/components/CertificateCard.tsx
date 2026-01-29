@@ -24,7 +24,7 @@ export default function CertificateCard({ certificate, themeColor, onSelect, isD
         onMouseLeave={() => setIsHovered(false)}
         whileHover={{ y: -5 }}
         whileTap={{ scale: 0.98 }}
-        className="min-w-[300px] md:min-w-[380px] snap-start group cursor-pointer w-full flex"
+        className="certificate-card min-w-[300px] md:min-w-[380px] snap-start group cursor-pointer w-full flex"
       >
         <div className={`border rounded-3xl p-6 transition-all w-full flex flex-col min-h-[420px] ${
           isDarkMode 

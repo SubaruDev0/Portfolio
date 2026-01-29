@@ -31,7 +31,7 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
         onClick={() => onSelect?.(project)}
         whileHover={{ y: -12, scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className={`group relative border rounded-3xl overflow-hidden transition-all duration-500 cursor-pointer ${className} ${
+        className={`project-card group relative border rounded-3xl overflow-hidden transition-all duration-500 cursor-pointer ${className} ${
           isDarkMode 
             ? 'bg-[#0a0a0a] border-white/10 hover:border-white/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]' 
             : 'bg-white border-black/5 hover:border-black/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)]'

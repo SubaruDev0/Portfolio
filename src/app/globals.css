@@ -1,3 +1,6 @@
+/* Import Audiowide and Poppins for headings and cards */
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Poppins:wght@300;400;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,14 +12,47 @@ html {
 :root {
   --background: #050505;
   --foreground: #ffffff;
-  --font-cascadia: 'Cascadia Code', 'Cascadia Code PL', monospace;
+  --font-heading: 'Audiowide', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Helvetica", sans-serif;
+  --font-card: 'Poppins', var(--font-body);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-cascadia), ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-body);
   overflow-x: hidden;
+}
+
+/* Preserve monospace for code blocks explicitly if needed */
+code, pre, kbd, samp {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, "Roboto Mono", "Segoe UI Mono", monospace;
+}
+
+/* Use Audiowide for headings and brand elements to keep display style */
+h1, h2, h3, h4, h5, h6,
+.site-title, .brand, .logo-text {
+  font-family: var(--font-heading) !important;
+}
+
+/* Use Poppins (casual, legible) for project and certificate cards */
+.project-card, .certificate-card {
+  /* Apply card-specific font to all text inside cards */
+  font-family: var(--font-card) !important;
+}
+
+/* Ensure paragraphs and small text inside cards are lighter for legibility */
+.project-card p, .certificate-card p,
+.project-card .text-sm, .certificate-card .text-sm {
+  font-family: var(--font-card) !important;
+  font-weight: 300;
+}
+
+/* Use card font for card headings (override global heading rule) */
+.project-card h1, .project-card h2, .project-card h3,
+.certificate-card h1, .certificate-card h2, .certificate-card h3 {
+  font-family: var(--font-card) !important;
+  font-weight: 600;
 }
 
 .grid-bg {

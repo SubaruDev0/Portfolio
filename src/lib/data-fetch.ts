@@ -3,6 +3,11 @@ import { sql } from './db';
 import { Project, Certificate } from '@/types';
 
 export async function getProjects(): Promise<Project[]> {
+  if (!sql) {
+    console.log('DATABASE_URL not configured, returning empty projects array');
+    return [];
+  }
+  
   try {
     const result = await sql`
       SELECT 
@@ -67,6 +72,11 @@ export async function getProjects(): Promise<Project[]> {
 }
 
 export async function getCertificates(): Promise<Certificate[]> {
+  if (!sql) {
+    console.log('DATABASE_URL not configured, returning empty certificates array');
+    return [];
+  }
+  
   try {
     const result = await sql`
       SELECT 
@@ -95,6 +105,11 @@ export async function getCertificates(): Promise<Certificate[]> {
 }
 
 export async function getPortfolioSettings(): Promise<Record<string, string>> {
+  if (!sql) {
+    console.log('DATABASE_URL not configured, returning empty settings');
+    return {};
+  }
+  
   try {
     const result = await sql`SELECT key, value FROM portfolio_settings`;
     const settings: Record<string, string> = {};

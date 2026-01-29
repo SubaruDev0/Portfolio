@@ -1,12 +1,12 @@
 
-import { sql } from './db';
+import { getSql } from './db';
 
 export async function initDatabase() {
   try {
     console.log('Initializing database...');
 
     // Create projects table
-    await sql`
+    await getSql()`
       CREATE TABLE IF NOT EXISTS projects (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
@@ -27,7 +27,7 @@ export async function initDatabase() {
     `;
 
     // Create certificates table
-    await sql`
+    await getSql()`
       CREATE TABLE IF NOT EXISTS certificates (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
@@ -40,7 +40,7 @@ export async function initDatabase() {
     `;
 
     // Create portfolio settings table
-    await sql`
+    await getSql()`
       CREATE TABLE IF NOT EXISTS portfolio_settings (
         key TEXT PRIMARY KEY,
         value TEXT
@@ -48,7 +48,7 @@ export async function initDatabase() {
     `;
 
     // Create admin_auth table
-    await sql`
+    await getSql()`
       CREATE TABLE IF NOT EXISTS admin_auth (
         id TEXT PRIMARY KEY DEFAULT 'admin_secret',
         password_hash TEXT NOT NULL,
@@ -60,9 +60,9 @@ export async function initDatabase() {
 
     // Add sort_order column to existing tables if it doesn't exist
     try {
-      await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`;
-      await sql`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`;
-      await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS secondary_category TEXT`;
+      await getSql()`ALTER TABLE projects ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`;
+      await getSql()`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`;
+      await getSql()`ALTER TABLE projects ADD COLUMN IF NOT EXISTS secondary_category TEXT`;
       console.log('Migration: sort_order and secondary_category columns added.');
     } catch (e) {
       console.log('Migration info:', e);
@@ -70,7 +70,7 @@ export async function initDatabase() {
 
     // Initialize admin password if not exists (Mabel#zer0)
     // Note: In a real app we should hash this, but we'll use literal for now as per user request context
-    await sql`
+    await getSql()`
       INSERT INTO admin_auth (id, password_hash)
       VALUES ('admin_secret', 'Mabel#zer0')
       ON CONFLICT (id) DO NOTHING

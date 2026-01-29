@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import React from 'react';
 import "./globals.css";
 
 const inter = Inter({
@@ -10,6 +11,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "SubaruDev // Portfolio",
   description: "Portafolio profesional de Javier Sebastián Morales Subaru - Ingeniero Civil Informático",
+  icons: {
+    icon: '/logos/sd-icon.png',
+    shortcut: '/logos/sd-icon.png',
+    apple: '/logos/sd-icon.png',
+  },
 };
 
 export default function RootLayout({
@@ -20,11 +26,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        {/* Cascadia Code PL desde CDN */}
-        <link 
-          href="https://cdn.jsdelivr.net/npm/@fontsource/cascadia-code@4.2.1/index.min.css" 
-          rel="stylesheet" 
-        />
+        {/* Removed Cascadia Code import to use Audiowide globally */}
+        {/* Favicon personalizado (archivo en public/logos/sd-icon.png) */}
+        <link rel="icon" href="/logos/sd-icon.png" />
       </head>
       <body
         className={`${inter.variable} antialiased`}
