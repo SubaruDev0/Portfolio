@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Sitemap: https://subarudev.com/sitemap.xml
+
+# Crawl-delay: 10
+# If you want to block specific paths, add Disallow directives below
+# Disallow: /admin
