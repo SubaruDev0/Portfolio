@@ -20,13 +20,13 @@ export default function Navbar({ themeColor, onOpenCV, isDarkMode = true }: Navb
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <Link
           href="/"
-          className="text-xl font-bold tracking-tighter flex items-center gap-2 group"
+          className="text-sm md:text-xl font-bold tracking-tighter flex items-center gap-2 group"
           style={{ color: isDarkMode ? 'white' : 'black' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
           onMouseLeave={(e) => (e.currentTarget.style.color = isDarkMode ? 'white' : 'black')}
         >
           <div
-            className={`relative w-20 h-10 flex items-center justify-center overflow-visible rounded-sm transition-all duration-500 bg-transparent`}
+            className={`relative w-12 h-12 md:w-20 md:h-10 flex items-center justify-center overflow-visible rounded-sm transition-all duration-500 bg-transparent`}
           >
             {/* Contenedor absoluto para que el SVG pueda crecer sin empujar el layout */}
             <div
@@ -35,7 +35,7 @@ export default function Navbar({ themeColor, onOpenCV, isDarkMode = true }: Navb
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 2048 959"
-                className="w-14 h-14 object-contain transform transition-transform duration-300"
+                className="w-10 h-10 md:w-14 md:h-14 object-contain transform transition-transform duration-300"
                 // Forzar fill vía style para que el logo herede `currentColor` y
                 // activar pointer-events sólo donde el SVG está pintado
                 style={{ fill: 'currentColor', pointerEvents: 'visiblePainted' }}
@@ -61,7 +61,7 @@ export default function Navbar({ themeColor, onOpenCV, isDarkMode = true }: Navb
                 />
             </div>
           </div>
-          <span className={`transition-all duration-500 logo-text text-current`}>SubaruDev</span>
+          <span className={`transition-all duration-500 logo-text text-current text-sm md:text-xl truncate`}>SubaruDev</span>
         </Link>
         
         <div className={`hidden md:flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em] ${isDarkMode ? 'text-gray-400' : 'text-slate-900'}`}>

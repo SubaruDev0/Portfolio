@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SubaruDev // Portfolio",
+  title: "SubaruDev - Portfolio",
   description: "Portafolio profesional de Javier Sebastián Morales Subaru - Ingeniero Civil Informático",
   icons: {
     icon: '/logos/sd-icon.png',
