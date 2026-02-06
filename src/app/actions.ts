@@ -9,42 +9,35 @@ import { put, del } from '@vercel/blob';
 export async function verifyAdminAction(password: string) {
   try {
     const sql = getSql();
-    const result = await getSql()`SELECT password_hash FROM admin_auth WHERE id = 'admin_secret' LIMIT 1`;
+    const result = await sql`SELECT password_hash FROM admin_auth WHERE id = 'admin_secret' LIMIT 1`;
     if (result && result.length > 0) {
       const dbPassword = (result[0] as any).password_hash;
-      // Case-insensitive comparison as requested
       const isMatch = dbPassword.toLowerCase() === password.toLowerCase();
       return { success: isMatch };
     }
-    // Fallback if DB is empty or table doesn't exist yet
-    // This allows initial access to run migrations
     const fallbackPassword = 'Mabel#zer0'; 
     return { success: password.toLowerCase() === fallbackPassword.toLowerCase() || password.toLowerCase() === 'mabel123' };
   } catch (error) {
     console.error('Auth error:', error);
-    // Even if query fails (table not exists), allow the owner to enter and initialize
     return { success: password.toLowerCase() === 'mabel#zer0' || password.toLowerCase() === 'mabel123' };
   }
 }
 
-// Image Upload - Upload to Vercel Blob Storage
+// Image Upload
 export async function uploadImageAction(formData: FormData) {
   try {
     const file = formData.get('file') as File;
     if (!file) throw new Error('No file provided');
 
-    // Generate unique filename
     const timestamp = Date.now();
     const extension = file.name.split('.').pop() || 'png';
     const filename = `portfolio/${timestamp}-${Math.random().toString(36).substring(7)}.${extension}`;
 
-    // Upload to Vercel Blob
     const blob = await put(filename, file, {
       access: 'public',
       addRandomSuffix: false,
     });
 
-    // Return the public URL
     return { success: true, url: blob.url };
   } catch (error) {
     console.error('Upload error:', error);
@@ -52,10 +45,8 @@ export async function uploadImageAction(formData: FormData) {
   }
 }
 
-// Delete image from Vercel Blob (optional cleanup)
 export async function deleteImageAction(url: string) {
   try {
-    // Only delete if it's a Vercel Blob URL (not base64)
     if (url && url.includes('blob.vercel-storage.com')) {
       await del(url);
     }
@@ -188,8 +179,9 @@ export async function deleteCertificateAction(id: string) {
 
 export async function updateSettingsAction(settings: Record<string, string>) {
   try {
+    const sql = getSql();
     for (const [key, value] of Object.entries(settings)) {
-      await getSql()`
+      await sql`
         INSERT INTO portfolio_settings (key, value)
         VALUES (${key}, ${value})
         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
@@ -206,19 +198,18 @@ export async function updateSettingsAction(settings: Record<string, string>) {
 
 export async function saveOrderAction(type: 'projects' | 'certificates', orderedIds: string[]) {
   try {
+    const sql = getSql();
     const isProjects = type === 'projects';
-    const tableName = isProjects ? 'projects' : 'certificates';
     
-    // Usamos transacciones implícitas de Postgres simplemente ejecutando los updates
-    // Para mejorar performance, podríamos usar una sola query pero con subaru esto es más seguro
     for (let i = 0; i < orderedIds.length; i++) {
         if (isProjects) {
-            await getSql()`UPDATE projects SET sort_order = ${i} WHERE id = ${orderedIds[i]}`;
+            await sql`UPDATE projects SET sort_order = ${i} WHERE id = ${orderedIds[i]}`;
         } else {
-            await getSql()`UPDATE certificates SET sort_order = ${i} WHERE id = ${orderedIds[i]}`;
+            await sql`UPDATE certificates SET sort_order = ${i} WHERE id = ${orderedIds[i]}`;
         }
     }
     
+    // REVALIDAR SOLO AL FINAL DEL BUCLE
     revalidatePath('/');
     revalidatePath('/admin');
     return { success: true };
@@ -230,24 +221,22 @@ export async function saveOrderAction(type: 'projects' | 'certificates', ordered
 
 export async function reorderAction(type: 'projects' | 'certificates', id: string, direction: 'up' | 'down') {
   try {
+    const sql = getSql();
     const isProjects = type === 'projects';
     const items = (isProjects
-      ? await getSql()`SELECT id, sort_order FROM projects ORDER BY sort_order ASC, created_at DESC`
-      : await getSql()`SELECT id, sort_order FROM certificates ORDER BY sort_order ASC, date DESC`) as { id: string; sort_order: number }[];
+      ? await sql`SELECT id, sort_order FROM projects ORDER BY sort_order ASC, created_at DESC`
+      : await sql`SELECT id, sort_order FROM certificates ORDER BY sort_order ASC, date DESC`) as { id: string; sort_order: number }[];
     
-    // Normalize sort_order if they are all 0 or duplicates
-    let normalized = false;
-  const orders = new Set(items.map((i) => i.sort_order));
+    const orders = new Set(items.map((i) => i.sort_order));
     if (orders.size < items.length) {
       for (let i = 0; i < items.length; i++) {
         if (isProjects) {
-          await getSql()`UPDATE projects SET sort_order = ${i} WHERE id = ${items[i].id}`;
+          await sql`UPDATE projects SET sort_order = ${i} WHERE id = ${items[i].id}`;
         } else {
-          await getSql()`UPDATE certificates SET sort_order = ${i} WHERE id = ${items[i].id}`;
+          await sql`UPDATE certificates SET sort_order = ${i} WHERE id = ${items[i].id}`;
         }
         items[i].sort_order = i;
       }
-      normalized = true;
     }
 
     const index = items.findIndex(item => item.id === id);
@@ -260,11 +249,11 @@ export async function reorderAction(type: 'projects' | 'certificates', id: strin
     const targetItem = items[targetIndex];
 
     if (isProjects) {
-      await getSql()`UPDATE projects SET sort_order = ${targetItem.sort_order} WHERE id = ${currentItem.id}`;
-      await getSql()`UPDATE projects SET sort_order = ${currentItem.sort_order} WHERE id = ${targetItem.id}`;
+      await sql`UPDATE projects SET sort_order = ${targetItem.sort_order} WHERE id = ${currentItem.id}`;
+      await sql`UPDATE projects SET sort_order = ${currentItem.sort_order} WHERE id = ${targetItem.id}`;
     } else {
-      await getSql()`UPDATE certificates SET sort_order = ${targetItem.sort_order} WHERE id = ${currentItem.id}`;
-      await getSql()`UPDATE certificates SET sort_order = ${currentItem.sort_order} WHERE id = ${targetItem.id}`;
+      await sql`UPDATE certificates SET sort_order = ${targetItem.sort_order} WHERE id = ${currentItem.id}`;
+      await sql`UPDATE certificates SET sort_order = ${currentItem.sort_order} WHERE id = ${targetItem.id}`;
     }
 
     revalidatePath('/');
