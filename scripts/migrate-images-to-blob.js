@@ -11,8 +11,16 @@
 const { neon } = require('@neondatabase/serverless');
 const { put } = require('@vercel/blob');
 
-// Load environment variables
-require('dotenv').config({ path: '.env.local' });
+// Load environment variables (.env.local preferred, fallback to .env)
+const fs = require('fs');
+const dotenv = require('dotenv');
+if (fs.existsSync('.env.local')) {
+  dotenv.config({ path: '.env.local' });
+} else if (fs.existsSync('.env')) {
+  dotenv.config({ path: '.env' });
+} else {
+  dotenv.config();
+}
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const BLOB_TOKEN = process.env.BLOB_READ_WRITE_TOKEN;

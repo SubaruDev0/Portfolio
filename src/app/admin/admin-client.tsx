@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/Navbar';
 import { ProjectCategory, Project, Certificate } from '@/types';
 import { Plus, Github, Link as LinkIcon, Save, Image as ImageIcon, Lock, X, Search, FileUp, Star, Briefcase, Award, ChevronUp, ChevronDown, Eye, EyeOff, Pencil, Database, LogIn, MoveVertical, GripVertical } from 'lucide-react';
-import { addProjectAction, deleteProjectAction, uploadImageAction, addCertificateAction, deleteCertificateAction, reorderAction, updateProjectAction, updateCertificateAction, runMigration, updateSettingsAction, verifyAdminAction, saveOrderAction } from '@/app/actions';
+import { addProjectAction, deleteProjectAction, uploadImageAction, addCertificateAction, deleteCertificateAction, reorderAction, updateProjectAction, updateCertificateAction, runMigration, updateSettingsAction, verifyAdminAction, saveOrderAction, deleteImageAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { Trash2, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
 import TechBadge from '@/components/TechBadge';
@@ -144,8 +144,15 @@ export default function AdminPage({
     let file = e.target.files?.[0];
     if (!file) return;
 
+    // Prevent too many gallery images
+    const MAX_GALLERY = 12;
+    if (isGallery && project.gallery.length >= MAX_GALLERY) {
+      alert(`Has alcanzado el máximo de imágenes en la galería (${MAX_GALLERY}). Elimina alguna antes de añadir más.`);
+      return;
+    }
+
     setIsUploading(true);
-    
+    const prevMain = project.imageUrl;
     // Si es una imagen pesada, la comprimimos
     if (file.type.startsWith('image/') && file.size > 200 * 1024) {
       try {
@@ -162,6 +169,11 @@ export default function AdminPage({
     setIsUploading(false);
 
     if (result.success && result.url) {
+      // Si hemos subido correctamente y existía una imagen previa en el proyecto, la eliminamos del blob (si aplica)
+      if (!isGallery && prevMain && prevMain.includes('blob.vercel-storage.com') && prevMain !== result.url) {
+        try { await deleteImageAction(prevMain); } catch (err) { console.error('Error borrando imagen previa:', err); }
+      }
+
       if (activeTab === 'settings') {
         setSettings({ ...settings, cv_url: result.url });
       } else if (activeTab === 'certificates') {
@@ -584,7 +596,23 @@ export default function AdminPage({
                     {project.gallery.map((img, i) => (
                       <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-white/10 group bg-black/50">
                         <img src={img} className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity" />
-                        <button type="button" onClick={() => setProject({...project, gallery: project.gallery.filter((_, idx) => idx !== i)})} className="absolute inset-0 bg-red-500/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white"><Trash2 size={16} /></button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            // Borrar blob en Vercel si aplica y actualizar estado local
+                            try {
+                              if (img && img.includes('blob.vercel-storage.com')) {
+                                await deleteImageAction(img);
+                              }
+                            } catch (err) {
+                              console.error('Error borrando imagen de galería:', err);
+                            }
+                            setProject({ ...project, gallery: project.gallery.filter((_, idx) => idx !== i) });
+                          }}
+                          className="absolute inset-0 bg-red-500/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     ))}
                     <label className="aspect-square bg-white/5 border border-white/10 border-dashed rounded-lg hover:bg-white/10 cursor-pointer transition-colors flex flex-col items-center justify-center text-gray-500"><Plus size={20} /><input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileUpload(e, true)} disabled={isUploading} /></label>

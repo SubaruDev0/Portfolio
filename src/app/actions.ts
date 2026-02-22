@@ -29,9 +29,18 @@ export async function uploadImageAction(formData: FormData) {
     const file = formData.get('file') as File;
     if (!file) throw new Error('No file provided');
 
-    const timestamp = Date.now();
-    const extension = file.name.split('.').pop() || 'png';
-    const filename = `portfolio/${timestamp}-${Math.random().toString(36).substring(7)}.${extension}`;
+    // Server-side validation: only accept images and limit size to 5MB
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      return { success: false, error: `File too large. Max allowed size is ${maxSize} bytes.` };
+    }
+    if (!file.type || !file.type.startsWith('image/')) {
+      return { success: false, error: 'Invalid file type. Only images are allowed.' };
+    }
+
+  const timestamp = Date.now();
+  const extension = file.name.split('.').pop() || 'png';
+  const filename = `portfolio/${timestamp}-${Math.random().toString(36).substring(7)}.${extension}`;
 
     const blob = await put(filename, file, {
       access: 'public',
@@ -84,7 +93,12 @@ export async function addProjectAction(project: Project) {
 
 export async function updateProjectAction(project: Project) {
   try {
-    await getSql()`
+    // Primero obtener la imagen/gallería previa para eliminar blobs huérfanos si cambian
+    const sql = getSql();
+    const prev = await sql`SELECT image_url, gallery FROM projects WHERE id = ${project.id} LIMIT 1`;
+    const prevRow = (prev && prev.length > 0) ? (prev[0] as any) : null;
+
+    await sql`
       UPDATE projects SET
         title = ${project.title},
         description = ${project.description},
@@ -100,6 +114,32 @@ export async function updateProjectAction(project: Project) {
         is_real_world = ${project.isRealWorld ?? false}
       WHERE id = ${project.id}
     `;
+
+    // Si la imagen principal cambió y la previa está en Vercel Blob, eliminarla
+    if (prevRow && prevRow.image_url && prevRow.image_url !== project.imageUrl && String(prevRow.image_url).includes('blob.vercel-storage.com')) {
+      try {
+        await deleteImageAction(prevRow.image_url);
+      } catch (e) {
+        console.error('Error eliminando blob previo (main):', e);
+      }
+    }
+
+    // Para la galería, eliminar imágenes previas que no estén en la galería nueva
+    try {
+      const prevGallery: string[] = prevRow && prevRow.gallery ? prevRow.gallery : [];
+      const newGallery: string[] = project.gallery || [];
+      for (const img of prevGallery) {
+        if (img && img.includes('blob.vercel-storage.com') && !newGallery.includes(img)) {
+          try {
+            await deleteImageAction(img);
+          } catch (e) {
+            console.error('Error eliminando blob previo (gallery):', e);
+          }
+        }
+      }
+    } catch (e) {
+      // ignore gallery cleanup errors
+    }
     revalidatePath('/');
     revalidatePath('/admin');
     return { success: true };
@@ -111,7 +151,27 @@ export async function updateProjectAction(project: Project) {
 
 export async function deleteProjectAction(id: string) {
   try {
-    await getSql()`DELETE FROM projects WHERE id = ${id}`;
+    const sql = getSql();
+    // Obtener URLs asociadas para limpiar blobs en Vercel
+    try {
+      const rows = await sql`SELECT image_url, gallery FROM projects WHERE id = ${id} LIMIT 1`;
+      const row = (rows && rows.length > 0) ? (rows[0] as any) : null;
+      if (row) {
+        if (row.image_url && String(row.image_url).includes('blob.vercel-storage.com')) {
+          try { await deleteImageAction(row.image_url); } catch (e) { console.error('Error eliminando blob (main) al borrar proyecto:', e); }
+        }
+        const gallery: string[] = row.gallery || [];
+        for (const img of gallery) {
+          if (img && String(img).includes('blob.vercel-storage.com')) {
+            try { await deleteImageAction(img); } catch (e) { console.error('Error eliminando blob (gallery) al borrar proyecto:', e); }
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error obteniendo imágenes previas antes de borrar proyecto:', e);
+    }
+
+    await sql`DELETE FROM projects WHERE id = ${id}`;
     revalidatePath('/');
     revalidatePath('/admin');
     return { success: true };
@@ -147,7 +207,11 @@ export async function addCertificateAction(certificate: Certificate) {
 
 export async function updateCertificateAction(certificate: Certificate) {
   try {
-    await getSql()`
+    const sql = getSql();
+    const prev = await sql`SELECT image_url FROM certificates WHERE id = ${certificate.id} LIMIT 1`;
+    const prevRow = (prev && prev.length > 0) ? (prev[0] as any) : null;
+
+    await sql`
       UPDATE certificates SET
         title = ${certificate.title},
         description = ${certificate.description || ''},
@@ -156,6 +220,10 @@ export async function updateCertificateAction(certificate: Certificate) {
         image_url = ${certificate.imageUrl || ''}
       WHERE id = ${certificate.id}
     `;
+
+    if (prevRow && prevRow.image_url && prevRow.image_url !== certificate.imageUrl && String(prevRow.image_url).includes('blob.vercel-storage.com')) {
+      try { await deleteImageAction(prevRow.image_url); } catch (e) { console.error('Error eliminando blob previo (cert):', e); }
+    }
     revalidatePath('/');
     revalidatePath('/admin');
     return { success: true };
@@ -167,7 +235,18 @@ export async function updateCertificateAction(certificate: Certificate) {
 
 export async function deleteCertificateAction(id: string) {
   try {
-    await getSql()`DELETE FROM certificates WHERE id = ${id}`;
+    const sql = getSql();
+    try {
+      const rows = await sql`SELECT image_url FROM certificates WHERE id = ${id} LIMIT 1`;
+      const row = (rows && rows.length > 0) ? (rows[0] as any) : null;
+      if (row && row.image_url && String(row.image_url).includes('blob.vercel-storage.com')) {
+        try { await deleteImageAction(row.image_url); } catch (e) { console.error('Error eliminando blob (cert) al borrar certificado:', e); }
+      }
+    } catch (e) {
+      console.error('Error obteniendo imagen previa antes de borrar certificado:', e);
+    }
+
+    await sql`DELETE FROM certificates WHERE id = ${id}`;
     revalidatePath('/');
     revalidatePath('/admin');
     return { success: true };
