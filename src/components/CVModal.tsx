@@ -51,11 +51,11 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
         </button>
 
         {/* Preview (Left) */}
-        <div className={`w-full md:w-1/2 flex flex-col h-[400px] md:h-auto overflow-hidden transition-colors duration-700 ${isDarkMode ? 'bg-black' : 'bg-slate-50'}`}>
+        <div className={`w-full md:w-1/2 flex flex-col h-[600px] md:h-auto overflow-hidden transition-colors duration-700 ${isDarkMode ? 'bg-black' : 'bg-slate-50'}`}>
           {cvUrl ? (
             <iframe 
-              src={`${cvUrl}#toolbar=0&navpanes=0&scrollbar=0`} 
-              className="w-full h-full border-none pointer-events-none"
+              src={`${cvUrl}#toolbar=0&navpanes=0&view=FitH`} 
+              className="w-full h-full border-none"
               title="CV Preview"
               loading="lazy"
             />
