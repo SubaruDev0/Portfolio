@@ -23,24 +23,28 @@ export async function verifyAdminAction(password: string) {
   }
 }
 
-// Image Upload
-export async function uploadImageAction(formData: FormData) {
+// File Upload (Images & PDFs for CV)
+export async function uploadFileAction(formData: FormData) {
   try {
     const file = formData.get('file') as File;
     if (!file) throw new Error('No file provided');
 
-    // Server-side validation: only accept images and limit size to 5MB
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Server-side validation: accept images and PDFs, limit size to 10MB
+    const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
       return { success: false, error: `File too large. Max allowed size is ${maxSize} bytes.` };
     }
-    if (!file.type || !file.type.startsWith('image/')) {
-      return { success: false, error: 'Invalid file type. Only images are allowed.' };
+    
+    const isImage = file.type && file.type.startsWith('image/');
+    const isPDF = file.type === 'application/pdf';
+    
+    if (!isImage && !isPDF) {
+      return { success: false, error: 'Invalid file type. Only images and PDFs are allowed.' };
     }
 
-  const timestamp = Date.now();
-  const extension = file.name.split('.').pop() || 'png';
-  const filename = `portfolio/${timestamp}-${Math.random().toString(36).substring(7)}.${extension}`;
+    const timestamp = Date.now();
+    const extension = file.name.split('.').pop() || (isPDF ? 'pdf' : 'png');
+    const filename = `portfolio/${timestamp}-${Math.random().toString(36).substring(7)}.${extension}`;
 
     const blob = await put(filename, file, {
       access: 'public',

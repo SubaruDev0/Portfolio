@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Download, Mail, MessageCircle, Maximize2 } from 'lucide-react';
 
 interface CVModalProps {
@@ -13,6 +13,17 @@ interface CVModalProps {
 }
 
 export default function CVModal({ isOpen, onClose, cvUrl, description, themeColor, isDarkMode = true }: CVModalProps) {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (

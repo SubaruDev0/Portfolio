@@ -3,10 +3,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/Navbar';
 import { ProjectCategory, Project, Certificate } from '@/types';
-import { Plus, Github, Link as LinkIcon, Save, Image as ImageIcon, Lock, X, Search, FileUp, Star, Briefcase, Award, ChevronUp, ChevronDown, Eye, EyeOff, Pencil, Database, LogIn, MoveVertical, GripVertical } from 'lucide-react';
-import { addProjectAction, deleteProjectAction, uploadImageAction, addCertificateAction, deleteCertificateAction, reorderAction, updateProjectAction, updateCertificateAction, runMigration, updateSettingsAction, verifyAdminAction, saveOrderAction, deleteImageAction } from '@/app/actions';
+import { Plus, Github, Link as LinkIcon, Save, Image as ImageIcon, Lock, X, Search, FileUp, Star, Briefcase, Award, ChevronUp, ChevronDown, Eye, EyeOff, Pencil, Database, LogIn, MoveVertical, GripVertical, Trash2, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
+import { addProjectAction, deleteProjectAction, uploadFileAction, addCertificateAction, deleteCertificateAction, reorderAction, updateProjectAction, updateCertificateAction, runMigration, updateSettingsAction, verifyAdminAction, saveOrderAction, deleteImageAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
-import { Trash2, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
 import TechBadge from '@/components/TechBadge';
 import { Reorder, AnimatePresence } from 'framer-motion';
 import { clsx, type ClassValue } from 'clsx';
@@ -165,7 +164,7 @@ export default function AdminPage({
     const formData = new FormData();
     formData.append('file', file);
 
-    const result = await uploadImageAction(formData);
+    const result = await uploadFileAction(formData);
     setIsUploading(false);
 
     if (result.success && result.url) {
@@ -185,6 +184,21 @@ export default function AdminPage({
       }
     } else {
       alert('Error subiendo archivo: ' + result.error);
+    }
+  };
+
+  const handleDeleteCV = async () => {
+    if (!settings.cv_url) return;
+    if (confirm('¿Estás seguro de que quieres borrar el CV actual?')) {
+      if (settings.cv_url.includes('blob.vercel-storage.com')) {
+        try {
+          await deleteImageAction(settings.cv_url);
+        } catch (err) {
+          console.error('Error borrando archivo de storage:', err);
+        }
+      }
+      setSettings({ ...settings, cv_url: '' });
+      alert('CV eliminado de la configuración (recuerda Guardar)');
     }
   };
 
@@ -773,11 +787,21 @@ export default function AdminPage({
               <form onSubmit={handleSettingsSubmit} className="space-y-6">
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Archivo CV (PDF)</label>
-                  <label className="flex w-full bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 cursor-pointer transition-colors items-center justify-center gap-3 text-xs text-gray-500 font-bold uppercase tracking-widest overflow-hidden">
-                    <FileUp size={18} className={isUploading ? "animate-bounce" : ""} />
-                    <span className="truncate">{settings.cv_url ? "CV Cargado con éxito" : "Subir CV (PDF)"}</span>
-                    <input type="file" className="hidden" accept="application/pdf" onChange={(e) => handleFileUpload(e)} disabled={isUploading} />
-                  </label>
+                  <div className="space-y-3">
+                    <label className="flex w-full bg-white/5 border border-white/10 p-4 rounded-xl hover:bg-white/10 cursor-pointer transition-colors items-center justify-center gap-3 text-xs text-gray-500 font-bold uppercase tracking-widest overflow-hidden">
+                      <FileUp size={18} className={isUploading ? "animate-bounce" : ""} />
+                      <span className="truncate">{settings.cv_url ? "Cambiar CV" : "Subir CV (PDF)"}</span>
+                      <input type="file" className="hidden" accept="application/pdf" onChange={(e) => handleFileUpload(e)} disabled={isUploading} />
+                    </label>
+                    {settings.cv_url && (
+                      <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
+                        <span className="text-[9px] text-cyan-500 font-bold uppercase tracking-tighter truncate max-w-[200px]">CV ACTUAL: {settings.cv_url.split('/').pop()}</span>
+                        <button type="button" onClick={handleDeleteCV} className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all" title="Eliminar CV Actual">
+                           <Trash2 size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div>
