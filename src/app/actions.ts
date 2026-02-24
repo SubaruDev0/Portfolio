@@ -82,7 +82,7 @@ export async function addProjectAction(project: Project) {
         ${project.id}, ${project.title}, ${project.description}, ${project.category}, ${project.secondaryCategory || null}, ${project.technologies},
         ${project.githubUrl || ''}, ${project.liveUrl || ''}, ${project.imageUrl || ''}, ${project.gallery || []},
         ${project.featured ?? true}, ${project.isStarred ?? false}, ${project.isRealWorld ?? false},
-        COALESCE((SELECT MAX(sort_order) FROM projects), 0) + 1,
+        COALESCE((SELECT MIN(sort_order) FROM projects), 0) - 1,
         ${project.createdAt || new Date().toISOString()}
       )
     `;
@@ -197,7 +197,7 @@ export async function addCertificateAction(certificate: Certificate) {
         ${certificate.date}, 
         ${certificate.academy}, 
         ${certificate.imageUrl || ''},
-        COALESCE((SELECT MAX(sort_order) FROM certificates), 0) + 1
+        COALESCE((SELECT MIN(sort_order) FROM certificates), 0) - 1
       )
     `;
     revalidatePath('/');
