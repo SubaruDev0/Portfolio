@@ -428,7 +428,7 @@ export default function HomeClient({
         )}
       </AnimatePresence>
 
-      <section className="relative pt-32 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center">
+  <section id="inicio" className="relative pt-32 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center">
         {/* Hero Section */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

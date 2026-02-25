@@ -87,14 +87,14 @@ export default function Navbar({ themeColor, onOpenCV, onContact, isDarkMode = t
             const navItemClass = `transition-colors duration-300 uppercase text-[10px] font-black tracking-[0.2em]`;
             return (
               <>
-                <button
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                <Link
+                  href="#inicio"
                   className={`${navItemClass} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
                   onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
                   onMouseLeave={(e) => (e.currentTarget.style.color = '')}
                 >
                   Inicio
-                </button>
+                </Link>
                 <Link
                   href="#proyectos-anchor"
                   className={`${navItemClass} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
