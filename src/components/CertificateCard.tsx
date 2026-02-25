@@ -37,6 +37,8 @@ export default function CertificateCard({ certificate, themeColor, onSelect, isD
             <img 
               src={certificate.imageUrl} 
               alt={certificate.title} 
+              loading="lazy"
+              decoding="async"
               className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
                 isDarkMode ? 'opacity-60 group-hover:opacity-100' : 'opacity-90 group-hover:opacity-100'
               }`}

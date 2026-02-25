@@ -10,10 +10,145 @@ import TechBadge from '@/components/TechBadge';
 import CVModal from '@/components/CVModal';
 import ProjectModal from '@/components/ProjectModal';
 import CertificateModal from '@/components/CertificateModal';
+import ContactModal from '@/components/ContactModal';
 import { ThemeType, Project, Certificate } from '@/types';
 import { getThemeColors } from '@/utils/theme';
-import { Code2, Cpu, Globe, Database, Award, ExternalLink, Mail, MessageCircle, Github, Linkedin, ArrowRight, ArrowLeft, ArrowUp, Terminal, Pause, Play, Sun, Moon, RotateCcw, ChevronUp, Star, Filter, Bug } from 'lucide-react';
+import { Code2, Cpu, Globe, Database, Award, ExternalLink, Mail, ArrowRight, ArrowUp, Linkedin, Github, Phone, Search, X, Sun, Moon, RotateCcw, ChevronUp, Filter, Bug, ArrowLeft, Play, Pause, Terminal, MessageCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+
+// Componente de buscador con debounce
+function FilterSearch({ 
+  allTechs, 
+  selectedTechs, 
+  toggleTech, 
+  isDarkMode, 
+  themeColor 
+}: { 
+  allTechs: string[], 
+  selectedTechs: string[], 
+  toggleTech: (t: string) => void,
+  isDarkMode: boolean,
+  themeColor: string
+}) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredTechs = useMemo(() => {
+    if (!debouncedSearch) return allTechs;
+    return allTechs.filter(t => {
+      const name = t.includes(':') ? t.split(':')[0] : t;
+      return name.toLowerCase().includes(debouncedSearch.toLowerCase());
+    });
+  }, [allTechs, debouncedSearch]);
+
+  return (
+    <div ref={containerRef} className="relative w-full max-w-md mx-auto z-40">
+      <div className={`relative group transition-all duration-500 ${isOpen ? 'scale-[1.02]' : ''}`}>
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <Search size={14} className={isDarkMode ? 'text-white/20' : 'text-black/20'} />
+        </div>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            if (!isOpen) setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          placeholder="BUSCAR TECNOLOGÍA O FILTRO..."
+          className={`w-full py-3 pl-10 pr-4 rounded-2xl border text-[10px] font-black tracking-[0.2em] outline-none transition-all duration-500 uppercase placeholder:text-gray-600 ${
+            isDarkMode 
+              ? 'bg-white/5 border-white/10 text-white focus:bg-white/10 focus:border-white/20' 
+              : 'bg-black/5 border-black/5 text-slate-800 focus:bg-black/10 focus:border-black/20'
+          }`}
+          style={{ caretColor: themeColor }}
+        />
+        {searchTerm && (
+          <button 
+            onClick={() => setSearchTerm('')}
+            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-white transition-colors"
+          >
+            <X size={14} />
+          </button>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {isOpen && (debouncedSearch || filteredTechs.length > 0) && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            className={`absolute top-full left-0 right-0 mt-2 p-2 rounded-2xl border shadow-2xl backdrop-blur-2xl max-h-64 overflow-y-auto custom-scrollbar transition-colors duration-500 ${
+              isDarkMode ? 'bg-[#0a0a0a]/90 border-white/10' : 'bg-white/90 border-black/5'
+            }`}
+          >
+            {filteredTechs.length > 0 ? (
+              <div className="grid grid-cols-1 gap-1">
+                {filteredTechs.map((tech) => (
+                  <button
+                    key={tech}
+                    onClick={() => {
+                      toggleTech(tech);
+                      // Opcional: mantener abierto o cerrar
+                    }}
+                    className={`flex items-center justify-between w-full p-2.5 rounded-xl transition-all group ${
+                      selectedTechs.includes(tech)
+                        ? (isDarkMode ? 'bg-white/10' : 'bg-black/5')
+                        : (isDarkMode ? 'hover:bg-white/5' : 'hover:bg-black/5')
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <TechBadge 
+                        name={tech} 
+                        showName={false} 
+                        isDarkMode={isDarkMode} 
+                        className="scale-90"
+                      />
+                      <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${
+                        selectedTechs.includes(tech) 
+                          ? 'text-white' 
+                          : (isDarkMode ? 'text-white/40 group-hover:text-white/70' : 'text-slate-500 group-hover:text-slate-900')
+                      }`}>
+                        {tech.includes(':') ? tech.split(':')[0] : tech}
+                      </span>
+                    </div>
+                    {selectedTechs.includes(tech) && (
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: themeColor }} />
+                    )}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 text-center">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-relaxed">
+                  No se encontraron <br /> coincidencias
+                </p>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function HomeClient({ 
   initialProjects, 
@@ -30,6 +165,7 @@ export default function HomeClient({
   const [isCVModalOpen, setIsCVModalOpen] = useState(false);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [activeCertificate, setActiveCertificate] = useState<Certificate | null>(null);
+  const [isContactModalOpen, setIsContactModalOpen] = React.useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [visibleProjectsCount, setVisibleProjectsCount] = useState(6);
   const [showAllFilters, setShowAllFilters] = useState(false);
@@ -48,7 +184,7 @@ export default function HomeClient({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const isAnyModalOpen = !!activeProject || !!activeCertificate || isCVModalOpen;
+  const isAnyModalOpen = !!activeProject || !!activeCertificate || isCVModalOpen || isContactModalOpen;
   
   // Colores dinámicos basados en Tema y Modo (Oscuro/Claro)
   const themeColors = useMemo(() => {
@@ -247,7 +383,12 @@ export default function HomeClient({
         }}
       />
       
-      <Navbar themeColor={themeColors.hex} onOpenCV={() => setIsCVModalOpen(true)} />
+      <Navbar 
+        themeColor={themeColors.hex} 
+        onOpenCV={() => setIsCVModalOpen(true)} 
+        onContact={() => setIsContactModalOpen(true)} 
+        isDarkMode={isDarkMode}
+      />
 
       {/* Selector de Modo (Sol/Luna) - Esquina Superior Derecha */}
       <div className="fixed top-24 right-6 z-[60] flex flex-col gap-2">
@@ -368,9 +509,9 @@ export default function HomeClient({
             )}
 
             <div className="mt-2 w-full flex flex-col items-center space-y-2">
-              <span className={`text-[9px] font-black uppercase tracking-[0.4em] transition-colors duration-700 ${isDarkMode ? 'text-white/20' : 'text-slate-300'}`}>Filtros</span>
+              <span className={`text-[9px] font-black uppercase tracking-[0.4em] transition-colors duration-700 ${isDarkMode ? 'text-white/20' : 'text-slate-400'}`}>Filtros</span>
               
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center gap-6 w-full">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={theme + selectedTechs.join(',')}
@@ -383,21 +524,30 @@ export default function HomeClient({
                       Mostrando <span style={{ color: themeColors.hex }} className="text-sm font-black transition-colors duration-500">{filteredProjects.length}</span> {filteredProjects.length === 1 ? 'Proyecto' : 'Proyectos'}
                     </span>
                     <div className="h-4 w-px bg-white/10" />
-                    <span className="text-[9px] uppercase font-black tracking-widest text-white/30">
+                    <span className={`text-[9px] uppercase font-black tracking-widest ${isDarkMode ? 'text-white/30' : 'text-slate-500'}`}>
                       {theme === 'all' ? 'Colección Total' : 
                        theme === 'research' ? 'Investigación' :
                        theme === 'other' ? 'Otros' : theme}
                     </span>
                   </motion.div>
                 </AnimatePresence>
+
+                {/* FILTRO BUSCADOR ACTIVADO */}
+                <FilterSearch 
+                  allTechs={allAvailableTechs} 
+                  selectedTechs={selectedTechs} 
+                  toggleTech={toggleTech} 
+                  isDarkMode={isDarkMode} 
+                  themeColor={themeColors.hex} 
+                />
               </div>
 
-              {/* Technology Filters */}
+              {/* Technology Filters (Opcional: mantener los populares debajo) */}
               <motion.div 
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                className="w-full flex flex-col items-center gap-2 pt-1"
+                className="w-full flex flex-col items-center gap-4 pt-4"
               >
                 <div className="flex flex-wrap justify-center gap-2">
                   {(showAllFilters ? allAvailableTechs : allAvailableTechs.slice(0, INITIAL_FILTERS_COUNT)).map(tech => (
@@ -466,6 +616,7 @@ export default function HomeClient({
                     themeColor={themeColors.hex}
                     onSelect={setActiveProject}
                     isDarkMode={isDarkMode}
+                    priority={index < 6}
                   />
                 </motion.div>
               ))
@@ -740,14 +891,12 @@ export default function HomeClient({
                 </div>
 
                 <div className="flex flex-col gap-4 w-full max-w-sm">
-                   <motion.a 
-                     href="mailto:subaru0.dev@gmail.com"
-                     target="_blank"
-                     rel="noopener noreferrer"
+                   <motion.button 
+                     onClick={() => setIsContactModalOpen(true)}
                      whileHover={{ x: 8, backgroundColor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)" }}
                      whileTap={{ scale: 0.98 }}
                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                     className={`p-5 border rounded-2xl flex items-center justify-between hover:border-white/20 transition-colors group/link ${
+                     className={`p-5 border rounded-2xl flex items-center justify-between hover:border-white/20 transition-colors group/link w-full text-left ${
                          isDarkMode ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'
                      }`}
                    >
@@ -756,21 +905,18 @@ export default function HomeClient({
                            <Mail size={20} style={{ color: themeColors.hex }} />
                         </div>
                         <div>
-                           <h3 className={`font-bold text-sm transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>Gmail</h3>
-                           <p className="text-gray-500 text-xs">subaru0.dev@gmail.com</p>
+                           <h3 className={`font-bold text-sm transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>Enviar correo</h3>
                         </div>
                      </div>
                      <ArrowRight size={16} className="text-gray-600 group-hover/link:translate-x-1 transition-transform" />
-                   </motion.a>
+                   </motion.button>
 
-                   <motion.a 
-                     href="https://wa.me/56954971044"
-                     target="_blank"
-                     rel="noopener noreferrer"
+                   <motion.button 
+                     onClick={() => window.location.href = `https://wa.me/${['56','9','5497','1044'].join('')}`}
                      whileHover={{ x: 8, backgroundColor: isDarkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)" }}
                      whileTap={{ scale: 0.98 }}
                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                     className={`p-5 border rounded-2xl flex items-center justify-between hover:border-white/20 transition-colors group/link ${
+                     className={`p-5 border rounded-2xl flex items-center justify-between hover:border-white/20 transition-colors group/link w-full text-left ${
                          isDarkMode ? 'bg-white/5 border-white/10' : 'bg-black/5 border-black/10'
                      }`}
                    >
@@ -780,11 +926,10 @@ export default function HomeClient({
                         </div>
                         <div>
                            <h3 className={`font-bold text-sm transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>WhatsApp</h3>
-                           <p className="text-gray-500 text-xs">+56 9 5497 1044</p>
                         </div>
                      </div>
                      <ArrowRight size={16} className="text-gray-600 group-hover/link:translate-x-1 transition-transform" />
-                   </motion.a>
+                   </motion.button>
 
                    <div className="grid grid-cols-2 gap-4">
                       <SocialIcon href="https://www.linkedin.com/in/subarudev0/" icon={Linkedin} color={themeColors.hex} title="LinkedIn" isDarkMode={isDarkMode} />
@@ -796,8 +941,10 @@ export default function HomeClient({
         </div>
       </section>
 
-      <footer className={`py-20 border-t text-center transition-colors duration-700 ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
-        <p className={`text-[10px] font-black uppercase tracking-[0.5em] transition-colors duration-700 ${isDarkMode ? 'text-white/20' : 'text-black/30'}`}>© 2026 SUBARUDEV // J.S.M. SUBARU</p>
+      <footer className={`py-20 border-t text-center transition-colors duration-700 ${
+        isDarkMode ? 'border-white/5 bg-transparent' : 'border-black/5 bg-white'
+      }`}>
+        <p className={`text-[10px] font-black uppercase tracking-[0.5em] transition-colors duration-700 ${isDarkMode ? 'text-white/20' : 'text-black'}`}>© 2026 SUBARUDEV // J.S.M. SUBARU</p>
       </footer>
 
       {activeProject && (
@@ -825,6 +972,13 @@ export default function HomeClient({
         onClose={() => setIsCVModalOpen(false)} 
         cvUrl={initialSettings.cv_url}
         description={initialSettings.cv_description}
+        themeColor={themeColors.hex}
+        isDarkMode={isDarkMode}
+      />
+
+      <ContactModal 
+        isOpen={isContactModalOpen} 
+        onClose={() => setIsContactModalOpen(false)}
         themeColor={themeColors.hex}
         isDarkMode={isDarkMode}
       />

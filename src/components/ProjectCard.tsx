@@ -13,9 +13,10 @@ interface ProjectCardProps {
   className?: string;
   onSelect?: (project: Project) => void;
   isDarkMode?: boolean;
+  priority?: boolean;
 }
 
-export default function ProjectCard({ project, themeColor, className = "", onSelect, isDarkMode = true }: ProjectCardProps) {
+export default function ProjectCard({ project, themeColor, className = "", onSelect, isDarkMode = true, priority = false }: ProjectCardProps) {
   const categoryLabels: Record<string, string> = {
     frontend: 'Front-end',
     backend: 'Back-end',
@@ -93,6 +94,9 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
             <img 
               src={project.imageUrl} 
               alt={project.title} 
+              loading={priority ? "eager" : "lazy"}
+              decoding={priority ? "sync" : "async"}
+              fetchPriority={priority ? "high" : "auto"}
               className="w-full h-full object-cover block scale-[1.01] transform-gpu group-hover:scale-110 group-hover:brightness-110 transition-all duration-700 ease-out" 
             />
           ) : (

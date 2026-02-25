@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { X, Download, Mail, MessageCircle, Maximize2 } from 'lucide-react';
+import { X, Download, Mail, Phone, Maximize2 } from 'lucide-react';
 
 interface CVModalProps {
   isOpen: boolean;
@@ -80,28 +80,24 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
             <div className="space-y-4 mb-10">
               <p className={`text-[10px] font-black uppercase tracking-widest mb-4 ${isDarkMode ? 'text-gray-500' : 'text-slate-400'}`}>Contacto Directo</p>
               <div className="flex flex-wrap gap-4">
-                <a 
-                  href="mailto:subaru0.dev@gmail.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button 
+                  onClick={() => window.location.href = `mailto:${['subaru0.dev', 'gmail.com'].join('@')}`}
                   className={`flex items-center gap-3 px-4 py-2 border rounded-xl transition-all text-sm group ${
                       isDarkMode ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-black/5 border-black/5 hover:bg-black/10'
                   }`}
                 >
                   <Mail size={16} className={`transition-colors ${isDarkMode ? 'text-gray-400 group-hover:text-white' : 'text-slate-400 group-hover:text-slate-900'}`} />
                   <span className={`transition-colors ${isDarkMode ? 'text-gray-300 group-hover:text-white' : 'text-slate-600 group-hover:text-slate-900'}`}>Gmail</span>
-                </a>
-                <a 
-                  href="https://wa.me/56954971044"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                </button>
+                <button 
+                  onClick={() => window.location.href = `https://wa.me/${['56','9','5497','1044'].join('')}`}
                   className={`flex items-center gap-3 px-4 py-2 border rounded-xl transition-all text-sm group ${
                       isDarkMode ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-black/5 border-black/5 hover:bg-black/10'
                   }`}
                 >
-                  <MessageCircle size={16} className={`transition-colors ${isDarkMode ? 'text-gray-400 group-hover:text-white' : 'text-slate-400 group-hover:text-slate-900'}`} />
+                  <Phone size={16} className={`transition-colors ${isDarkMode ? 'text-gray-400 group-hover:text-white' : 'text-slate-400 group-hover:text-slate-900'}`} />
                   <span className={`transition-colors ${isDarkMode ? 'text-gray-300 group-hover:text-white' : 'text-slate-600 group-hover:text-slate-900'}`}>WhatsApp</span>
-                </a>
+                </button>
               </div>
             </div>
           </div>

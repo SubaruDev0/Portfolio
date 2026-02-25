@@ -1,32 +1,45 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { User, Code2, Briefcase, Mail, Download } from 'lucide-react';
 
 interface NavbarProps {
   themeColor: string;
   onOpenCV?: () => void;
+  onContact?: () => void;
   isDarkMode?: boolean;
 }
 
-export default function Navbar({ themeColor, onOpenCV, isDarkMode = true }: NavbarProps) {
+export default function Navbar({ themeColor, onOpenCV, onContact, isDarkMode = true }: NavbarProps) {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <nav className={`fixed top-0 w-full z-50 border-b backdrop-blur-md animate-slide-in-top transition-colors duration-700 ${
-      isDarkMode 
-        ? 'border-white/10 bg-black/50' 
-        : 'border-black/5 bg-white/50'
+    <nav className={`fixed top-0 w-full z-50 border-b backdrop-blur-md animate-slide-in-top transition-all duration-500 ${
+      isScrolled 
+        ? (isDarkMode ? 'border-white/10 bg-black/70 py-2 shadow-2xl' : 'border-black/5 bg-white/70 py-2 shadow-lg')
+        : (isDarkMode ? 'border-white/5 bg-black py-5' : 'border-black/5 bg-white py-5')
     }`}>
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-6 flex justify-between items-center transition-all duration-500">
         <Link
           href="/"
-          className="text-sm md:text-xl font-bold tracking-tighter flex items-center gap-2 group"
+          className="text-sm md:text-xl font-bold tracking-tighter flex items-center gap-3 group"
           style={{ color: isDarkMode ? 'white' : 'black' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
           onMouseLeave={(e) => (e.currentTarget.style.color = isDarkMode ? 'white' : 'black')}
         >
           <div
-            className={`relative w-12 h-12 md:w-20 md:h-10 flex items-center justify-center overflow-visible rounded-sm transition-all duration-500 bg-transparent`}
+            className={`relative flex items-center justify-center transition-all duration-500 ${
+              isScrolled ? 'w-8 h-8 md:w-12 md:h-12' : 'w-10 h-10 md:w-16 md:h-16'
+            }`}
           >
             {/* Contenedor absoluto para que el SVG pueda crecer sin empujar el layout */}
             <div
@@ -35,7 +48,9 @@ export default function Navbar({ themeColor, onOpenCV, isDarkMode = true }: Navb
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 2048 959"
-                className="w-10 h-10 md:w-14 md:h-14 object-contain transform transition-transform duration-300"
+                className={`object-contain transform transition-all duration-500 ${
+                  isScrolled ? 'w-6 h-6 md:w-9 md:h-9' : 'w-8 h-8 md:w-12 md:h-12'
+                }`}
                 // Forzar fill vía style para que el logo herede `currentColor` y
                 // activar pointer-events sólo donde el SVG está pintado
                 style={{ fill: 'currentColor', pointerEvents: 'visiblePainted' }}
@@ -61,10 +76,14 @@ export default function Navbar({ themeColor, onOpenCV, isDarkMode = true }: Navb
                 />
             </div>
           </div>
-          <span className={`transition-all duration-500 logo-text text-current text-sm md:text-xl truncate`}>SubaruDev</span>
+          <span className={`transition-all duration-500 logo-text text-current font-black ${
+            isScrolled ? 'text-xs md:text-lg' : 'text-sm md:text-xl'
+          } truncate`}>SubaruDev</span>
         </Link>
         
-        <div className={`hidden md:flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em] ${isDarkMode ? 'text-gray-400' : 'text-slate-900'}`}>
+        <div className={`hidden md:flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${
+          isDarkMode ? 'text-white' : 'text-black'
+        }`}>
           <button 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className={`transition-colors duration-300 uppercase ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
@@ -97,32 +116,44 @@ export default function Navbar({ themeColor, onOpenCV, isDarkMode = true }: Navb
           >
             Certificados
           </Link>
-          <Link 
-            href="#contacto" 
-            className={`transition-colors duration-300 ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
-            onMouseEnter={(e) => e.currentTarget.style.color = themeColor}
-            onMouseLeave={(e) => e.currentTarget.style.color = ''}
-          >
-            Contacto
-          </Link>
+          {onContact ? (
+            <button
+              onClick={onContact}
+              className={`transition-colors duration-300 ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
+            >
+              Contacto
+            </button>
+          ) : (
+            <Link 
+              href="#contacto" 
+              className={`transition-colors duration-300 ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
+              onMouseEnter={(e) => e.currentTarget.style.color = themeColor}
+              onMouseLeave={(e) => e.currentTarget.style.color = ''}
+            >
+              Contacto
+            </Link>
+          )}
         </div>
 
         <button 
           onClick={onOpenCV}
-          className={`px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-all duration-500 hover:scale-105 active:scale-95 ${
-            isDarkMode ? 'bg-white text-black' : 'bg-black text-white'
+          className={`rounded-full text-xs md:text-sm font-black flex items-center gap-2 transition-all duration-500 hover:scale-105 active:scale-95 ${
+            isScrolled ? 'px-4 py-2' : 'px-6 py-3'
+          } ${
+            isDarkMode ? 'bg-white text-black shadow-lg shadow-white/5' : 'bg-black text-white shadow-lg shadow-black/5'
           }`}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = themeColor;
-            e.currentTarget.style.color = 'black';
+            e.currentTarget.style.color = 'white';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = isDarkMode ? 'white' : 'black';
             e.currentTarget.style.color = isDarkMode ? 'black' : 'white';
           }}
         >
-          <Download size={16} />
-          Descargar CV
+          <Download size={isScrolled ? 14 : 18} />
+          <span className="hidden sm:inline">Descargar CV</span>
+          <span className="sm:hidden">CV</span>
         </button>
       </div>
     </nav>
