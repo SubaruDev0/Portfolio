@@ -81,58 +81,56 @@ export default function Navbar({ themeColor, onOpenCV, onContact, isDarkMode = t
           } truncate`}>SubaruDev</span>
         </Link>
         
-        <div className={`hidden md:flex items-center gap-6 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${
-          isDarkMode ? 'text-white' : 'text-black'
-        }`}>
-          <button 
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className={`transition-colors duration-300 uppercase ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
-            onMouseEnter={(e) => e.currentTarget.style.color = themeColor}
-            onMouseLeave={(e) => e.currentTarget.style.color = ''}
-          >
-            Inicio
-          </button>
-          <Link 
-            href="#proyectos-anchor" 
-            className={`transition-colors duration-300 ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
-            onMouseEnter={(e) => e.currentTarget.style.color = themeColor}
-            onMouseLeave={(e) => e.currentTarget.style.color = ''}
-          >
-            Proyectos
-          </Link>
-          <Link 
-            href="#sobre-mi" 
-            className={`transition-colors duration-300 ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
-            onMouseEnter={(e) => e.currentTarget.style.color = themeColor}
-            onMouseLeave={(e) => e.currentTarget.style.color = ''}
-          >
-            Sobre Mí
-          </Link>
-          <Link 
-            href="#certificaciones-anchor" 
-            className={`transition-colors duration-300 ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
-            onMouseEnter={(e) => e.currentTarget.style.color = themeColor}
-            onMouseLeave={(e) => e.currentTarget.style.color = ''}
-          >
-            Certificados
-          </Link>
-          {onContact ? (
-            <button
-              onClick={onContact}
-              className={`transition-colors duration-300 ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
-            >
-              Contacto
-            </button>
-          ) : (
-            <Link 
-              href="#contacto" 
-              className={`transition-colors duration-300 ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
-              onMouseEnter={(e) => e.currentTarget.style.color = themeColor}
-              onMouseLeave={(e) => e.currentTarget.style.color = ''}
-            >
-              Contacto
-            </Link>
-          )}
+        <div className={`hidden md:flex items-center gap-6 transition-all duration-500 ${isDarkMode ? 'text-white' : 'text-black'}`}>
+          {/* unified nav item class to ensure consistent font, size and tracking */}
+          {(() => {
+            const navItemClass = `transition-colors duration-300 uppercase text-[10px] font-black tracking-[0.2em]`;
+            return (
+              <>
+                <button
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className={`${navItemClass} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '')}
+                >
+                  Inicio
+                </button>
+                <Link
+                  href="#proyectos-anchor"
+                  className={`${navItemClass} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '')}
+                >
+                  Proyectos
+                </Link>
+                <Link
+                  href="#sobre-mi"
+                  className={`${navItemClass} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '')}
+                >
+                  Sobre Mí
+                </Link>
+                <Link
+                  href="#certificaciones-anchor"
+                  className={`${navItemClass} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '')}
+                >
+                  Certificados
+                </Link>
+                {/* CONTACT should scroll to the section instead of opening modal */}
+                <Link
+                  href="#contacto"
+                  className={`${navItemClass} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '')}
+                >
+                  Contacto
+                </Link>
+              </>
+            );
+          })()}
         </div>
 
         <button 

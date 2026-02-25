@@ -810,21 +810,21 @@ export default function HomeClient({
             </div>
             
             <div className="flex items-center gap-3">
-               <button 
+               <button
                 onClick={() => animate(x, x.get() + itemWidth, { type: "spring", stiffness: 300, damping: 30 })}
-                className={`p-3 border rounded-full transition-all text-white/50 hover:text-white ${isDarkMode ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-black/5 border-black/10 hover:bg-black/10 text-slate-400 hover:text-slate-800'}`}
+                className={`p-3 border rounded-full transition-all ${isDarkMode ? 'text-white/50 hover:text-white bg-white/5 border-white/10 hover:bg-white/10' : 'text-slate-700 hover:text-black bg-white/5 border-black/10 hover:bg-black/10'}`}
                >
                  <ArrowLeft size={18} />
                </button>
-               <button 
+               <button
                 onClick={() => setIsPaused(!isPaused)}
-                className={`p-3 border rounded-full transition-all text-white/50 hover:text-white ${isDarkMode ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-black/5 border-black/10 hover:bg-black/10 text-slate-400 hover:text-slate-800'}`}
+                className={`p-3 border rounded-full transition-all ${isDarkMode ? 'text-white/50 hover:text-white bg-white/5 border-white/10 hover:bg-white/10' : 'text-slate-700 hover:text-black bg-white/5 border-black/10 hover:bg-black/10'}`}
                >
                  {isPaused ? <Play size={18} /> : <Pause size={18} />}
                </button>
-               <button 
+               <button
                 onClick={() => animate(x, x.get() - itemWidth, { type: "spring", stiffness: 300, damping: 30 })}
-                className={`p-3 border rounded-full transition-all text-white/50 hover:text-white ${isDarkMode ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-black/5 border-black/10 hover:bg-black/10 text-slate-400 hover:text-slate-800'}`}
+                className={`p-3 border rounded-full transition-all ${isDarkMode ? 'text-white/50 hover:text-white bg-white/5 border-white/10 hover:bg-white/10' : 'text-slate-700 hover:text-black bg-white/5 border-black/10 hover:bg-black/10'}`}
                >
                  <ArrowRight size={18} />
                </button>
