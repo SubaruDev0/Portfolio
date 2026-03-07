@@ -225,6 +225,34 @@ export default function HomeClient({
   }, []);
 
   const isAnyModalOpen = !!activeProject || !!activeCertificate || isCVModalOpen || isContactModalOpen;
+
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyTouchAction = body.style.touchAction;
+    const previousBodyOverscroll = body.style.overscrollBehavior;
+
+    if (isAnyModalOpen) {
+      html.style.overflow = 'hidden';
+      body.style.overflow = 'hidden';
+      body.style.touchAction = 'none';
+      body.style.overscrollBehavior = 'none';
+    } else {
+      html.style.overflow = '';
+      body.style.overflow = '';
+      body.style.touchAction = '';
+      body.style.overscrollBehavior = '';
+    }
+
+    return () => {
+      html.style.overflow = previousHtmlOverflow;
+      body.style.overflow = previousBodyOverflow;
+      body.style.touchAction = previousBodyTouchAction;
+      body.style.overscrollBehavior = previousBodyOverscroll;
+    };
+  }, [isAnyModalOpen]);
   
   // Colores dinámicos basados en Tema y Modo (Oscuro/Claro)
   const themeColors = useMemo(() => {

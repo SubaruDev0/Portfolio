@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { X, Download, Mail, Phone, Maximize2 } from 'lucide-react';
 import { useI18n } from '@/i18n/context';
 
@@ -15,16 +15,6 @@ interface CVModalProps {
 
 export default function CVModal({ isOpen, onClose, cvUrl, description, themeColor, isDarkMode = true }: CVModalProps) {
   const { dictionary } = useI18n();
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
 
   if (!isOpen) return null;
 

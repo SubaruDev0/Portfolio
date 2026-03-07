@@ -336,10 +336,17 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
               {shouldCollapseDescription && (
                 <button
                   onClick={() => setIsDescriptionExpanded((prev) => !prev)}
-                  className={`mt-4 text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${
-                    isDarkMode ? 'text-white/60 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+                  aria-expanded={isDescriptionExpanded}
+                  className={`mt-5 inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                    isDarkMode
+                      ? 'bg-white/5 border-white/20 text-white/80 hover:bg-white/10 hover:text-white focus:ring-white/50 focus:ring-offset-[#0a0a0a]'
+                      : 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200 hover:text-slate-900 focus:ring-slate-400 focus:ring-offset-white'
                   }`}
                 >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${isDescriptionExpanded ? 'opacity-60' : 'opacity-100'}`}
+                    style={{ backgroundColor: themeColor }}
+                  />
                   {isDescriptionExpanded ? dictionary.projectModal.readLess : dictionary.projectModal.readMore}
                 </button>
               )}
