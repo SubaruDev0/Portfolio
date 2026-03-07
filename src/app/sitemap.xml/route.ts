@@ -1,16 +1,16 @@
 // Use environment variable or fallback to domain
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://subarudev.com';
 
-const staticPages = [
-  '/',
-  '/#proyectos-anchor',
-  '/#sobre-mi',
-  '/#certificaciones-anchor',
-  '/#contacto',
-  '/admin'
-];
+const locales = ['es', 'en', 'pt', 'ja'] as const;
+const localizedAnchors = ['', '#proyectos-anchor', '#sobre-mi', '#certificaciones-anchor', '#contacto'];
 
 export async function GET() {
+  const localizedPages = locales.flatMap((locale) =>
+    localizedAnchors.map((anchor) => `/${locale}${anchor}`),
+  );
+
+  const staticPages = [...localizedPages, '/admin'];
+
   const sitemapEntries = staticPages.map((path) => {
     return `  <url>\n    <loc>${BASE}${path}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.8</priority>\n  </url>`;
   }).join('\n');

@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useAnimationFrame, useSpring, useTransform, animate } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import ThemeSwitch from '@/components/ThemeSwitch';
+import LanguageSwitch from '@/components/LanguageSwitch';
 import ProjectCard from '@/components/ProjectCard';
 import CertificateCard from '@/components/CertificateCard';
 import TechBadge from '@/components/TechBadge';
@@ -11,10 +12,13 @@ import CVModal from '@/components/CVModal';
 import ProjectModal from '@/components/ProjectModal';
 import CertificateModal from '@/components/CertificateModal';
 import ContactModal from '@/components/ContactModal';
-import { ThemeType, Project, Certificate } from '@/types';
+import { ThemeType, Project, Certificate, Locale } from '@/types';
 import { getThemeColors } from '@/utils/theme';
 import { Code2, Cpu, Globe, Database, Award, ExternalLink, Mail, ArrowRight, ArrowUp, Linkedin, Github, Phone, Search, X, Sun, Moon, RotateCcw, ChevronUp, Filter, Bug, ArrowLeft, Play, Pause, Terminal, MessageCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { Dictionary } from '@/i18n/dictionaries';
+import { I18nProvider } from '@/i18n/context';
+import { getLocalizedValue } from '@/i18n/getLocalizedValue';
 
 // Componente de buscador con debounce
 function FilterSearch({ 
@@ -22,13 +26,15 @@ function FilterSearch({
   selectedTechs, 
   toggleTech, 
   isDarkMode, 
-  themeColor 
+  themeColor,
+  dictionary,
 }: { 
   allTechs: string[], 
   selectedTechs: string[], 
   toggleTech: (t: string) => void,
   isDarkMode: boolean,
-  themeColor: string
+  themeColor: string,
+  dictionary: Dictionary,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -72,7 +78,7 @@ function FilterSearch({
             if (!isOpen) setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="BUSCAR TECNOLOGÍA O FILTRO..."
+          placeholder={dictionary.filters.searchPlaceholder}
           className={`w-full py-3 pl-10 pr-4 rounded-2xl border text-[10px] font-black tracking-[0.2em] outline-none transition-all duration-500 uppercase placeholder:text-gray-600 ${
             isDarkMode 
               ? 'bg-white/5 border-white/10 text-white focus:bg-white/10 focus:border-white/20' 
@@ -129,7 +135,11 @@ function FilterSearch({
                           ? (isDarkMode ? 'text-white' : 'text-slate-900')
                           : (isDarkMode ? 'text-white/40 group-hover:text-white/70' : 'text-slate-500 group-hover:text-slate-900')
                       }`}>
-                        {tech.includes(':') ? tech.split(':')[0] : tech}
+                        {tech === 'Producción'
+                          ? dictionary.filters.production
+                          : tech === 'Destacados'
+                            ? dictionary.filters.featured
+                            : (tech.includes(':') ? tech.split(':')[0] : tech)}
                       </span>
                     </div>
                     {selectedTechs.includes(tech) && (
@@ -141,7 +151,7 @@ function FilterSearch({
             ) : (
               <div className="py-8 text-center">
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest leading-relaxed">
-                  No se encontraron <br /> coincidencias
+                  {dictionary.filters.noMatches}
                 </p>
               </div>
             )}
@@ -153,10 +163,14 @@ function FilterSearch({
 }
 
 export default function HomeClient({ 
+  lang,
+  dictionary,
   initialProjects, 
   initialCertificates,
   initialSettings = {}
 }: { 
+  lang: Locale,
+  dictionary: Dictionary,
   initialProjects: Project[], 
   initialCertificates: Certificate[],
   initialSettings?: Record<string, string>
@@ -172,6 +186,30 @@ export default function HomeClient({
   const [visibleProjectsCount, setVisibleProjectsCount] = useState(6);
   const [showAllFilters, setShowAllFilters] = useState(false);
   const INITIAL_FILTERS_COUNT = 8; // Cuántos filtros mostrar inicialmente
+
+  const localizedProjects = useMemo(() => {
+    return initialProjects.map((project) => ({
+      ...project,
+      title: getLocalizedValue(project.title, project.titleI18n, lang),
+      description: getLocalizedValue(project.description, project.descriptionI18n, lang),
+    }));
+  }, [initialProjects, lang]);
+
+  const localizedCertificates = useMemo(() => {
+    return initialCertificates.map((certificate) => ({
+      ...certificate,
+      title: getLocalizedValue(certificate.title, certificate.titleI18n, lang),
+      description: getLocalizedValue(certificate.description || '', certificate.descriptionI18n, lang),
+      academy: getLocalizedValue(certificate.academy, certificate.academyI18n, lang),
+    }));
+  }, [initialCertificates, lang]);
+
+  const localizedCvDescription = useMemo(() => {
+    if (lang === 'es') {
+      return initialSettings.cv_description || '';
+    }
+    return initialSettings[`cv_description_${lang}`] || initialSettings.cv_description || '';
+  }, [lang, initialSettings]);
 
   // Resetear paginación cuando cambian los filtros
   useEffect(() => {
@@ -214,7 +252,7 @@ export default function HomeClient({
   const [isDragging, setIsDragging] = useState(false);
   const x = useMotionValue(0);
   const baseVelocity = -60; // Pixels per second
-  const totalItems = initialCertificates.length;
+  const totalItems = localizedCertificates.length;
   const [itemWidth, setItemWidth] = useState(420);
 
   useEffect(() => {
@@ -230,8 +268,8 @@ export default function HomeClient({
 
   const carouselCertificates = useMemo(() => {
     if (totalItems === 0) return [];
-    return [...initialCertificates, ...initialCertificates, ...initialCertificates, ...initialCertificates];
-  }, [initialCertificates, totalItems]);
+    return [...localizedCertificates, ...localizedCertificates, ...localizedCertificates, ...localizedCertificates];
+  }, [localizedCertificates, totalItems]);
 
   useEffect(() => {
     x.set(-totalWidth);
@@ -273,7 +311,7 @@ export default function HomeClient({
   };
 
   const filteredProjects = useMemo(() => {
-    return initialProjects
+    return localizedProjects
       .filter(p => {
         // Un proyecto coincide si su categoría principal O secundaria coincide con el filtro
         const matchesCategory = theme === 'all' ? true : (p.category === theme || p.secondaryCategory === theme);
@@ -317,16 +355,16 @@ export default function HomeClient({
         // 5. Por fecha de creación si todo lo demás es igual
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
-  }, [theme, selectedTechs, initialProjects]);
+  }, [theme, selectedTechs, localizedProjects]);
 
   const allAvailableTechs = useMemo(() => {
     const techsMap = new Map<string, { original: string; count: number }>(); // lowerCase -> {original, count}
     
     // Forzamos filtros maestros al inicio
-    const hasProduction = initialProjects.some(p => p.isRealWorld);
-    const hasStarred = initialProjects.some(p => p.isStarred);
+    const hasProduction = localizedProjects.some(p => p.isRealWorld);
+    const hasStarred = localizedProjects.some(p => p.isStarred);
     
-    initialProjects.forEach(p => p.technologies.forEach(t => {
+    localizedProjects.forEach(p => p.technologies.forEach(t => {
       // Guardamos el formato completo (Nombre:Slug) para que el Filtro tenga icono
       const namePart = t.includes(':') ? t.split(':')[0].trim() : t;
       const lowerName = namePart.toLowerCase();
@@ -362,7 +400,7 @@ export default function HomeClient({
     if (hasProduction) masterFilters.push('Producción');
     
     return [...masterFilters, ...sortedTechs];
-  }, [initialProjects]);
+  }, [localizedProjects]);
 
   const toggleTech = (tech: string) => {
     withTransition(() => {
@@ -373,9 +411,10 @@ export default function HomeClient({
   };
 
   return (
-    <main 
-      className={`min-h-screen relative overflow-hidden font-sans scroll-smooth transition-colors duration-700 ${isDarkMode ? 'bg-[#050505] text-white' : 'bg-[#fcfcfc] text-slate-900'}`}
-    >
+    <I18nProvider lang={lang} dictionary={dictionary}>
+      <main 
+        className={`min-h-screen relative overflow-hidden font-sans scroll-smooth transition-colors duration-700 ${isDarkMode ? 'bg-[#050505] text-white' : 'bg-[#fcfcfc] text-slate-900'}`}
+      >
       {/* Background Effects */}
       <div className={`fixed inset-0 pointer-events-none transition-colors duration-700 ${isDarkMode ? 'grid-bg' : 'grid-bg-light'}`} />
       <div 
@@ -392,8 +431,9 @@ export default function HomeClient({
         isDarkMode={isDarkMode}
       />
 
-      {/* Selector de Modo (Sol/Luna) - Esquina Superior Derecha */}
+      {/* Selector de Idioma y Modo */}
       <div className="fixed top-24 right-6 z-[60] flex flex-col gap-2">
+         <LanguageSwitch isDarkMode={isDarkMode} />
          <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -444,27 +484,17 @@ export default function HomeClient({
             }`} 
             style={{ color: themeColors.hex }}
           >
-            {theme === 'all' && 'Quizás no todos sean lo que buscas, ¡Filtra!'}
-            {theme === 'frontend' && 'No suelo hacer solo frontend, pero aquí hay unos...'}
-            {theme === 'backend' && 'Relacionado al Backend y la infraestructura'}
-            {theme === 'fullstack' && 'Le suelo meter backend a todo...'}
-            {theme === 'research' && 'Laboratorio e Investigación Activa'}
-            {theme === 'other' && '¡Variedad! (Proyectos misceláneos y experimentales)'}
+            {dictionary.hero.badgeByTheme[theme]}
           </span>
           <h1 className={`text-6xl md:text-8xl font-black mb-6 tracking-tighter leading-tight transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
             SubaruDev
             <br />
             <span className="text-2xl md:text-3xl font-light tracking-[0.2em] transition-colors duration-1000 uppercase block mt-2" style={{ color: themeColors.hex }}>
-              Ingeniero Civil Informático
+              {dictionary.hero.profession}
             </span>
           </h1>
           <p className={`max-w-2xl mx-auto text-lg mb-10 leading-relaxed font-light transition-colors duration-700 ${isDarkMode ? 'text-gray-400' : 'text-black/70'}`}>
-            {theme === 'all' && 'Explorando la arquitectura técnica y la innovación constante. Un registro de mi evolución y maduración como profesional.'}
-            {theme === 'frontend' && 'Diseño de interfaces funcionales y sistemas escalables. Enfoque en accesibilidad, rendimiento y buenas prácticas visuales.'}
-            {theme === 'backend' && 'Implementación de lógica de negocio, bases de datos y servicios robustos para entornos de alta exigencia.'}
-            {theme === 'fullstack' && 'Sincronía entre el diseño de experiencia y la arquitectura de datos. Solución de problemas con un enfoque integral.'}
-            {theme === 'research' && 'Computación aplicada al análisis de sistemas complejos. Participación activa en estudios de Graphlets y Bioinformática.'}
-            {theme === 'other' && 'Proyectos técnicos y herramientas especializadas: utilidades de terminal, algoritmos, simulaciones y desafíos de ingeniería.'}
+            {dictionary.hero.descriptionByTheme[theme]}
           </p>
           
           <div className="flex gap-4 justify-center">
@@ -473,7 +503,7 @@ export default function HomeClient({
                 className="px-8 py-3 rounded-full font-bold transition-all hover:scale-105 active:scale-95 shadow-lg duration-500 flex items-center gap-2"
                 style={{ backgroundColor: themeColors.hex, color: isDarkMode ? '#000' : '#fff', boxShadow: `0 0 20px ${themeColors.hex}40` }}
             >
-              Ver Proyectos
+              {dictionary.hero.viewProjects}
             </a>
             <button 
               onClick={() => setIsCVModalOpen(true)}
@@ -481,7 +511,7 @@ export default function HomeClient({
                   isDarkMode ? 'bg-white/5 border-white/10 hover:bg-white/10 text-white' : 'bg-black/5 border-black/10 hover:bg-black/10 text-slate-800'
               }`}
             >
-              Descargar CV
+              {dictionary.hero.downloadCv}
             </button>
           </div>
         </motion.div>
@@ -510,12 +540,12 @@ export default function HomeClient({
                 }`}
               >
                 <RotateCcw size={10} className="group-hover:rotate-180 transition-transform duration-500" />
-                Limpiar filtros
+                {dictionary.filters.clear}
               </motion.button>
             )}
 
             <div className="mt-2 w-full flex flex-col items-center space-y-2">
-              <span className={`text-[9px] font-black uppercase tracking-[0.4em] transition-colors duration-700 ${isDarkMode ? 'text-white/20' : 'text-slate-400'}`}>Filtros</span>
+              <span className={`text-[9px] font-black uppercase tracking-[0.4em] transition-colors duration-700 ${isDarkMode ? 'text-white/20' : 'text-slate-400'}`}>{dictionary.filters.title}</span>
               
               <div className="flex flex-col items-center gap-6 w-full">
                 <AnimatePresence mode="wait">
@@ -527,13 +557,11 @@ export default function HomeClient({
                     className={`flex items-center gap-3 px-6 py-2 rounded-full border bg-white/[0.02] transition-colors duration-700 ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}
                   >
                     <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-gray-500">
-                      Mostrando <span style={{ color: themeColors.hex }} className="text-sm font-black transition-colors duration-500">{filteredProjects.length}</span> {filteredProjects.length === 1 ? 'Proyecto' : 'Proyectos'}
+                      {dictionary.filters.showing} <span style={{ color: themeColors.hex }} className="text-sm font-black transition-colors duration-500">{filteredProjects.length}</span> {filteredProjects.length === 1 ? dictionary.filters.project : dictionary.filters.projects}
                     </span>
                     <div className="h-4 w-px bg-white/10" />
                     <span className={`text-[9px] uppercase font-black tracking-widest ${isDarkMode ? 'text-white/30' : 'text-slate-500'}`}>
-                      {theme === 'all' ? 'Colección Total' : 
-                       theme === 'research' ? 'Investigación' :
-                       theme === 'other' ? 'Otros' : theme}
+                      {theme === 'all' ? dictionary.filters.totalCollection : dictionary.themeSwitch[theme]}
                     </span>
                   </motion.div>
                 </AnimatePresence>
@@ -544,7 +572,8 @@ export default function HomeClient({
                   selectedTechs={selectedTechs} 
                   toggleTech={toggleTech} 
                   isDarkMode={isDarkMode} 
-                  themeColor={themeColors.hex} 
+                  themeColor={themeColors.hex}
+                  dictionary={dictionary}
                 />
               </div>
 
@@ -585,12 +614,12 @@ export default function HomeClient({
                     {showAllFilters ? (
                       <>
                         <ChevronUp size={12} className="group-hover:-translate-y-0.5 transition-transform" />
-                        Ver menos filtros
+                        {dictionary.filters.seeLess}
                       </>
                     ) : (
                       <>
                         <Filter size={10} />
-                        Ver {allAvailableTechs.length - INITIAL_FILTERS_COUNT} filtros más
+                        {dictionary.filters.seeMore.replace('{count}', String(allAvailableTechs.length - INITIAL_FILTERS_COUNT))}
                       </>
                     )}
                   </motion.button>
@@ -651,12 +680,12 @@ export default function HomeClient({
                 
                 <div className="max-w-md">
                   <h3 className={`font-black uppercase tracking-widest text-lg mb-3 transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
-                    {theme === 'fullstack' ? '¿Buscabas un Full-stack?' : 'Sin resultados por aquí'}
+                    {theme === 'fullstack' ? dictionary.projects.noResultsTitleFullstack : dictionary.projects.noResultsTitleDefault}
                   </h3>
                   <p className={`font-light text-sm leading-relaxed transition-colors duration-700 ${isDarkMode ? 'text-gray-500' : 'text-slate-500'}`}>
                     {theme === 'fullstack' 
-                      ? 'Como te habrás dado cuenta, me encanta meterle backend a todo lo que toco. Tengo varias ideas en el horno que subiré muy pronto, ¡Mantente atento!' 
-                      : 'Parece que no hay proyectos con estas tecnologías específicas. Prueba ajustando los filtros.'}
+                      ? dictionary.projects.noResultsDescriptionFullstack 
+                      : dictionary.projects.noResultsDescriptionDefault}
                   </p>
                 </div>
               </motion.div>
@@ -680,16 +709,16 @@ export default function HomeClient({
                     borderColor: `${themeColors.hex}40`,
                     backgroundColor: isDarkMode ? `${themeColors.hex}05` : `${themeColors.hex}08`
                   }}
-                >
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                    style={{ backgroundColor: `${themeColors.hex}10` }}
+                  >
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                      style={{ backgroundColor: `${themeColors.hex}10` }}
                   />
                   <span 
                     className="relative z-10 font-black uppercase text-[10px] tracking-[0.3em] flex items-center gap-3 transition-colors duration-300"
                     style={{ color: themeColors.hex }}
                   >
-                    Ver Más Proyectos 
+                    {dictionary.projects.seeMoreProjects}
                     <motion.div
                       animate={{ y: [0, 4, 0] }}
                       transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
@@ -712,7 +741,7 @@ export default function HomeClient({
                   className="group relative px-10 py-4 rounded-2xl overflow-hidden transition-all active:scale-95 border border-white/5 bg-white/5 hover:bg-white/10"
                 >
                   <span className="relative z-10 font-black uppercase text-[10px] tracking-[0.3em] flex items-center gap-3 text-gray-500 group-hover:text-white transition-colors">
-                    Ver Menos
+                    {dictionary.projects.seeLessProjects}
                     <motion.div
                       animate={{ y: [0, -4, 0] }}
                       transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
@@ -736,17 +765,16 @@ export default function HomeClient({
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className={`text-4xl font-black mb-8 tracking-tight uppercase transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Sobre <span style={{ color: themeColors.hex }}>Mí</span></h2>
+            <h2 className={`text-4xl font-black mb-8 tracking-tight uppercase transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{dictionary.about.titleStart} <span style={{ color: themeColors.hex }}>{dictionary.about.titleHighlight}</span></h2>
             <div className={`space-y-6 text-lg leading-relaxed font-light transition-colors duration-700 ${isDarkMode ? 'text-gray-400' : 'text-slate-700'}`}>
               <p>
-                Soy <span className={`font-bold transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>Javier Sebastián Morales Subaru</span>. 
+                {dictionary.about.introPrefix} <span className={`font-bold transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>{dictionary.about.name}</span>. 
               </p>
               <p>
-                Ingeniero Civil Informático apasionado por crear soluciones digitales que combinen una arquitectura sólida con experiencias de usuario excepcionales. Mi enfoque va más allá de escribir código; busco entender el producto de manera integral, desde la infraestructura hasta el último detalle visual.
+                {dictionary.about.paragraph1}
               </p>
               <p>
-                 He trabajado en diversos entornos, lo que me ha permitido cultivar una visión técnica versátil 
-                 y una capacidad de adaptación constante frente a nuevos desafíos tecnológicos.
+                 {dictionary.about.paragraph2}
               </p>
               
               {/* Nota Técnica Simplificada */}
@@ -757,18 +785,18 @@ export default function HomeClient({
                   </div>
                   <div>
                     <h4 className={`font-bold mb-1 text-sm uppercase tracking-wider transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>
-                      Nota Técnica
+                      {dictionary.about.techNoteTitle}
                     </h4>
                     <p className={`text-xs italic transition-colors duration-700 ${isDarkMode ? 'text-gray-500' : 'text-black/70'}`}>
-                      Este portfolio presenta mis proyectos con distintos niveles de profundidad técnica, permitiendo una revisión general o un análisis más detallado según el interés del lector.
+                      {dictionary.about.techNoteText}
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <StatItem value="Chile" label="Residencia" isDarkMode={isDarkMode} />
-                <StatItem value="Ingeniero Civil Informático" label="Título Profesional" isDarkMode={isDarkMode} />
+                <StatItem value={dictionary.about.residenceValue} label={dictionary.about.residenceLabel} isDarkMode={isDarkMode} />
+                <StatItem value={dictionary.about.degreeValue} label={dictionary.about.degreeLabel} isDarkMode={isDarkMode} />
               </div>
             </div>
           </motion.div>
@@ -786,20 +814,20 @@ export default function HomeClient({
                     <img src="/logos/Logo_Universidad_san_sebastian.png" alt="USS" className="w-8 h-8 object-contain opacity-50 group-hover:opacity-100 transition-opacity" />
                  </div>
                  <div>
-                   <h3 className={`font-bold transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>Universidad San Sebastián</h3>
-                   <p className="text-xs text-gray-500 uppercase tracking-widest">Sede Concepción</p>
+                   <h3 className={`font-bold transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>{dictionary.about.universityName}</h3>
+                   <p className="text-xs text-gray-500 uppercase tracking-widest">{dictionary.about.universityCampus}</p>
                  </div>
                </div>
                <p className={`text-sm font-light transition-colors duration-700 ${isDarkMode ? 'text-gray-400' : 'text-black/70'}`}>
-                 Formación en ingeniería de software avanzada, gestión de proyectos y ciencias de la computación.
+                 {dictionary.about.universityDescription}
                </p>
              </div>
 
              <div className="grid grid-cols-2 gap-4">
-               <FeatureBox icon={Cpu} title="Trabajo en Equipo" color={themeColors.hex} isDarkMode={isDarkMode} />
-               <FeatureBox icon={Globe} title="Inglés Técnico" color={themeColors.hex} isDarkMode={isDarkMode} />
-               <FeatureBox icon={Code2} title="Liderazgo" color={themeColors.hex} isDarkMode={isDarkMode} />
-               <FeatureBox icon={Database} title="Gestión Corfo" color={themeColors.hex} isDarkMode={isDarkMode} />
+               <FeatureBox icon={Cpu} title={dictionary.about.featureTeamwork} color={themeColors.hex} isDarkMode={isDarkMode} />
+               <FeatureBox icon={Globe} title={dictionary.about.featureEnglish} color={themeColors.hex} isDarkMode={isDarkMode} />
+               <FeatureBox icon={Code2} title={dictionary.about.featureLeadership} color={themeColors.hex} isDarkMode={isDarkMode} />
+               <FeatureBox icon={Database} title={dictionary.about.featureCorfo} color={themeColors.hex} isDarkMode={isDarkMode} />
              </div>
           </motion.div>
         </div>
@@ -811,7 +839,7 @@ export default function HomeClient({
         <div id="certificaciones" className="max-w-7xl mx-auto mt-32">
           <div className="flex items-center justify-between gap-4 mb-12">
             <div className="flex items-center gap-4 flex-1">
-              <h2 className={`text-2xl font-black uppercase tracking-widest transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Certificaciones <span className="text-gray-600">&</span> Logros</h2>
+              <h2 className={`text-2xl font-black uppercase tracking-widest transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{dictionary.certificates.sectionTitle} <span className="text-gray-600">&</span> {dictionary.certificates.sectionTitleSecondary}</h2>
               <div className={`h-px flex-1 ${isDarkMode ? 'bg-white/10' : 'bg-black/10'}`} />
             </div>
             
@@ -885,14 +913,14 @@ export default function HomeClient({
 
               <div className="flex flex-col lg:flex-row gap-12 items-center justify-between relative z-10">
                 <div className="text-center lg:text-left max-w-xl">
-                  <span className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-500 mb-4 block">Conectemos</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-500 mb-4 block">{dictionary.contactSection.tag}</span>
                   <h2 className={`text-4xl md:text-6xl font-black mb-6 tracking-tight uppercase leading-none transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
-                    ¿Buscas <br />
-                    <span style={{ color: themeColors.hex }}>Sumar Talento</span> <br />
-                    a tu equipo?
+                    {dictionary.contactSection.titleLine1} <br />
+                    <span style={{ color: themeColors.hex }}>{dictionary.contactSection.titleHighlight}</span> <br />
+                    {dictionary.contactSection.titleLine3}
                   </h2>
                   <p className={`text-lg font-light leading-relaxed transition-colors duration-700 ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>
-                    Estoy disponible. Conversemos sobre cómo puedo integrarme a tu equipo y contribuir en los próximos desafíos.
+                    {dictionary.contactSection.description}
                   </p>
                 </div>
 
@@ -911,7 +939,7 @@ export default function HomeClient({
                            <Mail size={20} style={{ color: themeColors.hex }} />
                         </div>
                         <div>
-                           <h3 className={`font-bold text-sm transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>Enviar correo</h3>
+                           <h3 className={`font-bold text-sm transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>{dictionary.contactSection.sendEmail}</h3>
                         </div>
                      </div>
                      <ArrowRight size={16} className="text-gray-600 group-hover/link:translate-x-1 transition-transform" />
@@ -931,7 +959,7 @@ export default function HomeClient({
                            <MessageCircle size={20} style={{ color: themeColors.hex }} />
                         </div>
                         <div>
-                           <h3 className={`font-bold text-sm transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>WhatsApp</h3>
+                           <h3 className={`font-bold text-sm transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-black'}`}>{dictionary.contactSection.whatsapp}</h3>
                         </div>
                      </div>
                      <ArrowRight size={16} className="text-gray-600 group-hover/link:translate-x-1 transition-transform" />
@@ -950,7 +978,7 @@ export default function HomeClient({
       <footer className={`py-20 border-t text-center transition-colors duration-700 ${
         isDarkMode ? 'border-white/5 bg-transparent' : 'border-black/5 bg-white'
       }`}>
-        <p className={`text-[10px] font-black uppercase tracking-[0.5em] transition-colors duration-700 ${isDarkMode ? 'text-white/20' : 'text-black'}`}>© 2026 SUBARUDEV // J.S.M. SUBARU</p>
+        <p className={`text-[10px] font-black uppercase tracking-[0.5em] transition-colors duration-700 ${isDarkMode ? 'text-white/20' : 'text-black'}`}>{dictionary.footer.copyright}</p>
       </footer>
 
       {activeProject && (
@@ -977,7 +1005,7 @@ export default function HomeClient({
         isOpen={isCVModalOpen} 
         onClose={() => setIsCVModalOpen(false)} 
         cvUrl={initialSettings.cv_url}
-        description={initialSettings.cv_description}
+        description={localizedCvDescription}
         themeColor={themeColors.hex}
         isDarkMode={isDarkMode}
       />
@@ -988,7 +1016,8 @@ export default function HomeClient({
         themeColor={themeColors.hex}
         isDarkMode={isDarkMode}
       />
-    </main>
+      </main>
+    </I18nProvider>
   );
 }
 

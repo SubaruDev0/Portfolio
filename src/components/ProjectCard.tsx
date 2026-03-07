@@ -6,6 +6,7 @@ import { Project } from '@/types';
 import { Github, ExternalLink, Code, Maximize2, Star, Briefcase, CheckCircle } from 'lucide-react';
 import TechBadge from './TechBadge';
 import { createExcerpt } from '@/utils/text';
+import { useI18n } from '@/i18n/context';
 
 interface ProjectCardProps {
   project: Project;
@@ -17,18 +18,18 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ project, themeColor, className = "", onSelect, isDarkMode = true, priority = false }: ProjectCardProps) {
+  const { dictionary } = useI18n();
   const categoryLabels: Record<string, string> = {
-    frontend: 'Front-end',
-    backend: 'Back-end',
-    fullstack: 'Full-stack',
-    research: 'Investigación',
-    other: 'Otros'
+    frontend: dictionary.projectCard.categories.frontend,
+    backend: dictionary.projectCard.categories.backend,
+    fullstack: dictionary.projectCard.categories.fullstack,
+    research: dictionary.projectCard.categories.research,
+    other: dictionary.projectCard.categories.other,
   };
 
   return (
     <>
       <motion.div
-        style={{ viewTransitionName: `card-${project.id}` } as any}
         onClick={() => onSelect?.(project)}
         whileHover={{ y: -12, scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
@@ -55,7 +56,7 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
                   ? 'bg-black/80 border-emerald-500/50 text-emerald-400 group-hover:bg-black group-hover:border-emerald-400'
                   : 'bg-emerald-50 border-emerald-200 text-emerald-600 group-hover:bg-emerald-100 group-hover:border-emerald-300 shadow-emerald-100/50'
               }`}>
-                <Briefcase size={10} fill="currentColor" /> Producción
+                <Briefcase size={10} fill="currentColor" /> {dictionary.projectCard.productionBadge}
               </div>
               
               {/* Tooltip Contextual - Elevado con z-50 */}
@@ -65,9 +66,9 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
                 <p className={`font-bold mb-1 flex items-center gap-1 uppercase tracking-tighter ${
                   isDarkMode ? 'text-emerald-400' : 'text-emerald-700'
                 }`}>
-                   <CheckCircle size={10} /> Proyecto Comercial
+                   <CheckCircle size={10} /> {dictionary.projectCard.productionTooltipTitle}
                 </p>
-                Este proyecto fue desarrollado para un cliente, pagado y actualmente en uso real.
+                {dictionary.projectCard.productionTooltipText}
               </div>
             </div>
           )}

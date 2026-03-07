@@ -3,7 +3,9 @@
 CREATE TABLE IF NOT EXISTS projects (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
+  title_i18n JSONB DEFAULT '{}'::jsonb,
   description TEXT,
+  description_i18n JSONB DEFAULT '{}'::jsonb,
   category TEXT,
   secondary_category TEXT,
   technologies TEXT[],
@@ -21,9 +23,12 @@ CREATE TABLE IF NOT EXISTS projects (
 CREATE TABLE IF NOT EXISTS certificates (
   id TEXT PRIMARY KEY,
   title TEXT NOT NULL,
+  title_i18n JSONB DEFAULT '{}'::jsonb,
   description TEXT,
+  description_i18n JSONB DEFAULT '{}'::jsonb,
   date TEXT,
   academy TEXT,
+  academy_i18n JSONB DEFAULT '{}'::jsonb,
   image_url TEXT,
   sort_order INTEGER DEFAULT 0
 );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { headers } from 'next/headers';
 import React from 'react';
 import "./globals.css";
 
@@ -13,39 +14,15 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://subarudev.com';
 export const metadata: Metadata = {
   title: {
     default: 'SubaruDev - Portfolio',
-    template: '%s - SubaruDev',
+    template: '%s',
   },
-  description: 'Portafolio profesional de Javier Sebastián Morales Subaru - Desarrollador web, programador y creador de proyectos. Proyectos, certificaciones y contacto profesional.',
+  description: 'SubaruDev professional portfolio.',
   keywords: [
-    'SubaruDev', 'Subaru', 'Javier Morales', 'Javier Morales Subaru', 'programador', 'portfolio', 'portafolio',
-    'desarrollador web', 'ingeniero civil informatico', 'frontend', 'backend', 'fullstack', 'react', 'next.js',
-    'typescript', 'nodejs', 'proyectos', 'certificados', 'CV', 'animalesperdidos.cl', 'subarudev.com'
+    'SubaruDev', 'Portfolio', 'Fullstack', 'React', 'Next.js',
   ],
   authors: [
     { name: 'Javier Sebastián Morales Subaru', url: SITE_URL },
   ],
-  openGraph: {
-  title: 'SubaruDev - Portfolio',
-  description: 'Portfolio profesional de Javier Sebastián Morales Subaru — proyectos, certificaciones y contacto.',
-    url: SITE_URL,
-    siteName: 'SubaruDev',
-    images: [
-      {
-        url: `${SITE_URL}/logos/sd-icon.png`,
-        width: 512,
-        height: 512,
-        alt: 'SubaruDev logo',
-      }
-    ],
-    locale: 'es_ES',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-  title: 'SubaruDev - Portfolio',
-  description: 'Portfolio profesional de Javier Sebastián Morales Subaru — proyectos, certificaciones y contacto.',
-    images: [`${SITE_URL}/logos/sd-icon.png`],
-  },
   icons: {
     icon: '/logos/sd-icon.png',
     shortcut: '/logos/sd-icon.png',
@@ -64,11 +41,14 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const requestHeaders = await headers();
+  const localeHeader = requestHeaders.get('x-locale');
+  const htmlLang = localeHeader || 'es';
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -95,12 +75,11 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="es">
+    <html lang={htmlLang}>
       <head>
         {/* Removed Cascadia Code import to use Audiowide globally */}
         {/* Favicon personalizado (archivo en public/logos/sd-icon.png) */}
         <link rel="icon" href="/logos/sd-icon.png" />
-        <link rel="canonical" href={SITE_URL} />
         <meta name="theme-color" content="#0f172a" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* JSON-LD para mejorar SEO y Rich Results */}

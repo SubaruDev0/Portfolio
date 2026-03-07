@@ -15,6 +15,19 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+type LocalizedTextForm = {
+  en: string;
+  pt: string;
+  ja: string;
+};
+
+type CertificateForm = Omit<Certificate, 'id' | 'description' | 'titleI18n' | 'descriptionI18n' | 'academyI18n'> & {
+  description: string;
+  titleI18n: LocalizedTextForm;
+  descriptionI18n: LocalizedTextForm;
+  academyI18n: LocalizedTextForm;
+};
+
 export default function AdminPage({
   initialProjects: allProjects,
   initialCertificates: allCertificates,
@@ -37,7 +50,9 @@ export default function AdminPage({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [project, setProject] = useState({
     title: '',
+    titleI18n: { en: '', pt: '', ja: '' },
     description: '',
+    descriptionI18n: { en: '', pt: '', ja: '' },
     category: 'frontend' as ProjectCategory,
     secondaryCategory: null as ProjectCategory | null,
     technologies: [] as string[],
@@ -49,17 +64,23 @@ export default function AdminPage({
     isRealWorld: false,
   });
 
-  const [certificate, setCertificate] = useState<Omit<Certificate, 'id'>>({
+  const [certificate, setCertificate] = useState<CertificateForm>({
     title: '',
+    titleI18n: { en: '', pt: '', ja: '' },
     description: '',
+    descriptionI18n: { en: '', pt: '', ja: '' },
     date: '',
     academy: '',
+    academyI18n: { en: '', pt: '', ja: '' },
     imageUrl: '',
   });
 
   const [settings, setSettings] = useState({
     cv_url: initialSettings.cv_url || '',
     cv_description: initialSettings.cv_description || '',
+    cv_description_en: initialSettings.cv_description_en || '',
+    cv_description_pt: initialSettings.cv_description_pt || '',
+    cv_description_ja: initialSettings.cv_description_ja || '',
   });
 
   const [localProjects, setLocalProjects] = useState<Project[]>(allProjects);
@@ -250,7 +271,16 @@ export default function AdminPage({
     if (result.success) {
       alert(editingId ? 'Certificado actualizado' : 'Certificado guardado');
       router.refresh();
-      setCertificate({ title: '', description: '', date: '', academy: '', imageUrl: '' });
+      setCertificate({
+        title: '',
+        titleI18n: { en: '', pt: '', ja: '' },
+        description: '',
+        descriptionI18n: { en: '', pt: '', ja: '' },
+        date: '',
+        academy: '',
+        academyI18n: { en: '', pt: '', ja: '' },
+        imageUrl: '',
+      });
       setEditingId(null);
     } else {
       alert('Error: ' + result.error);
@@ -260,7 +290,17 @@ export default function AdminPage({
   const startEditProject = (p: Project) => {
     setProject({
       title: p.title,
+      titleI18n: {
+        en: p.titleI18n?.en || '',
+        pt: p.titleI18n?.pt || '',
+        ja: p.titleI18n?.ja || '',
+      },
       description: p.description,
+      descriptionI18n: {
+        en: p.descriptionI18n?.en || '',
+        pt: p.descriptionI18n?.pt || '',
+        ja: p.descriptionI18n?.ja || '',
+      },
       category: p.category,
       secondaryCategory: p.secondaryCategory || null,
       technologies: p.technologies,
@@ -279,9 +319,24 @@ export default function AdminPage({
   const startEditCert = (c: Certificate) => {
     setCertificate({
       title: c.title,
+      titleI18n: {
+        en: c.titleI18n?.en || '',
+        pt: c.titleI18n?.pt || '',
+        ja: c.titleI18n?.ja || '',
+      },
       description: c.description || '',
+      descriptionI18n: {
+        en: c.descriptionI18n?.en || '',
+        pt: c.descriptionI18n?.pt || '',
+        ja: c.descriptionI18n?.ja || '',
+      },
       date: c.date,
       academy: c.academy,
+      academyI18n: {
+        en: c.academyI18n?.en || '',
+        pt: c.academyI18n?.pt || '',
+        ja: c.academyI18n?.ja || '',
+      },
       imageUrl: c.imageUrl || '',
     });
     setEditingId(c.id);
@@ -383,7 +438,9 @@ export default function AdminPage({
       setEditingId(null);
       setProject({
         title: '',
+        titleI18n: { en: '', pt: '', ja: '' },
         description: '',
+        descriptionI18n: { en: '', pt: '', ja: '' },
         category: 'frontend',
         secondaryCategory: null,
         technologies: [],
@@ -541,7 +598,21 @@ export default function AdminPage({
                   <button 
                     onClick={() => {
                       setEditingId(null);
-                      setProject({ title: '', description: '', category: 'frontend', secondaryCategory: null, technologies: [], githubUrl: '', liveUrl: '', imageUrl: '', gallery: [], isStarred: false, isRealWorld: false });
+                      setProject({
+                        title: '',
+                        titleI18n: { en: '', pt: '', ja: '' },
+                        description: '',
+                        descriptionI18n: { en: '', pt: '', ja: '' },
+                        category: 'frontend',
+                        secondaryCategory: null,
+                        technologies: [],
+                        githubUrl: '',
+                        liveUrl: '',
+                        imageUrl: '',
+                        gallery: [],
+                        isStarred: false,
+                        isRealWorld: false,
+                      });
                     }}
                     className="text-[10px] font-bold text-gray-500 hover:text-white transition-colors"
                   >
@@ -553,6 +624,33 @@ export default function AdminPage({
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Título del Proyecto</label>
                   <input type="text" required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-sm" placeholder="Ej: Sistema de Gestión" value={project.title} onChange={e => setProject({...project, title: e.target.value})} />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Título Traducido (EN / PT / JA)</label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <input
+                      type="text"
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors"
+                      placeholder="Title (EN)"
+                      value={project.titleI18n.en}
+                      onChange={e => setProject({ ...project, titleI18n: { ...project.titleI18n, en: e.target.value } })}
+                    />
+                    <input
+                      type="text"
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors"
+                      placeholder="Titulo (PT)"
+                      value={project.titleI18n.pt}
+                      onChange={e => setProject({ ...project, titleI18n: { ...project.titleI18n, pt: e.target.value } })}
+                    />
+                    <input
+                      type="text"
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors"
+                      placeholder="タイトル (JA)"
+                      value={project.titleI18n.ja}
+                      onChange={e => setProject({ ...project, titleI18n: { ...project.titleI18n, ja: e.target.value } })}
+                    />
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
@@ -713,6 +811,33 @@ export default function AdminPage({
                   <textarea rows={4} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-xs resize-none" placeholder="### Características\n- Item 1" value={project.description} onChange={e => setProject({...project, description: e.target.value})} />
                 </div>
 
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Descripción Traducida (EN / PT / JA)</label>
+                  <div className="grid grid-cols-1 gap-3">
+                    <textarea
+                      rows={3}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors resize-none"
+                      placeholder="Description (EN)"
+                      value={project.descriptionI18n.en}
+                      onChange={e => setProject({ ...project, descriptionI18n: { ...project.descriptionI18n, en: e.target.value } })}
+                    />
+                    <textarea
+                      rows={3}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors resize-none"
+                      placeholder="Descricao (PT)"
+                      value={project.descriptionI18n.pt}
+                      onChange={e => setProject({ ...project, descriptionI18n: { ...project.descriptionI18n, pt: e.target.value } })}
+                    />
+                    <textarea
+                      rows={3}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors resize-none"
+                      placeholder="説明 (JA)"
+                      value={project.descriptionI18n.ja}
+                      onChange={e => setProject({ ...project, descriptionI18n: { ...project.descriptionI18n, ja: e.target.value } })}
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <input type="url" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-[10px] focus:outline-none focus:border-white" placeholder="GitHub" value={project.githubUrl} onChange={e => setProject({...project, githubUrl: e.target.value})} />
                   <input type="url" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-[10px] focus:outline-none focus:border-white" placeholder="Live" value={project.liveUrl} onChange={e => setProject({...project, liveUrl: e.target.value})} />
@@ -736,7 +861,16 @@ export default function AdminPage({
                   <button 
                     onClick={() => {
                       setEditingId(null);
-                      setCertificate({ title: '', description: '', date: '', academy: '', imageUrl: '' });
+                      setCertificate({
+                        title: '',
+                        titleI18n: { en: '', pt: '', ja: '' },
+                        description: '',
+                        descriptionI18n: { en: '', pt: '', ja: '' },
+                        date: '',
+                        academy: '',
+                        academyI18n: { en: '', pt: '', ja: '' },
+                        imageUrl: '',
+                      });
                     }}
                     className="text-[10px] font-bold text-gray-500 hover:text-white transition-colors"
                   >
@@ -750,8 +884,60 @@ export default function AdminPage({
                   <input type="text" required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-sm" placeholder="Ej: AWS Solutions Architect" value={certificate.title} onChange={e => setCertificate({...certificate, title: e.target.value})} />
                 </div>
                 <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Título Traducido (EN / PT / JA)</label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <input
+                      type="text"
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors"
+                      placeholder="Title (EN)"
+                      value={certificate.titleI18n.en}
+                      onChange={e => setCertificate({ ...certificate, titleI18n: { ...certificate.titleI18n, en: e.target.value } })}
+                    />
+                    <input
+                      type="text"
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors"
+                      placeholder="Titulo (PT)"
+                      value={certificate.titleI18n.pt}
+                      onChange={e => setCertificate({ ...certificate, titleI18n: { ...certificate.titleI18n, pt: e.target.value } })}
+                    />
+                    <input
+                      type="text"
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors"
+                      placeholder="タイトル (JA)"
+                      value={certificate.titleI18n.ja}
+                      onChange={e => setCertificate({ ...certificate, titleI18n: { ...certificate.titleI18n, ja: e.target.value } })}
+                    />
+                  </div>
+                </div>
+                <div>
                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Logros / Descripción (Markdown)</label>
                    <textarea rows={3} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-xs resize-none" placeholder="Certificación enfocada en..." value={certificate.description} onChange={e => setCertificate({...certificate, description: e.target.value})} />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Descripción Traducida (EN / PT / JA)</label>
+                  <div className="grid grid-cols-1 gap-3">
+                    <textarea
+                      rows={2}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors resize-none"
+                      placeholder="Description (EN)"
+                      value={certificate.descriptionI18n.en}
+                      onChange={e => setCertificate({ ...certificate, descriptionI18n: { ...certificate.descriptionI18n, en: e.target.value } })}
+                    />
+                    <textarea
+                      rows={2}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors resize-none"
+                      placeholder="Descricao (PT)"
+                      value={certificate.descriptionI18n.pt}
+                      onChange={e => setCertificate({ ...certificate, descriptionI18n: { ...certificate.descriptionI18n, pt: e.target.value } })}
+                    />
+                    <textarea
+                      rows={2}
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors resize-none"
+                      placeholder="説明 (JA)"
+                      value={certificate.descriptionI18n.ja}
+                      onChange={e => setCertificate({ ...certificate, descriptionI18n: { ...certificate.descriptionI18n, ja: e.target.value } })}
+                    />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -761,6 +947,32 @@ export default function AdminPage({
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Año</label>
                     <input type="text" required placeholder="2024" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-xs focus:outline-none focus:border-white" value={certificate.date} onChange={e => setCertificate({...certificate, date: e.target.value})} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Institución Traducida (EN / PT / JA)</label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <input
+                      type="text"
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors"
+                      placeholder="Academy (EN)"
+                      value={certificate.academyI18n.en}
+                      onChange={e => setCertificate({ ...certificate, academyI18n: { ...certificate.academyI18n, en: e.target.value } })}
+                    />
+                    <input
+                      type="text"
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors"
+                      placeholder="Instituicao (PT)"
+                      value={certificate.academyI18n.pt}
+                      onChange={e => setCertificate({ ...certificate, academyI18n: { ...certificate.academyI18n, pt: e.target.value } })}
+                    />
+                    <input
+                      type="text"
+                      className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 text-white text-xs focus:outline-none focus:border-white transition-colors"
+                      placeholder="機関名 (JA)"
+                      value={certificate.academyI18n.ja}
+                      onChange={e => setCertificate({ ...certificate, academyI18n: { ...certificate.academyI18n, ja: e.target.value } })}
+                    />
                   </div>
                 </div>
                 <div>
@@ -807,6 +1019,21 @@ export default function AdminPage({
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Descripción del CV (Modal)</label>
                   <textarea rows={4} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-xs resize-none" value={settings.cv_description} onChange={e => setSettings({...settings, cv_description: e.target.value})} placeholder="Describe brevemente este CV..." />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Descripción CV EN</label>
+                  <textarea rows={3} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-xs resize-none" value={settings.cv_description_en} onChange={e => setSettings({...settings, cv_description_en: e.target.value})} placeholder="CV description in English..." />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Descripción CV PT</label>
+                  <textarea rows={3} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-xs resize-none" value={settings.cv_description_pt} onChange={e => setSettings({...settings, cv_description_pt: e.target.value})} placeholder="Descricao do CV em portugues..." />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Descripción CV JA</label>
+                  <textarea rows={3} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors text-xs resize-none" value={settings.cv_description_ja} onChange={e => setSettings({...settings, cv_description_ja: e.target.value})} placeholder="日本語のCV説明..." />
                 </div>
 
                 <button disabled={isSaving} type="submit" className="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50 text-xs tracking-[0.3em] uppercase">
@@ -926,4 +1153,3 @@ export default function AdminPage({
     </div>
   );
 }
-

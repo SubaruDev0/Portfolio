@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { User, Code2, Briefcase, Mail, Download } from 'lucide-react';
+import { useI18n } from '@/i18n/context';
 
 interface NavbarProps {
   themeColor: string;
@@ -13,6 +14,7 @@ interface NavbarProps {
 
 export default function Navbar({ themeColor, onOpenCV, onContact, isDarkMode = true }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { lang, dictionary } = useI18n();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,7 +32,7 @@ export default function Navbar({ themeColor, onOpenCV, onContact, isDarkMode = t
     }`}>
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center transition-all duration-500">
         <Link
-          href="/"
+          href={`/${lang}`}
           className="text-sm md:text-xl font-bold tracking-tighter flex items-center gap-3 group"
           style={{ color: isDarkMode ? 'white' : 'black' }}
           onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
@@ -88,45 +90,45 @@ export default function Navbar({ themeColor, onOpenCV, onContact, isDarkMode = t
             return (
               <>
                 <Link
-                  href="#inicio"
+                  href={`/${lang}#inicio`}
                   className={`${navItemClass} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
                   onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
                   onMouseLeave={(e) => (e.currentTarget.style.color = '')}
                 >
-                  Inicio
+                  {dictionary.navbar.home}
                 </Link>
                 <Link
-                  href="#proyectos-anchor"
+                  href={`/${lang}#proyectos-anchor`}
                   className={`${navItemClass} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
                   onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
                   onMouseLeave={(e) => (e.currentTarget.style.color = '')}
                 >
-                  Proyectos
+                  {dictionary.navbar.projects}
                 </Link>
                 <Link
-                  href="#sobre-mi"
+                  href={`/${lang}#sobre-mi`}
                   className={`${navItemClass} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
                   onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
                   onMouseLeave={(e) => (e.currentTarget.style.color = '')}
                 >
-                  Sobre Mí
+                  {dictionary.navbar.about}
                 </Link>
                 <Link
-                  href="#certificaciones-anchor"
+                  href={`/${lang}#certificaciones-anchor`}
                   className={`${navItemClass} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
                   onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
                   onMouseLeave={(e) => (e.currentTarget.style.color = '')}
                 >
-                  Certificados
+                  {dictionary.navbar.certificates}
                 </Link>
                 {/* CONTACT should scroll to the section instead of opening modal */}
                 <Link
-                  href="#contacto"
+                  href={`/${lang}#contacto`}
                   className={`${navItemClass} ${isDarkMode ? 'hover:text-white' : 'hover:text-black'}`}
                   onMouseEnter={(e) => (e.currentTarget.style.color = themeColor)}
                   onMouseLeave={(e) => (e.currentTarget.style.color = '')}
                 >
-                  Contacto
+                  {dictionary.navbar.contact}
                 </Link>
               </>
             );
@@ -150,8 +152,8 @@ export default function Navbar({ themeColor, onOpenCV, onContact, isDarkMode = t
           }}
         >
           <Download size={isScrolled ? 14 : 18} />
-          <span className="hidden sm:inline">Descargar CV</span>
-          <span className="sm:hidden">CV</span>
+          <span className="hidden sm:inline">{dictionary.navbar.downloadCv}</span>
+          <span className="sm:hidden">{dictionary.navbar.cvShort}</span>
         </button>
       </div>
     </nav>

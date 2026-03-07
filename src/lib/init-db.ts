@@ -10,7 +10,9 @@ export async function initDatabase() {
       CREATE TABLE IF NOT EXISTS projects (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
+        title_i18n JSONB DEFAULT '{}'::jsonb,
         description TEXT,
+        description_i18n JSONB DEFAULT '{}'::jsonb,
         category TEXT,
         secondary_category TEXT,
         technologies TEXT[],
@@ -31,9 +33,12 @@ export async function initDatabase() {
       CREATE TABLE IF NOT EXISTS certificates (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
+        title_i18n JSONB DEFAULT '{}'::jsonb,
         description TEXT,
+        description_i18n JSONB DEFAULT '{}'::jsonb,
         date TEXT,
         academy TEXT,
+        academy_i18n JSONB DEFAULT '{}'::jsonb,
         image_url TEXT,
         sort_order INTEGER DEFAULT 0
       )
@@ -63,7 +68,12 @@ export async function initDatabase() {
       await getSql()`ALTER TABLE projects ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`;
       await getSql()`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0`;
       await getSql()`ALTER TABLE projects ADD COLUMN IF NOT EXISTS secondary_category TEXT`;
-      console.log('Migration: sort_order and secondary_category columns added.');
+      await getSql()`ALTER TABLE projects ADD COLUMN IF NOT EXISTS title_i18n JSONB DEFAULT '{}'::jsonb`;
+      await getSql()`ALTER TABLE projects ADD COLUMN IF NOT EXISTS description_i18n JSONB DEFAULT '{}'::jsonb`;
+      await getSql()`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS title_i18n JSONB DEFAULT '{}'::jsonb`;
+      await getSql()`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS description_i18n JSONB DEFAULT '{}'::jsonb`;
+      await getSql()`ALTER TABLE certificates ADD COLUMN IF NOT EXISTS academy_i18n JSONB DEFAULT '{}'::jsonb`;
+      console.log('Migration: sort/order, secondary category, and i18n columns added.');
     } catch (e) {
       console.log('Migration info:', e);
     }

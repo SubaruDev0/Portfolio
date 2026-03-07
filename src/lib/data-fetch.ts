@@ -13,7 +13,9 @@ export async function getProjects(): Promise<Project[]> {
       SELECT 
         id, 
         title, 
+        title_i18n as "titleI18n",
         description, 
+        description_i18n as "descriptionI18n",
         category, 
         secondary_category as "secondaryCategory",
         technologies, 
@@ -82,9 +84,12 @@ export async function getCertificates(): Promise<Certificate[]> {
       SELECT 
         id, 
         title, 
+        title_i18n as "titleI18n",
         description, 
+        description_i18n as "descriptionI18n",
         date, 
         academy, 
+        academy_i18n as "academyI18n",
         image_url as "imageUrl",
         sort_order as "sortOrder"
       FROM certificates 
@@ -92,7 +97,7 @@ export async function getCertificates(): Promise<Certificate[]> {
     `;
     return result as unknown as Certificate[];
   } catch (error: any) {
-    if (error.message?.includes('column "sort_order" does not exist')) {
+    if (error.message?.includes('column') && error.message?.includes('does not exist')) {
       const fallbackResult = await sql`
         SELECT id, title, description, date, academy, image_url as "imageUrl"
         FROM certificates 
@@ -124,4 +129,3 @@ export async function getPortfolioSettings(): Promise<Record<string, string>> {
     throw error;
   }
 }
-

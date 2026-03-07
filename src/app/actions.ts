@@ -5,6 +5,16 @@ import { getSql } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { put, del } from '@vercel/blob';
 
+const PUBLIC_LOCALES = ['es', 'en', 'pt', 'ja'] as const;
+
+function revalidatePortfolioPaths() {
+  revalidatePath('/');
+  for (const locale of PUBLIC_LOCALES) {
+    revalidatePath(`/${locale}`);
+  }
+  revalidatePath('/admin');
+}
+
 // AUTHENTICATION
 export async function verifyAdminAction(password: string) {
   try {
@@ -75,19 +85,18 @@ export async function addProjectAction(project: Project) {
   try {
     await getSql()`
       INSERT INTO projects (
-        id, title, description, category, secondary_category, technologies, 
+        id, title, title_i18n, description, description_i18n, category, secondary_category, technologies, 
         github_url, live_url, image_url, gallery, 
         featured, is_starred, is_real_world, sort_order, created_at
       ) VALUES (
-        ${project.id}, ${project.title}, ${project.description}, ${project.category}, ${project.secondaryCategory || null}, ${project.technologies},
+        ${project.id}, ${project.title}, ${JSON.stringify(project.titleI18n || {})}::jsonb, ${project.description}, ${JSON.stringify(project.descriptionI18n || {})}::jsonb, ${project.category}, ${project.secondaryCategory || null}, ${project.technologies},
         ${project.githubUrl || ''}, ${project.liveUrl || ''}, ${project.imageUrl || ''}, ${project.gallery || []},
         ${project.featured ?? true}, ${project.isStarred ?? false}, ${project.isRealWorld ?? false},
         COALESCE((SELECT MIN(sort_order) FROM projects), 0) - 1,
         ${project.createdAt || new Date().toISOString()}
       )
     `;
-    revalidatePath('/');
-    revalidatePath('/admin');
+    revalidatePortfolioPaths();
     return { success: true };
   } catch (error) {
     console.error('Error al guardar el proyecto:', error);
@@ -105,7 +114,9 @@ export async function updateProjectAction(project: Project) {
     await sql`
       UPDATE projects SET
         title = ${project.title},
+        title_i18n = ${JSON.stringify(project.titleI18n || {})}::jsonb,
         description = ${project.description},
+        description_i18n = ${JSON.stringify(project.descriptionI18n || {})}::jsonb,
         category = ${project.category},
         secondary_category = ${project.secondaryCategory || null},
         technologies = ${project.technologies},
@@ -144,8 +155,7 @@ export async function updateProjectAction(project: Project) {
     } catch (e) {
       // ignore gallery cleanup errors
     }
-    revalidatePath('/');
-    revalidatePath('/admin');
+    revalidatePortfolioPaths();
     return { success: true };
   } catch (error) {
     console.error('Update project error:', error);
@@ -176,8 +186,7 @@ export async function deleteProjectAction(id: string) {
     }
 
     await sql`DELETE FROM projects WHERE id = ${id}`;
-    revalidatePath('/');
-    revalidatePath('/admin');
+    revalidatePortfolioPaths();
     return { success: true };
   } catch (error) {
     console.error('Error al borrar el proyecto:', error);
@@ -189,19 +198,21 @@ export async function deleteProjectAction(id: string) {
 export async function addCertificateAction(certificate: Certificate) {
   try {
     await getSql()`
-      INSERT INTO certificates (id, title, description, date, academy, image_url, sort_order)
+      INSERT INTO certificates (id, title, title_i18n, description, description_i18n, date, academy, academy_i18n, image_url, sort_order)
       VALUES (
         ${certificate.id}, 
         ${certificate.title}, 
+        ${JSON.stringify(certificate.titleI18n || {})}::jsonb,
         ${certificate.description || ''}, 
+        ${JSON.stringify(certificate.descriptionI18n || {})}::jsonb,
         ${certificate.date}, 
         ${certificate.academy}, 
+        ${JSON.stringify(certificate.academyI18n || {})}::jsonb,
         ${certificate.imageUrl || ''},
         COALESCE((SELECT MIN(sort_order) FROM certificates), 0) - 1
       )
     `;
-    revalidatePath('/');
-    revalidatePath('/admin');
+    revalidatePortfolioPaths();
     return { success: true };
   } catch (error) {
     console.error('Error al guardar el certificado:', error);
@@ -218,9 +229,12 @@ export async function updateCertificateAction(certificate: Certificate) {
     await sql`
       UPDATE certificates SET
         title = ${certificate.title},
+        title_i18n = ${JSON.stringify(certificate.titleI18n || {})}::jsonb,
         description = ${certificate.description || ''},
+        description_i18n = ${JSON.stringify(certificate.descriptionI18n || {})}::jsonb,
         date = ${certificate.date},
         academy = ${certificate.academy},
+        academy_i18n = ${JSON.stringify(certificate.academyI18n || {})}::jsonb,
         image_url = ${certificate.imageUrl || ''}
       WHERE id = ${certificate.id}
     `;
@@ -228,8 +242,7 @@ export async function updateCertificateAction(certificate: Certificate) {
     if (prevRow && prevRow.image_url && prevRow.image_url !== certificate.imageUrl && String(prevRow.image_url).includes('blob.vercel-storage.com')) {
       try { await deleteImageAction(prevRow.image_url); } catch (e) { console.error('Error eliminando blob previo (cert):', e); }
     }
-    revalidatePath('/');
-    revalidatePath('/admin');
+    revalidatePortfolioPaths();
     return { success: true };
   } catch (error) {
     console.error('Update certificate error:', error);
@@ -251,8 +264,7 @@ export async function deleteCertificateAction(id: string) {
     }
 
     await sql`DELETE FROM certificates WHERE id = ${id}`;
-    revalidatePath('/');
-    revalidatePath('/admin');
+    revalidatePortfolioPaths();
     return { success: true };
   } catch (error) {
     console.error('Error al borrar el certificado:', error);
@@ -270,8 +282,7 @@ export async function updateSettingsAction(settings: Record<string, string>) {
         ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
       `;
     }
-    revalidatePath('/');
-    revalidatePath('/admin');
+    revalidatePortfolioPaths();
     return { success: true };
   } catch (error) {
     console.error('Update settings error:', error);
@@ -293,8 +304,7 @@ export async function saveOrderAction(type: 'projects' | 'certificates', ordered
     }
     
     // REVALIDAR SOLO AL FINAL DEL BUCLE
-    revalidatePath('/');
-    revalidatePath('/admin');
+    revalidatePortfolioPaths();
     return { success: true };
   } catch (error) {
     console.error('Error al guardar orden:', error);
@@ -339,8 +349,7 @@ export async function reorderAction(type: 'projects' | 'certificates', id: strin
       await sql`UPDATE certificates SET sort_order = ${currentItem.sort_order} WHERE id = ${targetItem.id}`;
     }
 
-    revalidatePath('/');
-    revalidatePath('/admin');
+    revalidatePortfolioPaths();
     return { success: true };
   } catch (error) {
     console.error('Reorder error:', error);

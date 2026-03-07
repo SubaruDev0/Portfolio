@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Certificate } from '@/types';
 import { Award, Maximize2 } from 'lucide-react';
 import { removeMarkdown } from '@/utils/text';
+import { useI18n } from '@/i18n/context';
 
 interface CertificateCardProps {
   certificate: Certificate;
@@ -15,6 +16,7 @@ interface CertificateCardProps {
 
 export default function CertificateCard({ certificate, themeColor, onSelect, isDarkMode = true }: CertificateCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const { dictionary } = useI18n();
 
   return (
     <>
@@ -71,7 +73,7 @@ export default function CertificateCard({ certificate, themeColor, onSelect, isD
           <p className={`text-sm mb-6 flex-1 font-light line-clamp-3 leading-relaxed transition-colors duration-700 ${
             isDarkMode ? 'text-gray-500' : 'text-slate-600'
           }`}>
-            {removeMarkdown(certificate.description || "")}
+            {removeMarkdown(certificate.description || dictionary.certificateCard.defaultDescription)}
           </p>
           
           <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.2em]">

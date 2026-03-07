@@ -1,17 +1,9 @@
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { normalizeLocaleFromAcceptLanguage } from '@/i18n/config';
 
-import { getProjects, getCertificates, getPortfolioSettings } from '@/lib/data-fetch';
-import HomeClient from './page-client';
-
-export default async function Page() {
-  const projects = await getProjects();
-  const certificates = await getCertificates();
-  const settings = await getPortfolioSettings();
-
-  return (
-    <HomeClient 
-      initialProjects={projects} 
-      initialCertificates={certificates} 
-      initialSettings={settings}
-    />
-  );
+export default async function RootRedirectPage() {
+  const requestHeaders = await headers();
+  const preferred = normalizeLocaleFromAcceptLanguage(requestHeaders.get('accept-language'));
+  redirect(`/${preferred}`);
 }

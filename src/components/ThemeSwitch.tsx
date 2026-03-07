@@ -5,6 +5,7 @@ import { ThemeType } from '@/types';
 import { Layout, Server, Layers, Microscope, Briefcase, Boxes, Zap } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useI18n } from '@/i18n/context';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -16,23 +17,27 @@ interface ThemeSwitchProps {
   isDarkMode?: boolean;
 }
 
-const themes: { id: ThemeType; label: string; icon: any; color: string }[] = [
-  { id: 'all', label: 'Todos', icon: Zap, color: 'text-amber-400' },
-  { id: 'frontend', label: 'Front-end', icon: Layout, color: 'text-cyan-400' },
-  { id: 'backend', label: 'Back-end', icon: Server, color: 'text-red-500' },
-  { id: 'fullstack', label: 'Full-stack', icon: Layers, color: 'text-purple-500' },
-  { id: 'research', label: 'Investigación', icon: Microscope, color: 'text-emerald-400' },
-  { id: 'other', label: 'Otros', icon: Boxes, color: 'text-slate-400' },
+const themes: { id: ThemeType; icon: any; color: string }[] = [
+  { id: 'all', icon: Zap, color: 'text-amber-400' },
+  { id: 'frontend', icon: Layout, color: 'text-cyan-400' },
+  { id: 'backend', icon: Server, color: 'text-red-500' },
+  { id: 'fullstack', icon: Layers, color: 'text-purple-500' },
+  { id: 'research', icon: Microscope, color: 'text-emerald-400' },
+  { id: 'other', icon: Boxes, color: 'text-slate-400' },
 ];
 
 export default function ThemeSwitch({ currentTheme, setTheme, isDarkMode = true }: ThemeSwitchProps) {
+  const { dictionary } = useI18n();
+
   return (
     <div className="flex justify-center mb-12 py-4">
       <div className={cn(
         "p-1 rounded-full border flex gap-2 backdrop-blur-sm self-center shadow-2xl overflow-x-auto md:overflow-visible max-w-[90vw] md:max-w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
         isDarkMode ? "bg-white/5 border-white/10" : "bg-white/80 border-black/10"
       )}>
-        {themes.map((theme) => (
+        {themes.map((theme) => {
+          const label = dictionary.themeSwitch[theme.id];
+          return (
           <button
             key={theme.id}
             onClick={() => setTheme(theme.id)}
@@ -63,7 +68,7 @@ export default function ThemeSwitch({ currentTheme, setTheme, isDarkMode = true 
                 "absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 backdrop-blur-xl border rounded-xl text-[9px] font-bold uppercase tracking-[0.2em] opacity-0 group-hover/btn:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 translate-y-2 group-hover/btn:translate-y-0 shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex flex-col items-center",
                 isDarkMode ? "bg-black/95 border-white/20 text-white" : "bg-white border-black/10 text-slate-900"
               )}>
-                {theme.label}
+                {label}
                 <div className={cn(
                   "absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 border-r border-b rotate-45",
                   isDarkMode ? "bg-[#0a0a0a] border-white/20" : "bg-white border-black/10"
@@ -75,11 +80,12 @@ export default function ThemeSwitch({ currentTheme, setTheme, isDarkMode = true 
             
             {currentTheme === theme.id && (
               <span className="relative z-10 ml-2 animate-fade-in animate-duration-500 overflow-hidden whitespace-nowrap">
-                {theme.label}
+                {label}
               </span>
             )}
           </button>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

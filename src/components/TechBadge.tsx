@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Flame, Briefcase, Star } from 'lucide-react';
+import { useI18n } from '@/i18n/context';
 
 interface TechBadgeProps {
   name: string;
@@ -92,6 +93,7 @@ export default function TechBadge({
   isDarkMode = true
 }: TechBadgeProps) {
   const [error, setError] = useState(false);
+  const { dictionary } = useI18n();
   
   let displayName = rawName;
   let customSlug = "";
@@ -115,6 +117,14 @@ export default function TechBadge({
   };
 
   const normalizedName = displayName.charAt(0).toUpperCase() + displayName.slice(1).toLowerCase();
+  const normalizedDisplayName = displayName.trim().toLowerCase();
+  const isProductionFilter = normalizedDisplayName === 'producción' || normalizedDisplayName === 'producao' || normalizedDisplayName === 'production' || normalizedDisplayName === '本番運用';
+  const isFeaturedFilter = normalizedDisplayName === 'destacados' || normalizedDisplayName === 'featured' || normalizedDisplayName === 'destaques' || normalizedDisplayName === '注目';
+  const visibleDisplayName = isProductionFilter
+    ? dictionary.filters.production
+    : isFeaturedFilter
+      ? dictionary.filters.featured
+      : displayName;
   
   // Búsqueda insensible a mayúsculas en el mapa
   const getSlugFromName = (name: string) => {
@@ -143,7 +153,7 @@ export default function TechBadge({
     iconUrl = "https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg";
   } else if (displayName.toLowerCase() === 'videojuego' || displayName.toLowerCase() === 'videojuegos') {
     iconUrl = "https://raw.githubusercontent.com/devicons/devicon/master/icons/unity/unity-original.svg";
-  } else if (displayName.toLowerCase() === 'producción' || displayName.toLowerCase() === 'destacados') {
+  } else if (isProductionFilter || isFeaturedFilter) {
     iconUrl = ""; // Usaremos Lucide en este caso especial
   } else if (slug === 'uss') {
     iconUrl = "/logos/Logo_Universidad_san_sebastian.png";
@@ -160,9 +170,9 @@ export default function TechBadge({
       }`}
     >
       <div className={`${isSmall ? 'w-4 h-4' : 'w-5 h-5'} flex items-center justify-center opacity-100 group-hover/tech:scale-110 transition-all duration-700 uppercase`}>
-        {displayName.toLowerCase() === 'producción' ? (
+        {isProductionFilter ? (
           <Briefcase size={isSmall ? 14 : 16} className={isDarkMode ? "text-emerald-400" : "text-emerald-600"} fill="currentColor" />
-        ) : displayName.toLowerCase() === 'destacados' ? (
+        ) : isFeaturedFilter ? (
           <Star size={isSmall ? 14 : 16} className={isDarkMode ? "text-amber-400" : "text-amber-500"} fill="currentColor" />
         ) : error ? (
           <div className="text-[10px] opacity-10 font-bold tracking-tighter overflow-hidden whitespace-nowrap">
@@ -182,16 +192,16 @@ export default function TechBadge({
         )}
       </div>
 
-      {showName ? (
+	      {showName ? (
         <span className={`${isSmall ? 'text-[8px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em] transition-colors duration-500 ${
             isDarkMode ? 'text-gray-400 group-hover/tech:text-white' : 'text-slate-900 group-hover/tech:text-black'
         }`}>
-          {displayName}
+          {visibleDisplayName}
         </span>
       ) : (
         /* Tooltip para cuando no hay nombre visible (en las tarjetas) */
         <span className="absolute -top-10 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/95 border border-white/20 rounded-lg text-[10px] uppercase tracking-[0.2em] text-white opacity-0 group-hover/tech:opacity-100 transition-all duration-500 pointer-events-none whitespace-nowrap z-50 shadow-2xl">
-          {displayName}
+          {visibleDisplayName}
         </span>
       )}
     </div>

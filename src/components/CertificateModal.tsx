@@ -4,6 +4,7 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Certificate } from '@/types';
 import { X, Award, ExternalLink, Download } from 'lucide-react';
+import { useI18n } from '@/i18n/context';
 
 interface CertificateModalProps {
   certificate: Certificate;
@@ -14,10 +15,11 @@ interface CertificateModalProps {
 }
 
 export default function CertificateModal({ certificate, isOpen, onClose, themeColor, isDarkMode = true }: CertificateModalProps) {
+  const { dictionary } = useI18n();
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
+    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 md:p-6">
       <div 
         className={`absolute inset-0 backdrop-blur-xl animate-fade-in transition-colors duration-700 ${isDarkMode ? 'bg-black/95' : 'bg-slate-100/90'}`}
         onClick={onClose}
@@ -54,7 +56,7 @@ export default function CertificateModal({ certificate, isOpen, onClose, themeCo
             ) : (
               <div className={`w-full h-full flex flex-col items-center justify-center space-y-4 ${isDarkMode ? 'text-white/5' : 'text-black/5'}`}>
                 <Award size={100} strokeWidth={1} />
-                <span className="text-xs uppercase tracking-[0.5em]">Sin Previsualización</span>
+                <span className="text-xs uppercase tracking-[0.5em]">{dictionary.cvModal.noPreview}</span>
               </div>
             )}
           </div>
@@ -88,8 +90,8 @@ export default function CertificateModal({ certificate, isOpen, onClose, themeCo
                   ? 'prose prose-invert text-gray-400 prose-headings:text-white prose-strong:text-white' 
                   : 'prose text-slate-600 prose-headings:text-slate-800 prose-strong:text-slate-900'
             }`}>
-              <ReactMarkdown>
-                {certificate.description || "Este certificado valida las competencias adquiridas en el área técnica especificada."}
+                <ReactMarkdown>
+                {certificate.description || dictionary.certificateModal.defaultDescription}
               </ReactMarkdown>
             </div>
           </div>
@@ -100,7 +102,7 @@ export default function CertificateModal({ certificate, isOpen, onClose, themeCo
                 className="flex items-center justify-center gap-3 w-full py-4 rounded-xl text-white font-black transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-black/20"
                 style={{ backgroundColor: themeColor }}
               >
-                <ExternalLink size={20} /> Ver Imagen Full HD
+                <ExternalLink size={20} /> {dictionary.certificateModal.viewFullImage}
               </button>
               
               <a 
@@ -110,7 +112,7 @@ export default function CertificateModal({ certificate, isOpen, onClose, themeCo
                     isDarkMode ? 'border-white/10 bg-white/5 hover:bg-white/10 text-white' : 'border-black/5 bg-slate-50 hover:bg-slate-100 text-slate-800'
                 }`}
               >
-                <Download size={18} /> Descargar Archivo
+                <Download size={18} /> {dictionary.certificateModal.downloadFile}
               </a>
           </div>
         </div>

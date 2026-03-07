@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { X, Download, Mail, Phone, Maximize2 } from 'lucide-react';
+import { useI18n } from '@/i18n/context';
 
 interface CVModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface CVModalProps {
 }
 
 export default function CVModal({ isOpen, onClose, cvUrl, description, themeColor, isDarkMode = true }: CVModalProps) {
+  const { dictionary } = useI18n();
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -27,7 +29,7 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
       {/* Overlay */}
       <div 
         className={`absolute inset-0 backdrop-blur-sm animate-fade-in transition-colors duration-700 ${isDarkMode ? 'bg-black/90' : 'bg-slate-100/80'}`}
@@ -56,13 +58,13 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
             <iframe 
               src={`${cvUrl}#toolbar=0&navpanes=0&view=FitH`} 
               className="w-full h-full border-none"
-              title="CV Preview"
+              title={dictionary.cvModal.previewTitle}
               loading="lazy"
             />
           ) : (
             <div className={`flex-1 flex flex-col items-center justify-center p-12 text-center ${isDarkMode ? 'text-white/10' : 'text-black/10'}`}>
               <Download size={64} className="mb-4" />
-              <p className="text-sm uppercase tracking-widest font-bold">Vista previa no disponible</p>
+              <p className="text-sm uppercase tracking-widest font-bold">{dictionary.cvModal.noPreview}</p>
             </div>
           )}
         </div>
@@ -72,13 +74,13 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
             isDarkMode ? 'bg-[#0a0a0a] border-white/5' : 'bg-white border-black/5'
         }`}>
           <div>
-            <h2 className={`text-3xl font-black mb-6 tracking-tight uppercase transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Mi <span style={{ color: themeColor }}>Curriculum</span></h2>
+            <h2 className={`text-3xl font-black mb-6 tracking-tight uppercase transition-colors duration-700 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{dictionary.cvModal.titleStart} <span style={{ color: themeColor }}>{dictionary.cvModal.titleHighlight}</span></h2>
             <p className={`leading-relaxed mb-8 font-light italic transition-colors duration-700 ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>
-              {description || "Este es mi CV general. Si necesitas uno más específico para un rol particular, no dudes en contactarme."}
+              {description || dictionary.cvModal.defaultDescription}
             </p>
 
             <div className="space-y-4 mb-10">
-              <p className={`text-[10px] font-black uppercase tracking-widest mb-4 ${isDarkMode ? 'text-gray-500' : 'text-slate-400'}`}>Contacto Directo</p>
+              <p className={`text-[10px] font-black uppercase tracking-widest mb-4 ${isDarkMode ? 'text-gray-500' : 'text-slate-400'}`}>{dictionary.cvModal.directContact}</p>
               <div className="flex flex-wrap gap-4">
                 <button 
                   onClick={() => window.location.href = `mailto:${['subaru0.dev', 'gmail.com'].join('@')}`}
@@ -87,7 +89,7 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
                   }`}
                 >
                   <Mail size={16} className={`transition-colors ${isDarkMode ? 'text-gray-400 group-hover:text-white' : 'text-slate-400 group-hover:text-slate-900'}`} />
-                  <span className={`transition-colors ${isDarkMode ? 'text-gray-300 group-hover:text-white' : 'text-slate-600 group-hover:text-slate-900'}`}>Gmail</span>
+                  <span className={`transition-colors ${isDarkMode ? 'text-gray-300 group-hover:text-white' : 'text-slate-600 group-hover:text-slate-900'}`}>{dictionary.cvModal.gmail}</span>
                 </button>
                 <button 
                   onClick={() => window.location.href = `https://wa.me/${['56','9','5497','1044'].join('')}`}
@@ -96,7 +98,7 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
                   }`}
                 >
                   <Phone size={16} className={`transition-colors ${isDarkMode ? 'text-gray-400 group-hover:text-white' : 'text-slate-400 group-hover:text-slate-900'}`} />
-                  <span className={`transition-colors ${isDarkMode ? 'text-gray-300 group-hover:text-white' : 'text-slate-600 group-hover:text-slate-900'}`}>WhatsApp</span>
+                  <span className={`transition-colors ${isDarkMode ? 'text-gray-300 group-hover:text-white' : 'text-slate-600 group-hover:text-slate-900'}`}>{dictionary.cvModal.whatsapp}</span>
                 </button>
               </div>
             </div>
@@ -105,12 +107,12 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
           <div className="flex flex-col gap-3">
             <a 
               href={cvUrl}
-              download="CV_SubaruDev.pdf"
+              download="cv_subarudev_javier_morales_subaru.pdf"
               className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all transform hover:scale-[1.02] active:scale-95 shadow-xl"
               style={{ backgroundColor: themeColor, color: '#000' }}
             >
               <Download size={20} />
-              Descargar PDF
+              {dictionary.cvModal.downloadPdf}
             </a>
             
             {cvUrl && (
@@ -119,7 +121,7 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
                   const win = window.open();
                   if (win) {
                     win.document.write(`<iframe src="${cvUrl}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
-                    win.document.title = "CV SubaruDev - Previsualización";
+                    win.document.title = `CV SubaruDev - ${dictionary.cvModal.previewTitle}`;
                   }
                 }}
                 className={`w-full py-3 rounded-2xl font-bold flex items-center justify-center gap-3 transition-all border ${
@@ -129,7 +131,7 @@ export default function CVModal({ isOpen, onClose, cvUrl, description, themeColo
                 }`}
               >
                 <Maximize2 size={18} />
-                Vista Pantalla Completa
+                {dictionary.cvModal.fullscreenPreview}
               </button>
             )}
           </div>

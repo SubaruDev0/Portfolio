@@ -6,6 +6,7 @@ import { Project } from '@/types';
 import { X, Github, ExternalLink, Code, Star, Briefcase, CheckCircle, Maximize2, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import TechBadge from './TechBadge';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useI18n } from '@/i18n/context';
 
 interface ProjectModalProps {
   project: Project;
@@ -35,7 +36,7 @@ function ImageLightbox({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-2xl p-4"
+      className="fixed inset-0 z-[700] flex items-center justify-center bg-black/95 backdrop-blur-2xl p-4"
       onClick={onClose}
     >
       <button 
@@ -78,6 +79,7 @@ function ImageLightbox({
 }
 
 export default function ProjectModal({ project, isOpen, onClose, themeColor, isDarkMode = true }: ProjectModalProps) {
+  const { dictionary } = useI18n();
   const [activeImage, setActiveImage] = React.useState(project.imageUrl);
   const [isLightboxOpen, setIsLightboxOpen] = React.useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = React.useState(false);
@@ -139,7 +141,7 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
         )}
       </AnimatePresence>
 
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
+      <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 md:p-6">
         {/* Overlay con blur dinámico */}
         <div 
           className={`absolute inset-0 backdrop-blur-xl animate-fade-in transition-colors duration-700 ${isDarkMode ? 'bg-black/95' : 'bg-slate-100/90'}`}
@@ -188,7 +190,7 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
             ) : (
               <div className={`w-full h-full flex flex-col items-center justify-center space-y-4 ${isDarkMode ? 'text-white/5' : 'text-black/5'}`}>
                 <Code size={100} strokeWidth={1} />
-                <span className="text-xs uppercase tracking-[0.5em]">Sin Previsualización</span>
+                <span className="text-xs uppercase tracking-[0.5em]">{dictionary.cvModal.noPreview}</span>
               </div>
             )}
           </div>
@@ -225,11 +227,11 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
                 }`}
                 style={{ color: themeColor }}
               >
-                {project.category === 'other' ? 'OTROS' : 
-                 project.category === 'research' ? 'INVESTIGACIÓN' : 
-                 project.category === 'frontend' ? 'FRONT-END' :
-                 project.category === 'backend' ? 'BACK-END' :
-                 'FULL-STACK'}
+                {project.category === 'other' ? dictionary.projectModal.categories.other : 
+                 project.category === 'research' ? dictionary.projectModal.categories.research : 
+                 project.category === 'frontend' ? dictionary.projectModal.categories.frontend :
+                 project.category === 'backend' ? dictionary.projectModal.categories.backend :
+                 dictionary.projectModal.categories.fullstack}
               </span>
               
               {project.isRealWorld && (
@@ -239,7 +241,7 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
                       ? 'bg-black/80 border-emerald-500/50 text-emerald-400 hover:border-emerald-400'
                       : 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300'
                   }`}>
-                    <Briefcase size={10} fill="currentColor" /> Producción
+                    <Briefcase size={10} fill="currentColor" /> {dictionary.projectModal.productionBadge}
                   </div>
                   
                   {/* Tooltip en el Modal */}
@@ -249,16 +251,16 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
                     <p className={`font-bold mb-2 flex items-center gap-1 uppercase tracking-tight ${
                       isDarkMode ? 'text-emerald-400' : 'text-emerald-700'
                     }`}>
-                       <CheckCircle size={12} /> Proyecto Comercial
+                       <CheckCircle size={12} /> {dictionary.projectModal.productionTooltipTitle}
                     </p>
-                    Este proyecto fue desarrollado para un cliente, pagado y actualmente en uso real.
+                    {dictionary.projectModal.productionTooltipText}
                   </div>
                 </div>
               )}
               
               {project.isStarred && (
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-yellow-500 flex items-center gap-1">
-                  <Star size= {10} fill="currentColor" /> Destacado
+                  <Star size= {10} fill="currentColor" /> {dictionary.projectModal.featured}
                 </span>
               )}
             </div>
@@ -271,7 +273,7 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
             {/* UX: Stack y Botones primero para acción rápida */}
             <div className="mb-10 space-y-8">
               <div>
-                <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-4 ${isDarkMode ? 'text-white/30' : 'text-slate-400'}`}>Stack Tecnológico</h4>
+                <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-4 ${isDarkMode ? 'text-white/30' : 'text-slate-400'}`}>{dictionary.projectModal.stackTitle}</h4>
                 <div className="flex flex-wrap gap-2.5">
                   {project.technologies.map((tech) => (
                     <TechBadge key={tech} name={tech} isDarkMode={isDarkMode} />
@@ -288,7 +290,7 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
                     className="flex items-center justify-center gap-3 w-full py-4 rounded-xl text-white font-black transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-black/20"
                     style={{ backgroundColor: themeColor }}
                   >
-                    <ExternalLink size={20} /> Ver Demo en Vivo
+                    <ExternalLink size={20} /> {dictionary.projectModal.liveDemo}
                   </a>
                 )}
                 {project.githubUrl && (
@@ -300,7 +302,7 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
                       isDarkMode ? 'bg-white/5 hover:bg-white/10 border-white/10 text-white' : 'bg-slate-50 hover:bg-slate-100 border-black/5 text-slate-800'
                     }`}
                   >
-                    <Github size={20} /> Ver Código Fuente
+                    <Github size={20} /> {dictionary.projectModal.sourceCode}
                   </a>
                 )}
               </div>
@@ -308,7 +310,7 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
             
             {/* Descripción después de los elementos de acción */}
             <div className={`pt-10 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
-              <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-6 ${isDarkMode ? 'text-white/30' : 'text-slate-400'}`}>Sobre el proyecto</h4>
+              <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-6 ${isDarkMode ? 'text-white/30' : 'text-slate-400'}`}>{dictionary.projectModal.aboutProject}</h4>
               <div className="relative">
                 <div className={`transition-all duration-300 ${
                   shouldCollapseDescription && !isDescriptionExpanded ? 'max-h-56 overflow-hidden pr-1' : ''
@@ -338,7 +340,7 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
                     isDarkMode ? 'text-white/60 hover:text-white' : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  {isDescriptionExpanded ? 'Ver menos' : 'Leer descripción completa'}
+                  {isDescriptionExpanded ? dictionary.projectModal.readLess : dictionary.projectModal.readMore}
                 </button>
               )}
             </div>
