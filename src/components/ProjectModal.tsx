@@ -80,10 +80,15 @@ function ImageLightbox({
 export default function ProjectModal({ project, isOpen, onClose, themeColor, isDarkMode = true }: ProjectModalProps) {
   const [activeImage, setActiveImage] = React.useState(project.imageUrl);
   const [isLightboxOpen, setIsLightboxOpen] = React.useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = React.useState(false);
 
   const allImages = React.useMemo(() => {
     return [project.imageUrl, ...(project.gallery || [])].filter(Boolean) as string[];
   }, [project.imageUrl, project.gallery]);
+  const shouldCollapseDescription = React.useMemo(() => {
+    const compactText = project.description.replace(/\s+/g, ' ').trim();
+    return compactText.length > 420;
+  }, [project.description]);
 
   const currentIdx = activeImage ? allImages.indexOf(activeImage as string) : 0;
 
@@ -101,8 +106,9 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
   React.useEffect(() => {
     if (isOpen) {
       setActiveImage(project.imageUrl);
+      setIsDescriptionExpanded(false);
     }
-  }, [project.imageUrl, isOpen]);
+  }, [project.id, project.imageUrl, isOpen]);
 
   // Manejar teclado para el lightbox
   React.useEffect(() => {
@@ -237,13 +243,15 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
                   </div>
                   
                   {/* Tooltip en el Modal */}
-                  <div className={`absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-4 border rounded-2xl text-[11px] leading-relaxed opacity-0 group-hover/real:opacity-100 transition-all duration-300 pointer-events-none shadow-2xl z-50 translate-y-2 group-hover/real:translate-y-0 ${
+                  <div className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-64 p-4 border rounded-2xl text-[11px] leading-relaxed opacity-0 group-hover/real:opacity-100 transition-all duration-300 pointer-events-none shadow-2xl z-[160] translate-y-2 group-hover/real:translate-y-0 ${
                     isDarkMode ? 'bg-[#0a0a0a]/95 border-white/20 text-gray-300' : 'bg-white border-black/10 text-slate-600'
                   }`}>
-                    <p className="font-bold text-emerald-500 mb-2 flex items-center gap-1 uppercase tracking-tight">
-                       <CheckCircle size={12} /> Calidad Industrial
+                    <p className={`font-bold mb-2 flex items-center gap-1 uppercase tracking-tight ${
+                      isDarkMode ? 'text-emerald-400' : 'text-emerald-700'
+                    }`}>
+                       <CheckCircle size={12} /> Proyecto Comercial
                     </p>
-                    Este sistema ha sido validado en un entorno de producción real, resolviendo necesidades operativas con altos estándares de fiabilidad y rendimiento.
+                    Este proyecto fue desarrollado para un cliente, pagado y actualmente en uso real.
                   </div>
                 </div>
               )}
@@ -301,15 +309,38 @@ export default function ProjectModal({ project, isOpen, onClose, themeColor, isD
             {/* Descripción después de los elementos de acción */}
             <div className={`pt-10 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
               <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-6 ${isDarkMode ? 'text-white/30' : 'text-slate-400'}`}>Sobre el proyecto</h4>
-              <div className={`prose-sm max-w-none font-light italic leading-relaxed transition-colors duration-700 ${
-                isDarkMode 
-                  ? 'prose prose-invert text-gray-400 prose-headings:text-white prose-strong:text-emerald-400 prose-a:text-cyan-400' 
-                  : 'prose text-slate-600 prose-headings:text-slate-900 prose-strong:text-emerald-600 prose-a:text-cyan-600'
-              }`}>
-                <ReactMarkdown>
-                  {project.description}
-                </ReactMarkdown>
+              <div className="relative">
+                <div className={`transition-all duration-300 ${
+                  shouldCollapseDescription && !isDescriptionExpanded ? 'max-h-56 overflow-hidden pr-1' : ''
+                }`}>
+                  <div className={`prose prose-sm max-w-none leading-relaxed transition-colors duration-700 ${
+                    isDarkMode 
+                      ? 'prose-invert text-gray-300 prose-headings:text-white prose-strong:text-emerald-400 prose-a:text-cyan-400 prose-p:my-3 prose-p:leading-7 prose-li:my-1' 
+                      : 'text-slate-700 prose-headings:text-slate-900 prose-strong:text-emerald-700 prose-a:text-cyan-700 prose-p:my-3 prose-p:leading-7 prose-li:my-1'
+                  }`}>
+                    <ReactMarkdown>
+                      {project.description}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+
+                {shouldCollapseDescription && !isDescriptionExpanded && (
+                  <div className={`pointer-events-none absolute inset-x-0 bottom-0 h-20 ${
+                    isDarkMode ? 'bg-gradient-to-t from-[#0a0a0a] to-transparent' : 'bg-gradient-to-t from-white to-transparent'
+                  }`} />
+                )}
               </div>
+
+              {shouldCollapseDescription && (
+                <button
+                  onClick={() => setIsDescriptionExpanded((prev) => !prev)}
+                  className={`mt-4 text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${
+                    isDarkMode ? 'text-white/60 hover:text-white' : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  {isDescriptionExpanded ? 'Ver menos' : 'Leer descripción completa'}
+                </button>
+              )}
             </div>
           </div>
         </div>

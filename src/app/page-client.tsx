@@ -83,7 +83,9 @@ function FilterSearch({
         {searchTerm && (
           <button 
             onClick={() => setSearchTerm('')}
-            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-white transition-colors"
+            className={`absolute inset-y-0 right-0 pr-4 flex items-center transition-colors ${
+              isDarkMode ? 'text-gray-500 hover:text-white' : 'text-slate-400 hover:text-slate-800'
+            }`}
           >
             <X size={14} />
           </button>
@@ -124,7 +126,7 @@ function FilterSearch({
                       />
                       <span className={`text-[10px] font-bold tracking-widest uppercase transition-colors ${
                         selectedTechs.includes(tech) 
-                          ? 'text-white' 
+                          ? (isDarkMode ? 'text-white' : 'text-slate-900')
                           : (isDarkMode ? 'text-white/40 group-hover:text-white/70' : 'text-slate-500 group-hover:text-slate-900')
                       }`}>
                         {tech.includes(':') ? tech.split(':')[0] : tech}
@@ -489,7 +491,11 @@ export default function HomeClient({
 
         {/* Metamorphosis Controller */}
         <div className="w-full max-w-7xl mb-8 flex flex-col items-center">
-            <ThemeSwitch currentTheme={theme} setTheme={(t) => withTransition(() => setTheme(t))} />
+            <ThemeSwitch
+              currentTheme={theme}
+              setTheme={(t) => withTransition(() => setTheme(t))}
+              isDarkMode={isDarkMode}
+            />
             
             {(theme !== 'all' || selectedTechs.length > 0) && (
               <motion.button

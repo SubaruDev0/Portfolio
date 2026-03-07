@@ -13,6 +13,7 @@ function cn(...inputs: ClassValue[]) {
 interface ThemeSwitchProps {
   currentTheme: ThemeType;
   setTheme: (theme: ThemeType) => void;
+  isDarkMode?: boolean;
 }
 
 const themes: { id: ThemeType; label: string; icon: any; color: string }[] = [
@@ -24,17 +25,22 @@ const themes: { id: ThemeType; label: string; icon: any; color: string }[] = [
   { id: 'other', label: 'Otros', icon: Boxes, color: 'text-slate-400' },
 ];
 
-export default function ThemeSwitch({ currentTheme, setTheme }: ThemeSwitchProps) {
+export default function ThemeSwitch({ currentTheme, setTheme, isDarkMode = true }: ThemeSwitchProps) {
   return (
     <div className="flex justify-center mb-12 py-4">
-      <div className="bg-white/5 p-1 rounded-full border border-white/10 flex gap-2 backdrop-blur-sm self-center shadow-2xl overflow-x-auto md:overflow-visible max-w-[90vw] md:max-w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className={cn(
+        "p-1 rounded-full border flex gap-2 backdrop-blur-sm self-center shadow-2xl overflow-x-auto md:overflow-visible max-w-[90vw] md:max-w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
+        isDarkMode ? "bg-white/5 border-white/10" : "bg-white/80 border-black/10"
+      )}>
         {themes.map((theme) => (
           <button
             key={theme.id}
             onClick={() => setTheme(theme.id)}
             className={cn(
               "relative px-4 py-3 rounded-full text-sm font-medium transition-all flex items-center justify-center group/btn shrink-0",
-              currentTheme === theme.id ? "text-white w-40" : "text-gray-500 hover:text-gray-300 w-12"
+              currentTheme === theme.id
+                ? (isDarkMode ? "text-white w-40" : "text-slate-900 w-40")
+                : (isDarkMode ? "text-gray-500 hover:text-gray-300 w-12" : "text-slate-400 hover:text-slate-700 w-12")
             )}
           >
             {currentTheme === theme.id && (
@@ -53,9 +59,15 @@ export default function ThemeSwitch({ currentTheme, setTheme }: ThemeSwitchProps
             
             {/* Tooltip mejorado */}
             {currentTheme !== theme.id && (
-              <span className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-black/95 backdrop-blur-xl border border-white/20 rounded-xl text-[9px] font-bold uppercase tracking-[0.2em] text-white opacity-0 group-hover/btn:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 translate-y-2 group-hover/btn:translate-y-0 shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex flex-col items-center">
+              <span className={cn(
+                "absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 backdrop-blur-xl border rounded-xl text-[9px] font-bold uppercase tracking-[0.2em] opacity-0 group-hover/btn:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 translate-y-2 group-hover/btn:translate-y-0 shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex flex-col items-center",
+                isDarkMode ? "bg-black/95 border-white/20 text-white" : "bg-white border-black/10 text-slate-900"
+              )}>
                 {theme.label}
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#0a0a0a] border-r border-b border-white/20 rotate-45" />
+                <div className={cn(
+                  "absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 border-r border-b rotate-45",
+                  isDarkMode ? "bg-[#0a0a0a] border-white/20" : "bg-white border-black/10"
+                )} />
               </span>
             )}
 

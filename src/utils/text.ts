@@ -31,3 +31,17 @@ export function removeMarkdown(md: string): string {
     .replace(/\n+/g, " ")
     .trim();
 }
+
+/**
+ * Crea un extracto legible para previsualizar texto largo en tarjetas.
+ */
+export function createExcerpt(md: string, maxLength = 150): string {
+  const cleanText = removeMarkdown(md).replace(/\s+/g, " ").trim();
+  if (cleanText.length <= maxLength) return cleanText;
+
+  const truncated = cleanText.slice(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(" ");
+  const safeCut = lastSpace > Math.floor(maxLength * 0.65) ? lastSpace : maxLength;
+
+  return `${truncated.slice(0, safeCut).trim()}...`;
+}

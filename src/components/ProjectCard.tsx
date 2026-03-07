@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Project } from '@/types';
-import { Github, ExternalLink, Code, Maximize2, Star, Briefcase, Info, CheckCircle } from 'lucide-react';
+import { Github, ExternalLink, Code, Maximize2, Star, Briefcase, CheckCircle } from 'lucide-react';
 import TechBadge from './TechBadge';
-import { removeMarkdown } from '@/utils/text';
+import { createExcerpt } from '@/utils/text';
 
 interface ProjectCardProps {
   project: Project;
@@ -59,13 +59,15 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
               </div>
               
               {/* Tooltip Contextual - Elevado con z-50 */}
-              <div className={`absolute left-0 top-full mt-2 w-48 p-3 backdrop-blur-xl border rounded-xl text-[10px] leading-relaxed opacity-0 group-hover/real:opacity-100 transition-all duration-300 pointer-events-none shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-50 translate-y-2 group-hover/real:translate-y-0 ${
+              <div className={`absolute left-0 top-full mt-2 w-56 p-3 backdrop-blur-xl border rounded-xl text-[10px] leading-relaxed opacity-0 group-hover/real:opacity-100 transition-all duration-300 pointer-events-none shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-[140] translate-y-2 group-hover/real:translate-y-0 ${
                 isDarkMode ? 'bg-black/95 border-white/20 text-gray-300' : 'bg-white border-black/10 text-slate-600'
               }`}>
-                <p className="font-bold text-emerald-400 mb-1 flex items-center gap-1 uppercase tracking-tighter">
-                   <CheckCircle size={10} /> Calidad Industrial
+                <p className={`font-bold mb-1 flex items-center gap-1 uppercase tracking-tighter ${
+                  isDarkMode ? 'text-emerald-400' : 'text-emerald-700'
+                }`}>
+                   <CheckCircle size={10} /> Proyecto Comercial
                 </p>
-                Este sistema ha sido validado en un entorno de producción real, resolviendo necesidades operativas con altos estándares de fiabilidad y rendimiento.
+                Este proyecto fue desarrollado para un cliente, pagado y actualmente en uso real.
               </div>
             </div>
           )}
@@ -141,8 +143,8 @@ export default function ProjectCard({ project, themeColor, className = "", onSel
 
         <div className="p-6">
           <h3 className={`text-xl font-bold mb-2 transition-colors duration-700 ${isDarkMode ? 'text-white group-hover:text-white' : 'text-slate-900 group-hover:text-black'}`} style={{ color: !isDarkMode && themeColor ? themeColor : undefined } as any}>{project.title}</h3>
-          <p className={`text-sm mb-6 line-clamp-2 leading-relaxed transition-colors duration-700 ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>
-            {removeMarkdown(project.description)}
+          <p className={`text-sm mb-6 line-clamp-3 leading-relaxed transition-colors duration-700 ${isDarkMode ? 'text-gray-400' : 'text-slate-600'}`}>
+            {createExcerpt(project.description, 165)}
           </p>
           
           <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
