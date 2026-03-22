@@ -460,20 +460,20 @@ export default function HomeClient({
       />
 
       {/* Selector de Idioma y Modo */}
-      <div className="fixed top-24 right-6 z-[60] flex flex-col gap-2">
-         <LanguageSwitch isDarkMode={isDarkMode} />
-         <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className={`p-3 rounded-2xl shadow-2xl backdrop-blur-xl border transition-all duration-500 ${
-              isDarkMode 
-              ? 'bg-white/5 border-white/10 text-yellow-400' 
+      <div className="fixed top-24 right-6 z-[60] flex flex-col gap-2 items-end">
+        <LanguageSwitch isDarkMode={isDarkMode} />
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsDarkMode(!isDarkMode)}
+          className={`w-10 h-10 flex items-center justify-center rounded-2xl shadow-2xl backdrop-blur-xl border transition-all duration-500 ${
+            isDarkMode
+              ? 'bg-white/5 border-white/10 text-yellow-400'
               : 'bg-black/5 border-black/10 text-indigo-600'
-            }`}
-         >
-            {isDarkMode ? <Sun size={20} fill="currentColor" /> : <Moon size={20} fill="currentColor" />}
-         </motion.button>
+          }`}
+        >
+          {isDarkMode ? <Sun size={18} fill="currentColor" /> : <Moon size={18} fill="currentColor" />}
+        </motion.button>
       </div>
 
       {/* Botón Volver Arriba */}

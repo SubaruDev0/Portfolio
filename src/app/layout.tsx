@@ -82,6 +82,30 @@ export default async function RootLayout({
         <link rel="icon" href="/logos/sd-icon.png" />
         <meta name="theme-color" content="#0f172a" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {/* Defensive cleanup: remove unexpected attributes that some browser extensions inject
+            (e.g. __processed_<id>, bis_register) before React hydrates to avoid hydration warnings
+            This runs very early as an inline script in the head and is intentionally small and safe. */}
+        <script dangerouslySetInnerHTML={{ __html: `(() => {
+          try {
+            // run after DOM is parsed but before hydration; remove suspicious attributes on <body>
+            const removeAttrs = () => {
+              const b = document && document.body;
+              if (!b || !b.attributes) return;
+              const toRemove = [];
+              for (let i = 0; i < b.attributes.length; i++) {
+                const name = b.attributes[i].name;
+                if (/^__processed_/.test(name) || /bis_register/.test(name) || /^ext-/.test(name)) {
+                  toRemove.push(name);
+                }
+              }
+              toRemove.forEach(n => b.removeAttribute(n));
+            };
+            // If body already exists, run immediately; otherwise wait for DOMContentLoaded
+            if (document && document.body) removeAttrs(); else document.addEventListener('DOMContentLoaded', removeAttrs);
+          } catch (e) {
+            // swallow - defensive only
+          }
+        })();` }} />
         {/* JSON-LD para mejorar SEO y Rich Results */}
         <script
           type="application/ld+json"
